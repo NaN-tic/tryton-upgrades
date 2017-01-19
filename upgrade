@@ -1,0 +1,187 @@
+#!/usr/bin/env python
+import os
+import yaml
+import argparse
+import psycopg2
+import subprocess
+
+from blessings import Terminal
+
+t = Terminal()
+
+
+parser = argparse.ArgumentParser(description='Upgrade a Tryton database.')
+parser.add_argument('database', nargs=1, help='PostgreSQL database to upgrade')
+parser.add_argument('-c', '--config', default='trytond.conf',
+        help='path to the trytond configuration file')
+
+args = parser.parse_args()
+
+database_name, = args.database
+config_file = args.config
+#host = args.host
+#port = args.port
+#user = args.user
+#password = args.password
+#if args.json and args.yaml:
+#print('Cannot use both --json and --yaml parameters.')
+#sys.exit(1)
+#
+#if not args.check and not args.list:
+#print('One of --list or check arguments is required.')
+#sys.exit(1)
+
+config = yaml.load(open('upgrades/config.yml', 'r').read())
+
+to_uninstall = config.get('to_uninstall')
+
+#db = psycopg2.connect(dbname=database, host=host, port=port, user=user,
+            #password=password)
+
+
+connection = psycopg2.connect(dbname=database_name)
+cursor = connection.cursor()
+
+def run(*args):
+    #process = subprocess.Popen(args, stdout=subprocess.PIPE,
+    #    stderr=subprocess.PIPE)
+    #process.wait()
+    #stdout = process.stdout.read()
+    #stderr = process.stderr.read()
+    print "RUNING: ", args
+    process = subprocess.Popen(args, stdout=subprocess.PIPE, bufsize=1)
+    for line in iter(process.stdout.readline, b''):
+        print line,
+    process.stdout.close()
+    process.wait()
+    #return process.returncode, stdout, stderr
+
+
+def execute(query, *args, **kwargs):
+    if not args:
+        args = kwargs
+    cursor.execute(query, args)
+
+
+def run_trytond():
+    to_run = ['trytond/bin/trytond-admin', '-v', '-c', config_file]
+    to_install = config.get('to_install')
+    if to_install:
+        to_run += ['-u']
+        to_run += to_install
+    to_run.append('--all')
+    to_run.append('-d')
+    to_run.append(database_name)
+    return run(*to_run)
+
+
+def run_after():
+    for filename in os.listdir('upgrades/after'):
+        print 'Running %s...' % filename
+        run('upgrades/after/' + filename, database_name, args.config)
+
+# INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
+
+
+def table_exists(table):
+    execute('SELECT count(*) FROM information_schema.tables '
+        'WHERE table_name=%s', table)
+    return bool(cursor.fetchone()[0])
+
+def field_exists(field):
+    table, field = field.split('.')
+    execute('SELECT count(*) FROM information_schema.columns '
+        'WHERE table_name=%s AND column_name=%s', table, field)
+    return bool(cursor.fetchone()[0])
+
+
+def uninstall_modules(to_uninstall):
+    module_table = None
+    for table in ('ir_module_module', 'ir_module'):
+        if table_exists(table):
+            module_table = table
+            break
+    for module in to_uninstall:
+        print 'Module:', module
+        execute('DELETE FROM ' + module_table + '_dependency WHERE '
+            'module IN (SELECT id FROM ' + module_table + ' WHERE name=%s)',
+            module)
+        execute('DELETE FROM ' + module_table + ' WHERE name=%s', module)
+
+        execute('SELECT model, db_id FROM ir_model_data WHERE module=%s',
+            module)
+        for model, db_id in cursor.fetchall():
+            print 'DELETING', model
+            execute('DELETE FROM "' + model.replace('.', '_')
+                + '" WHERE id=%s', db_id)
+        execute('DELETE FROM ir_model_data WHERE module=%s', module)
+
+    execute('DELETE FROM ir_action_act_window WHERE res_model IN (SELECT '
+        'model FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+        module_table)
+    execute('DELETE FROM ir_action_wizard WHERE model in (SELECT model FROM '
+        'ir_model WHERE module NOT IN (SELECT name FROM %s))' % module_table)
+    execute('DELETE FROM ir_model WHERE module NOT IN (SELECT name FROM '
+        '%s)' % module_table)
+    execute('DELETE FROM ir_model_field WHERE module NOT IN (SELECT name FROM '
+        '%s)' % module_table)
+    execute('DELETE FROM ir_ui_view WHERE module NOT IN (SELECT name FROM '
+        '%s)' % module_table)
+
+
+def process_queries(queries):
+    if not queries:
+        return
+    for query in queries:
+        if isinstance(query, dict):
+            tables = query.get('tables', '')
+            fields = query.get('fields', '')
+            query = query.get('query')
+            found = True
+            tables = tables.split()
+            for table in tables:
+                if not table_exists(table):
+                    print t.red("TABLE '%s' NOT FOUND" % table)
+                    found = False
+                    break
+            if not found:
+                continue
+
+            found = True
+            fields = fields.split()
+            for field in fields:
+                if not field_exists(field):
+                    print t.red("FIELD '%s' NOT FOUND" % field)
+                    found = False
+                    break
+            if not found:
+                continue
+        query = query.replace('%', '%%')
+        print query
+        execute(query)
+
+
+print t.green('Uninstalling modules...')
+uninstall_modules(to_uninstall)
+
+print t.green('Executing queries before update...')
+process_queries(config.get('before'))
+connection.commit()
+
+print t.green('Updating trytond...')
+run_trytond()
+
+
+run_after()
+#python ./upgrades/4.0/migration_project_product.py $1 $2
+#python ./upgrades/4.0/migration_shipment_work.py $1 $2
+#python ./upgrades/4.0/purchase_work.py $1 $2
+#python ./upgrades/4.0/milestone_migration.py $1 $2
+#python ./upgrades/4.0/convert_domain_rules.py $1 $2
+
+
+print t.green('Executing queries after update...')
+process_queries(config.get('after'))
+
+connection.rollback()
+connection.commit()
