@@ -32,13 +32,15 @@ config_file = args.config
 #sys.exit(1)
 
 config = yaml.load(open('upgrades/config.yml', 'r').read())
+if os.path.exists('config.yml'):
+    override = yaml.load(open('config.yml', 'r').read())
+    config['to_install'] += override.get('to_install', [])
+
 
 to_uninstall = config.get('to_uninstall')
 
 #db = psycopg2.connect(dbname=database, host=host, port=port, user=user,
-            #password=password)
-
-
+    #password=password)
 connection = psycopg2.connect(dbname=database_name)
 cursor = connection.cursor()
 
