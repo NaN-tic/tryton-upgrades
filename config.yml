@@ -27,31 +27,20 @@ to_uninstall:
   - project_unittest
   - stock_delivery_note_jreport
 
-to_install:
-  - account_invoice_tree
-  - asset_owner
-  - asset_shipment_work
-  - contract_revenue
-  - project
-  - project_asset
-  - project_certification
-  - project_invoice_milestone
-  - project_management
-  - project_management_with_sales
-  - project_management_with_purchase
-  - project_management_with_shipment_work
-  - project_menu_tree_remove
-  - project_invoice
-  - project_revenue
-  - project_product
-  - project_shipment_work
-  - project_state_by_buttons
-  - purchase_request
-  - sale_tree
+#to_install:
 
 before:
-# Rename table name - 3.6 migration
-  - tables: account_financial_statement
+  - UPDATE ir_model_data SET module = 'aeat_303' WHERE module = 'aeat_303_es';
+  - UPDATE ir_model_data SET module = 'aeat_349' WHERE module = 'aeat_349_es';
+  - UPDATE ir_translation SET module = 'aeat_303' WHERE module = 'aeat_303_es';
+  - UPDATE ir_translation SET module = 'aeat_349' WHERE module = 'aeat_349_es';
+  - DELETE from ir_ui_view where module = '';
+  - DELETE from ir_ui_view where data = '' and module = 'account_payment_type';
+  - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL;
+  - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
+  - INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
+  - comment: # Rename table name - 3.6 migration
+    tables: account_financial_statement
     query:
       ALTER TABLE account_financial_statement_report_line_account
       RENAME TO account_financial_statement_rep_lin_acco
@@ -60,8 +49,8 @@ before:
       ALTER TABLE account_financial_statement_report_line_account_id_seq
       RENAME TO account_financial_statement_rep_lin_acco_id_seq
 
-# [SQL]: Change tax sign for credit note (must be run before update):
-  - tables: account_tax_template
+  - comment: # [SQL]: Change tax sign for credit note (must be run before update)
+    tables: account_tax_template
     query:
       UPDATE account_tax_template
       SET
@@ -74,50 +63,54 @@ before:
           credit_note_base_sign = credit_note_base_sign * -1,
           credit_note_tax_sign = credit_note_tax_sign * -1;
 
-# [SQL]: Fix amount second currency with:
-  - tables: account_move_line
+  - comment: # [SQL]: Fix amount second currency with:
+    tables: account_move_line
     query:
       UPDATE account_move_line
       SET
           amount_second_currency = (amount_second_currency * -1)
       WHERE amount_second_currency IS NOT NULL
           AND SIGN(amount_second_currency) != SIGN(debit - credit)
-  - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
   - tables: shipment_work
     query: ALTER TABLE shipment_work RENAME COLUMN project TO work_project
   - fields: sale_sale.project
     query: ALTER TABLE sale_sale RENAME COLUMN project TO work_project
 
-  - UPDATE ir_model_data SET module = 'aeat_303' WHERE module = 'aeat_303_es';
-  - UPDATE ir_model_data SET module = 'aeat_349' WHERE module = 'aeat_349_es';
-  - UPDATE ir_translation SET module = 'aeat_303' WHERE module = 'aeat_303_es';
-  - UPDATE ir_translation SET module = 'aeat_349' WHERE module = 'aeat_349_es';
-
-  - DELETE from ir_ui_view where module = '';
-  - DELETE from ir_ui_view where data = '' and module = 'account_payment_type';
-
-  - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL;
-
-
-
-
 
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es';
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
-# Mark all categories as accounting type
-  - UPDATE product_category SET accounting = True;
-# DROP category COLUMN
-  - ALTER TABLE product_template DROP COLUMN category;
-# Change login's length
-  - ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE character varying(512);
-# Set reconciliation date
-  - UPDATE account_move_reconciliation SET date=create_date WHERE date IS NULL;
-  - ALTER TABLE account_move_reconciliation ALTER COLUMN date SET NOT NULL;
-  - UPDATE contract SET first_invoice_date=start_period_date WHERE
-    first_invoice_date IS NULL AND state = 'cancelled';
-  - ALTER TABLE asset ALTER COLUMN company SET NOT NULL;
-  - ALTER TABLE timesheet_line ALTER COLUMN duration SET NOT NULL;
-  - ALTER TABLE stock_shipment_in_return ALTER COLUMN supplier SET NOT NULL;
-  - ALTER TABLE contract ALTER COLUMN first_invoice_date SET NOT NULL;
-  - UPDATE asset SET company = 1 WHERE company IS NULL;
+  - comment: # Change login's length
+    query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE character varying(512);
+  - comment: # Mark all categories as accounting type
+    tables: product_category
+    query: UPDATE product_category SET accounting = True;
+  - comment: # DROP category COLUMN
+    tables: product_template
+    query: ALTER TABLE product_template DROP COLUMN category;
+  - comment: # Set reconciliation date
+    tables: account_move_reconciliation
+    query: UPDATE account_move_reconciliation SET date=create_date WHERE date IS NULL;
+  - tables: account_move_reconciliation
+    query: ALTER TABLE account_move_reconciliation ALTER COLUMN date SET NOT NULL;
+  - tables: contract
+    query: UPDATE contract SET first_invoice_date=start_period_date WHERE first_invoice_date IS NULL AND state = 'cancelled';
+  - tables: asset
+    query: ALTER TABLE asset ALTER COLUMN company SET NOT NULL;
+  - tables: timesheet_line
+    query: ALTER TABLE timesheet_line ALTER COLUMN duration SET NOT NULL;
+  - tables: stock_shipment_in_return
+    query: ALTER TABLE stock_shipment_in_return ALTER COLUMN supplier SET NOT NULL;
+  - tables: contract
+    query: ALTER TABLE contract ALTER COLUMN first_invoice_date SET NOT NULL;
+  - tables: asset
+    query: UPDATE asset SET company = 1 WHERE company IS NULL;
+  - script: convert_domain_rules.py
+  - tables: work_project
+    script: migration_project_product.py
+  - tables: project_work
+    script: purchase_work.py
+  - tables: shipment_work
+    script: migration_shipment_work.py
+  - tables: account_invoice_milestone
+    script: milestone_migration.py

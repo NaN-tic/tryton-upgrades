@@ -1,69 +1,49 @@
 #!/usr/bin/env python
 import os
+import sys
 import yaml
 import argparse
+from urlparse import urlparse
 import psycopg2
 import subprocess
+import ConfigParser
 
 from blessings import Terminal
 
 t = Terminal()
 
-
-parser = argparse.ArgumentParser(description='Upgrade a Tryton database.')
-parser.add_argument('database', nargs=1, help='PostgreSQL database to upgrade')
-parser.add_argument('-c', '--config', default='trytond.conf',
-        help='path to the trytond configuration file')
-
-args = parser.parse_args()
-
-database_name, = args.database
-config_file = args.config
-#host = args.host
-#port = args.port
-#user = args.user
-#password = args.password
-#if args.json and args.yaml:
-#print('Cannot use both --json and --yaml parameters.')
-#sys.exit(1)
-#
-#if not args.check and not args.list:
-#print('One of --list or check arguments is required.')
-#sys.exit(1)
-
-config = yaml.load(open('upgrades/config.yml', 'r').read())
-if os.path.exists('config.yml'):
-    override = yaml.load(open('config.yml', 'r').read())
-    config['to_install'] += override.get('to_install', [])
-
-
-to_uninstall = config.get('to_uninstall')
-
-#db = psycopg2.connect(dbname=database, host=host, port=port, user=user,
-    #password=password)
-connection = psycopg2.connect(dbname=database_name)
-cursor = connection.cursor()
+def get_url():
+    config = ConfigParser.ConfigParser()
+    config.read(args.config)
+    url = urlparse(config.get('database', 'uri'))
+    return url
 
 def run(*args):
-    #process = subprocess.Popen(args, stdout=subprocess.PIPE,
-    #    stderr=subprocess.PIPE)
-    #process.wait()
-    #stdout = process.stdout.read()
-    #stderr = process.stderr.read()
-    print "RUNING: ", args
-    process = subprocess.Popen(args, stdout=subprocess.PIPE, bufsize=1)
-    for line in iter(process.stdout.readline, b''):
-        print line,
+    print 'RUNING:', ' '.join(args)
+    summary = []
+    process = subprocess.Popen(args, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, bufsize=1)
+    #for line in iter(process.stdout.readline, b''):
+    for line in iter(process.stderr.readline, b''):
+        line = line.strip()
+        if 'ERROR' in line:
+            line = t.red(line)
+            summary.append(line)
+        elif 'WARNING' in line:
+            line = t.yellow(line)
+            summary.append(line)
+        print line
     process.stdout.close()
     process.wait()
-    #return process.returncode, stdout, stderr
-
+    if summary:
+        print t.bold('\nWARNING AND ERROR SUMMARY:')
+        print '\n'.join(summary)
+    return process.returncode
 
 def execute(query, *args, **kwargs):
     if not args:
         args = kwargs
     cursor.execute(query, args)
-
 
 def run_trytond():
     to_run = ['trytond/bin/trytond-admin', '-v', '-c', config_file]
@@ -74,16 +54,11 @@ def run_trytond():
     to_run.append('--all')
     to_run.append('-d')
     to_run.append(database_name)
-    return run(*to_run)
-
-
-def run_after():
-    for filename in os.listdir('upgrades/after'):
-        print 'Running %s...' % filename
-        run('upgrades/after/' + filename, database_name, args.config)
-
-# INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
-
+    returncode = run(*to_run)
+    if returncode:
+        print t.red('Trytond update failed. Upgrade aborted.')
+        sys.exit(1)
+    return returncode
 
 def table_exists(table):
     execute('SELECT count(*) FROM information_schema.tables '
@@ -96,8 +71,8 @@ def field_exists(field):
         'WHERE table_name=%s AND column_name=%s', table, field)
     return bool(cursor.fetchone()[0])
 
-
-def uninstall_modules(to_uninstall):
+def uninstall_modules():
+    to_uninstall = config.get('to_uninstall')
     module_table = None
     for table in ('ir_module_module', 'ir_module'):
         if table_exists(table):
@@ -130,20 +105,20 @@ def uninstall_modules(to_uninstall):
     execute('DELETE FROM ir_ui_view WHERE module NOT IN (SELECT name FROM '
         '%s)' % module_table)
 
-
-def process_queries(queries):
-    if not queries:
+def process_actions(actions):
+    if not actions:
         return
-    for query in queries:
-        if isinstance(query, dict):
-            tables = query.get('tables', '')
-            fields = query.get('fields', '')
-            query = query.get('query')
+    for action in actions:
+        if isinstance(action, dict):
+            tables = action.get('tables', '')
+            fields = action.get('fields', '')
+            query = action.get('query')
+            script = action.get('script')
             found = True
             tables = tables.split()
             for table in tables:
                 if not table_exists(table):
-                    print t.red("TABLE '%s' NOT FOUND" % table)
+                    print "TABLE '%s' NOT FOUND" % table
                     found = False
                     break
             if not found:
@@ -153,37 +128,62 @@ def process_queries(queries):
             fields = fields.split()
             for field in fields:
                 if not field_exists(field):
-                    print t.red("FIELD '%s' NOT FOUND" % field)
+                    print "FIELD '%s' NOT FOUND" % field
                     found = False
                     break
             if not found:
                 continue
-        query = query.replace('%', '%%')
-        print query
-        execute(query)
+        else:
+            query = action
+            script = None
+        if query:
+            query = query.replace('%', '%%')
+            print query
+            execute(query)
+        if script:
+            run('upgrades/after/' + script, database_name, args.config)
 
 
-print t.green('Uninstalling modules...')
-uninstall_modules(to_uninstall)
+parser = argparse.ArgumentParser(description='Upgrade a Tryton database.')
+parser.add_argument('database', nargs=1, help='PostgreSQL database to upgrade')
+parser.add_argument('-c', '--config', default='trytond.conf',
+        help='path to the trytond configuration file')
 
-print t.green('Executing queries before update...')
-process_queries(config.get('before'))
+args = parser.parse_args()
+
+database_name, = args.database
+config_file = args.config
+
+url = get_url()
+
+config = yaml.load(open('upgrades/config.yml', 'r').read())
+config.setdefault('to_uninstall', [])
+config.setdefault('to_install', [])
+if os.path.exists('upgrade.yml'):
+    override = yaml.load(open('upgrade.yml', 'r').read())
+    config['to_install'] += override.get('to_install', [])
+
+
+if url.username:
+    connection = psycopg2.connect(dbname=database_name, host=url.hostname,
+        port=url.port, user=url.username, password=url.password)
+else:
+    connection = psycopg2.connect(dbname=database_name)
+
+cursor = connection.cursor()
+
+
+print t.green('\nUninstalling modules...')
+uninstall_modules()
+
+print t.green('\nExecuting actions before update...')
+process_actions(config.get('before'))
 connection.commit()
 
-print t.green('Updating trytond...')
+print t.green('\nUpdating trytond...')
 run_trytond()
 
+print t.green('\nExecuting actions after update...')
+process_actions(config.get('after'))
 
-run_after()
-#python ./upgrades/4.0/migration_project_product.py $1 $2
-#python ./upgrades/4.0/migration_shipment_work.py $1 $2
-#python ./upgrades/4.0/purchase_work.py $1 $2
-#python ./upgrades/4.0/milestone_migration.py $1 $2
-#python ./upgrades/4.0/convert_domain_rules.py $1 $2
-
-
-print t.green('Executing queries after update...')
-process_queries(config.get('after'))
-
-connection.rollback()
 connection.commit()
