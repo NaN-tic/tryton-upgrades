@@ -38,6 +38,8 @@ before:
   - DELETE from ir_ui_view where data = '' and module = 'account_payment_type';
   - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL;
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
+  - comment: -> 4.0
+    query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
   - tables: stock_location
     query: INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
   - comment: # Rename table name - 3.6 migration
