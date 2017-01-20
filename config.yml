@@ -88,9 +88,6 @@ after:
   - comment: # Mark all categories as accounting type
     tables: product_category
     query: UPDATE product_category SET accounting = True;
-  - comment: # DROP category COLUMN
-    tables: product_template
-    query: ALTER TABLE product_template DROP COLUMN category;
   - comment: # Set reconciliation date
     tables: account_move_reconciliation
     query: UPDATE account_move_reconciliation SET date=create_date WHERE date IS NULL;
@@ -117,3 +114,8 @@ after:
     script: migration_shipment_work.py
   - tables: account_invoice_milestone
     script: milestone_migration.py
+
+purge:
+  - comment: Drop category column
+    fields: product_template.category
+    query: ALTER TABLE product_template DROP COLUMN category;

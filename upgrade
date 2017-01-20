@@ -148,6 +148,8 @@ parser = argparse.ArgumentParser(description='Upgrade a Tryton database.')
 parser.add_argument('database', nargs=1, help='PostgreSQL database to upgrade')
 parser.add_argument('-c', '--config', default='trytond.conf',
         help='path to the trytond configuration file')
+parser.add_argument('-p', '--purge', action='store_true', dest='purge',
+    help='remove all fields that drop information')
 
 args = parser.parse_args()
 
@@ -172,6 +174,10 @@ else:
 
 cursor = connection.cursor()
 
+if args.purge:
+    process_actions(config.get('purge'))
+    connection.commit()
+    sys.exit(0)
 
 print t.green('\nUninstalling modules...')
 uninstall_modules()
