@@ -32,11 +32,13 @@ def run(*args):
     for line in iter(process.stderr.readline, b''):
         line = line.strip()
         if 'ERROR' in line:
+            s = line[line.index('ERROR'):]
+            summary.add(t.yellow(s))
             line = t.red(line)
-            summary.add(line)
         elif 'WARNING' in line:
+            s = line[line.index('WARNING'):]
+            summary.add(t.yellow(s))
             line = t.yellow(line)
-            summary.add(line)
         print line
     process.stdout.close()
     process.wait()
