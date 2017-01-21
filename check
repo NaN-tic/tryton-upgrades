@@ -1,0 +1,118 @@
+#!/usr/bin/env python
+import sys
+
+dbname = sys.argv[1]
+config_file = sys.argv[2]
+from trytond.config import config as CONFIG
+CONFIG.update_etc(config_file)
+
+from trytond.transaction import Transaction
+from trytond.pool import Pool
+import logging
+from lxml import etree
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
+from blessings import Terminal
+t = Terminal()
+
+
+Pool.start()
+pool = Pool(dbname)
+pool.init()
+
+context = {'company': 1}
+
+
+def check_data():
+    '''
+    Test that all records can be read
+    '''
+    logger.info(t.yellow('Checking data...'))
+    with Transaction().start(dbname, 0):
+        Company = pool.get('company.company')
+        companies = [x.id for x in Company.search([])]
+    for company in companies:
+        logger.info('Checking data on %s...' % company)
+        with Transaction().start(dbname, 0, context={
+                    'company': company,
+                    }):
+            for model in pool._pool[dbname]['model'].keys():
+                logger.info('Model: %s...' % model)
+                Model = pool.get(model)
+                if not hasattr(Model, 'search'):
+                    continue
+                for x in Model.search([]):
+                    # We're not loading lazy fields
+                    pass
+
+def check_view():
+    'Test validity of all views of the module'
+    logger.info(t.yellow('Checking views...'))
+    with Transaction().start(dbname, 1):
+        View = pool.get('ir.ui.view')
+        views = View.search([
+                ('model', '!=', ''),
+                ])
+        for view in views:
+            if view.inherit and view.inherit.model == view.model:
+                view_id = view.inherit.id
+            else:
+                view_id = view.id
+            model = view.model
+            Model = pool.get(model)
+            try:
+                res = Model.fields_view_get(view_id)
+            except ValueError:
+                logging.error(t.red('ERROR PROCESSING VIEW'))
+                logging.error(t.red('View ID: %d; Model: %s' % (view.id,
+                            view.model)))
+                logging.error(t.red('Arch:\n%s' % view.arch))
+                raise
+
+            assert res['model'] == model
+            tree = etree.fromstring(res['arch'])
+
+            validator = etree.RelaxNG(etree=View.get_rng(res['type']))
+            # Don't use assert_ because 2to3 convert to assertTrue
+            validator.assertValid(tree)
+
+            tree_root = tree.getroottree().getroot()
+
+            for element in tree_root.iter():
+                if element.tag in ('field', 'label', 'separator', 'group'):
+                    for attr in ('name', 'icon'):
+                        field = element.get(attr)
+                        if field:
+                            assert field in res['fields'], (
+                                'Missing field: %s' % field)
+
+def check_model_access():
+    'Test missing default model access'
+    logger.info(t.yellow('Checking model access...'))
+    with Transaction().start(dbname, 1):
+        Access = pool.get('ir.model.access')
+        no_groups = {a.model.name for a in Access.search([
+                    ('group', '=', None),
+                    ])}
+        with_groups = {a.model.name for a in Access.search([
+                    ('group', '!=', None),
+                    ])}
+
+        assert no_groups >= with_groups, (
+            'Model "%(models)s" are missing a default access' % {
+                'models': list(with_groups - no_groups), })
+
+
+for check in (check_model_access, check_view, check_data):
+    try:
+        check()
+    except:
+        logging.exception(t.red('Check failed.'))
+        pass
