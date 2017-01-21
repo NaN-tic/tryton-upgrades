@@ -66,7 +66,7 @@ before:
 #          credit_note_base_sign = credit_note_base_sign * -1,
 #          credit_note_tax_sign = credit_note_tax_sign * -1;
 
-  - comment: # [SQL]: Fix amount second currency with:
+  - comment: # [SQL]: Fix amount second currency with 3.4 -> 3.6
     tables: account_move_line
     query:
       UPDATE account_move_line
