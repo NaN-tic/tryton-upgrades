@@ -84,10 +84,12 @@ after:
   - DELETE FROM ir_translation WHERE module = 'account_es';
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
   - comment: -> 4.0
+    version: 4.0
     query: UPDATE account_move_reconciliation SET date=create_date::DATE WHERE date IS NULL;
   - comment: # Change login's length
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE character varying(512);
   - comment: # Mark all categories as accounting type
+    version: 4.0
     tables: product_category
     query: UPDATE product_category SET accounting = True;
   - comment: # Set reconciliation date

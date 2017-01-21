@@ -10,6 +10,11 @@ import ConfigParser
 
 from blessings import Terminal
 
+import trytond
+
+trytond_version = '.'.join(trytond.__version__.split('.')[:2])
+
+
 t = Terminal()
 
 def get_url():
@@ -112,8 +117,16 @@ def process_actions(actions):
         if isinstance(action, dict):
             tables = action.get('tables', '')
             fields = action.get('fields', '')
+            version = action.get('version', '')
             query = action.get('query')
             script = action.get('script')
+
+            # Check version
+            if version != trytond_version:
+                # Unfortunately we can only check for exact version
+                continue
+
+            # Check tables
             found = True
             tables = tables.split()
             for table in tables:
@@ -124,6 +137,7 @@ def process_actions(actions):
             if not found:
                 continue
 
+            # Check fields
             found = True
             fields = fields.split()
             for field in fields:
@@ -133,6 +147,7 @@ def process_actions(actions):
                     break
             if not found:
                 continue
+
         else:
             query = action
             script = None
