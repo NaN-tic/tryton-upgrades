@@ -44,7 +44,7 @@ def check_data():
                     'company': company,
                     }):
             for model in pool._pool[dbname]['model'].keys():
-                logger.info('Model: %s...' % model)
+                logger.info('Company: %d, Model: %s...' % (model, company))
                 Model = pool.get(model)
                 if not hasattr(Model, 'search'):
                     continue
