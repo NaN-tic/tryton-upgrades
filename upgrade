@@ -197,11 +197,12 @@ if args.purge:
     connection.commit()
     sys.exit(0)
 
+print t.green('\nExecuting actions before update...')
+process_actions(config.get('before'))
+
 print t.green('\nUninstalling modules...')
 uninstall_modules()
 
-print t.green('\nExecuting actions before update...')
-process_actions(config.get('before'))
 connection.commit()
 
 print t.green('\nUpdating trytond...')
