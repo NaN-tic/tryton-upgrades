@@ -121,8 +121,6 @@ after:
     script: migration_shipment_work.py
   - tables: account_invoice_milestone
     script: milestone_migration.py
-
-purge:
   - comment: Drop category column
     fields: product_template.category
     query: ALTER TABLE product_template DROP COLUMN category;

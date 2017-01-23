@@ -167,8 +167,6 @@ parser.add_argument('from_version', nargs=1, help='Tryton version of the '
     'database to be migrated')
 parser.add_argument('-c', '--config', default='trytond.conf',
         help='path to the trytond configuration file')
-parser.add_argument('-p', '--purge', action='store_true', dest='purge',
-    help='remove all fields that drop information')
 
 args = parser.parse_args()
 
@@ -193,11 +191,6 @@ else:
     connection = psycopg2.connect(dbname=database_name)
 
 cursor = connection.cursor()
-
-if args.purge:
-    process_actions(config.get('purge'))
-    connection.commit()
-    sys.exit(0)
 
 print t.green('\nExecuting actions before update...')
 process_actions(config.get('before'))
