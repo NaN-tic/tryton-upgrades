@@ -160,9 +160,11 @@ def process_actions(actions):
             run('upgrades/after/' + script, database_name, args.config)
 
 
-parser = argparse.ArgumentParser(description='Upgrade a Tryton database to the version of the trytond library available.')
+parser = argparse.ArgumentParser(description='Upgrade a Tryton database to the '
+    'version of the trytond library available.')
 parser.add_argument('database', nargs=1, help='PostgreSQL database to upgrade')
-parser.add_argument('from_version', nargs=1, help='Tryton version of the database to be migrated')
+parser.add_argument('from_version', nargs=1, help='Tryton version of the '
+    'database to be migrated')
 parser.add_argument('-c', '--config', default='trytond.conf',
         help='path to the trytond configuration file')
 parser.add_argument('-p', '--purge', action='store_true', dest='purge',
