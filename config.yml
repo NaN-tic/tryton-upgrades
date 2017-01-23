@@ -54,19 +54,22 @@ before:
 
 #  - comment: # [SQL]: Change tax sign for credit note (must be run before update)
 #    tables: account_tax_template
+#    version: 4.0
 #    query:
 #      UPDATE account_tax_template
 #      SET
 #          credit_note_base_sign = credit_note_base_sign * -1,
 #          credit_note_tax_sign = credit_note_tax_sign * -1;
-#  - tables: account_tax
-#    query:
-#      UPDATE account_tax
-#      SET
-#          credit_note_base_sign = credit_note_base_sign * -1,
-#          credit_note_tax_sign = credit_note_tax_sign * -1;
+  - tables: account_tax
+    version: 4.0
+    query:
+      UPDATE account_tax
+      SET
+          credit_note_base_sign = credit_note_base_sign * -1,
+          credit_note_tax_sign = credit_note_tax_sign * -1;
 
   - comment: # [SQL]: Fix amount second currency with 3.4 -> 3.6
+    version: 3.6
     tables: account_move_line
     query:
       UPDATE account_move_line

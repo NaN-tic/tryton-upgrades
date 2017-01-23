@@ -124,8 +124,7 @@ def process_actions(actions):
             script = action.get('script')
 
             # Check version
-            if version != trytond_version:
-                # Unfortunately we can only check for exact version
+            if version <= trytond_version and version >= from_version:
                 continue
 
             # Check tables
@@ -161,8 +160,9 @@ def process_actions(actions):
             run('upgrades/after/' + script, database_name, args.config)
 
 
-parser = argparse.ArgumentParser(description='Upgrade a Tryton database.')
+parser = argparse.ArgumentParser(description='Upgrade a Tryton database to the version of the trytond library available.')
 parser.add_argument('database', nargs=1, help='PostgreSQL database to upgrade')
+parser.add_argument('from_version', nargs=1, help='Tryton version of the database to be migrated')
 parser.add_argument('-c', '--config', default='trytond.conf',
         help='path to the trytond configuration file')
 parser.add_argument('-p', '--purge', action='store_true', dest='purge',
@@ -171,6 +171,7 @@ parser.add_argument('-p', '--purge', action='store_true', dest='purge',
 args = parser.parse_args()
 
 database_name, = args.database
+from_version, = args.from_version
 config_file = args.config
 
 url = get_url()
