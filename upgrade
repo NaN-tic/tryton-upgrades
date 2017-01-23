@@ -205,5 +205,7 @@ run_trytond()
 
 print t.green('\nExecuting actions after update...')
 process_actions(config.get('after'))
-
 connection.commit()
+
+print t.green('\nUpdating trytond again...')
+run_trytond()
