@@ -11,7 +11,9 @@ if [[ -z "$FROM_DATABASE" || -z "$TO_DATABASE" || -z "$FROM_VERSION" ]]; then
 fi
 
 #invoke database.drop $TO_DATABASE
+./server.py stop
 dropdb $TO_DATABASE
 invoke database.copy -o $TO_DATABASE $FROM_DATABASE $TO_DATABASE
 export PYTHONPATH=trytond
 ./upgrades/upgrade $TO_DATABASE $FROM_VERSION
+./server.py start $TO_DATABASE
