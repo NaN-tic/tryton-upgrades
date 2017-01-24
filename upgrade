@@ -52,9 +52,8 @@ def execute(query, *args, **kwargs):
         args = kwargs
     cursor.execute(query, args)
 
-def run_trytond():
+def run_trytond(to_install=None):
     to_run = ['trytond/bin/trytond-admin', '-v', '-c', config_file]
-    to_install = config.get('to_install')
     if to_install:
         to_run += ['-u']
         to_run += to_install
@@ -201,7 +200,7 @@ uninstall_modules()
 connection.commit()
 
 print t.green('\nUpdating trytond...')
-run_trytond()
+run_trytond(config.get('to_install'))
 
 print t.green('\nExecuting actions after update...')
 process_actions(config.get('after'))
