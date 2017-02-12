@@ -19,7 +19,7 @@ t = Terminal()
 
 def get_url():
     config = ConfigParser.ConfigParser()
-    config.read(args.config)
+    config.read(config_file)
     url = urlparse(config.get('database', 'uri'))
     return url
 
