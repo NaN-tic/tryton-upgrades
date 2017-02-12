@@ -164,14 +164,29 @@ parser = argparse.ArgumentParser(description='Upgrade a Tryton database to the '
 parser.add_argument('database', nargs=1, help='PostgreSQL database to upgrade')
 parser.add_argument('from_version', nargs=1, help='Tryton version of the '
     'database to be migrated')
-parser.add_argument('-c', '--config', default='trytond.conf',
+parser.add_argument('-c', '--config', default=None,
         help='path to the trytond configuration file')
 
 args = parser.parse_args()
 
 database_name, = args.database
 from_version, = args.from_version
-config_file = args.config
+if not args.config:
+    instance = os.path.basename(os.path.realpath(os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), '..')))
+    paths = (
+        '/etc/trytond/%s.conf' % instance,
+        os.path.join(root, 'server-%s.cfg' % fqdn),
+        os.path.join(root, 'trytond.conf'),
+        os.environ.get('TRYTOND_CONFIG'),
+        )
+    for config_file in paths:
+        print 'Checking %s...' % settings.config
+        if os.path.exists(config_file):
+            break
+    print "Configuration file: %s" % config_file
+else:
+    config_file = args.config
 
 url = get_url()
 
