@@ -176,12 +176,10 @@ if not args.config:
                 os.path.dirname(os.path.realpath(__file__)), '..')))
     paths = (
         '/etc/trytond/%s.conf' % instance,
-        os.path.join(root, 'server-%s.cfg' % fqdn),
-        os.path.join(root, 'trytond.conf'),
         os.environ.get('TRYTOND_CONFIG'),
         )
     for config_file in paths:
-        print 'Checking %s...' % settings.config
+        print 'Checking %s...' % config_file
         if os.path.exists(config_file):
             break
     print "Configuration file: %s" % config_file
