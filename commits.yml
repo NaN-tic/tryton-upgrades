@@ -1,0 +1,9 @@
+---
+# Commits already revised and must be skipped on compare_branches_task.
+
+
+account_bank_statement_counterpart:
+  - f8c619f54df228b2d762f2749dc2225a5a642ad1
+
+stock_reservation:
+  - bc5de0c1b1293e0c0ff1475e2c79dd922ffd8296
