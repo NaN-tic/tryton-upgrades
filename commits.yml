@@ -34,6 +34,13 @@ account_bank_statement_es_csb43:
   - 624df1893cd2a138909f4130db89c375295bf81d
   - 633b31d210162b0b6fdc12b8aa7daa09cbcf5fb8
 
+account_es:
+  - aeaa3c1eec0a10ac60ecb46a5362258797363b02
+  - 7d7c5e3c451fe0ca14c0ecb122dea217aa88ec5c
+
+account_financial_statement:
+  - 96b6456df5e0ca61b984f9d753112ebba650196f
+
 account_invoice_consecutive:
   - d04736470e24398b437e12e17fac5a7a0d73b322
   - 356ad40636bc3999466c342914ce37b239f84f2c
@@ -47,7 +54,7 @@ account_payment_type:
 
 account_invoice_posted2draft:
   - 5b155527920c2bbde5791713a69076f7efd273cd
-  
+
 account_jasper_reports:
   - c269341666d09b8598f46c570f1afee729eb081c
   - 0bb9270ccc4a4c35fbef9318c706e21705184c2a
