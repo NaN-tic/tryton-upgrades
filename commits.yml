@@ -1,9 +1,46 @@
 ---
 # Commits already revised and must be skipped on compare_branches_task.
 
+account_bank:
+  - 0c5045700d3f8400b3e1facd9dadf9c8512d12d5
+  - 6d548839d29f607834222c659026b61d8cb27134
+  - b6cd13e26e3d4625ad11ccabdea80b22e6205275
+  - ab6db7eae0f6c96e016e3799351d0900cf8b6c40
+
+account_statement_of_account:
+  - 97236e4e27c2354a6bf408cf08d1b01259035aef
+  - ecb336859b21046685ae5c8dc008ea645d782549
+  - a2cb083c4a2d0603d87f1277181817d87bc11bb3
+
+account_bank_statement:
+  - bb9e573f5778cb7f7534bc72d92a65aba5588449
+  - 7c427cddbfd6ae4ba47868def5fc03ddbedd7280
+  - 8f249c84aca9c245442cd9a54ef3fa7063ca4dca
+  - a6bb492d41503f47e2c6c9f70f7a29bccccba879
+  - 82de349cdc38f9f6a75c82060a15a6d1a623c5f9
+  - b3140a18cf61252bcd0f2d4b7d35d4ccccf00ca3
+  - f8c71d9d0ee17d3ffa442092ed1a9f2c07114bbb
+  - 21825911398ec0aa7ef408f1f21340f9aea78611
+
+account_bank_statement_account:
+  - b3701dc5c4a1bfbd16b764a8e9735026d0f10384
 
 account_bank_statement_counterpart:
   - f8c619f54df228b2d762f2749dc2225a5a642ad1
+
+account_bank_statement_es_csb43:
+  - e93f6ee4cac7fa73a74d30360398c30008c7a424
+  - c6acd52ef7bc5ab3ea0017c2aa7909283ab3920f
+  - 624df1893cd2a138909f4130db89c375295bf81d
+  - 633b31d210162b0b6fdc12b8aa7daa09cbcf5fb8
+
+account_invoice_consecutive:
+  - d04736470e24398b437e12e17fac5a7a0d73b322
+  - 356ad40636bc3999466c342914ce37b239f84f2c
+
+account_payment_type:
+  - acd6a877747415098c392ec43d539e388a7b86a4
+  - cb16acc700a21f14b4853b22a16233f37ce16cc6
 
 aeat_347:
   - 07ad5135f0ce804bf8a6ea39d8407e9851c82974
@@ -28,6 +65,10 @@ jasper_reports:
   - 72bbde57ad9c898175eb33b56540a9494e47deba
   - b5902ba5ff18cf9f54ad700dfb51ebe18a96159f
   - 0825f064d35610778bc7d6a013f5875d7d86d23e
+
+sale_shop:
+  - bc1ca42cc53de066c10355c2d60546711937e799
+  - cea31990b05ee11af9e3c636d60bfe963c2034f7
 
 stock_reservation:
   - bc5de0c1b1293e0c0ff1475e2c79dd922ffd8296
