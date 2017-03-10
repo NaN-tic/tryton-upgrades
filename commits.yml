@@ -38,9 +38,19 @@ account_invoice_consecutive:
   - d04736470e24398b437e12e17fac5a7a0d73b322
   - 356ad40636bc3999466c342914ce37b239f84f2c
 
+account_invoice_discount:
+  - 1a2a55bafa294deef2ae122d050b7a4f7189a87a
 account_payment_type:
   - acd6a877747415098c392ec43d539e388a7b86a4
   - cb16acc700a21f14b4853b22a16233f37ce16cc6
+
+account_jasper_reports:
+  - c269341666d09b8598f46c570f1afee729eb081c
+  - 0bb9270ccc4a4c35fbef9318c706e21705184c2a
+  - 9adbf349fe1b2cea638c069eda55ccc95d458623
+  
+account_payment_bank:
+  - 62a18eaf11779fb3937baeec4680f733071e201b
 
 aeat_347:
   - 07ad5135f0ce804bf8a6ea39d8407e9851c82974
