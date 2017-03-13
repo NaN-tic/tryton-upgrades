@@ -125,3 +125,6 @@ after:
   - comment: Drop category column
     fields: product_template.category
     query: ALTER TABLE product_template DROP COLUMN category;
+  - tables: country_zip
+    version: 4.0
+    query: update country_zip set country = (select id from country_country where code = 'ES') where country_zip is null;
