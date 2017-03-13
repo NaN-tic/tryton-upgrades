@@ -123,7 +123,7 @@ def process_actions(actions):
             script = action.get('script')
 
             # Check version
-            if version <= trytond_version and version >= from_version:
+            if version <= trytond_version and version > from_version:
                 continue
 
             # Check tables
