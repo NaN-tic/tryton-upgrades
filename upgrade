@@ -156,7 +156,9 @@ def process_actions(actions):
             print query
             execute(query)
         if script:
-            run('upgrades/after/' + script, database_name, args.config)
+            if not script.startswith('upgrades'):
+                script = 'upgrades/after/' + script
+            run(script, database_name, args.config)
 
 
 parser = argparse.ArgumentParser(description='Upgrade a Tryton database to the '
@@ -194,7 +196,8 @@ config.setdefault('to_install', [])
 if os.path.exists('upgrade.yml'):
     override = yaml.load(open('upgrade.yml', 'r').read())
     config['to_install'] += override.get('to_install', [])
-
+    config['before'] += override.get('before', [])
+    config['after'] += override.get('after', [])
 
 if url.username:
     connection = psycopg2.connect(dbname=database_name, host=url.hostname,
