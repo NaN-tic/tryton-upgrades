@@ -147,18 +147,20 @@ def process_actions(actions):
                     break
             if not found:
                 continue
-
         else:
             query = action
             script = None
+
         if query:
             query = query.replace('%', '%%')
             print query
             execute(query)
+
         if script:
-            if not script.startswith('upgrades'):
-                script = 'upgrades/after/' + script
-            run(script, database_name, args.config)
+            if os.path.isfile(script):
+                run(script, database_name, args.config)
+            else:
+                print "Not found script: %s" % script
 
 
 parser = argparse.ArgumentParser(description='Upgrade a Tryton database to the '
