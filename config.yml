@@ -128,3 +128,5 @@ after:
   - tables: country_zip
     version: 4.0
     query: update country_zip set country = (select id from country_country where code = 'ES') where country_zip is null;
+  - version: 4.0
+    query: update ir_action_act_window set domain = '[["parent", "=", null]]', context = '{"babi_tree_view": true}' where context like '%babi%';
