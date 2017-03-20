@@ -130,3 +130,10 @@ after:
     query: update country_zip set country = (select id from country_country where code = 'ES') where country_zip is null;
   - version: 4.0
     query: update ir_action_act_window set domain = '[["parent", "=", null]]', context = '{"babi_tree_view": true}' where context like '%babi%';
+  - comment: # change code to number electronic mail template
+    version: 4.0
+  - tables: electronic_mail_template
+    query: update electronic_mail_template set subject = regexp_replace(subject, 'record.code', 'record.number', 'g'), plain = regexp_replace(plain, 'record.code', 'record.number', 'g'), html = regexp_replace(html, 'record.code', 'record.number', 'g') where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'));
+  - comment: # change code to number electronic mail template
+    version: 4.0
+    query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
