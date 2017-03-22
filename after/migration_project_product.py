@@ -96,10 +96,8 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     #    print project._save_values
         #    project.save()
 
-
-    logger.info('Writing projects')
-    #Project.create([x._save_values for x in projects])
-    Project.save(projects)
+    logger.info('Writing  %s projects' % len(projects))
+    Project.create([x._save_values for x in projects])
     logger.info('%s projects createds' % len(projects))
 
     transaction.commit()

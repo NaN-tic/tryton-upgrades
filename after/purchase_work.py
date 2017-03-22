@@ -32,18 +32,14 @@ with Transaction().start(dbname, 0, context=context):
 
 with Transaction().start(dbname, 0, context=context) as transaction:
 
-    Project = pool.get('project.work')
+    SaleLine = pool.get('sale.line')
     PurchaseLine = pool.get('purchase.line')
-    projects = Project.search([])
-    to_save = []
-    for project in projects:
-        purchase_lines = []
-        project.purchase_lines = []
-        for line in project.sale_lines:
-            purchase_lines += line.purchase_lines
+    sale_lines = SaleLine.search([('project', '!=', None)])
 
-        if purchase_lines:
-            for pl in purchase_lines:
-                project.purchase_lines += (pl, )
-            to_save.append(project)
-    Project.save(to_save)
+    to_save = []
+    for line in sale_lines:
+        for purchase_line in line.purchase_lines:
+            purchase_line.work = line.project
+            to_save.append(purchase_line)
+    PurchaseLine.save(to_save)
+    transaction.commit()

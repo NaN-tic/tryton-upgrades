@@ -28,8 +28,10 @@ def run(*args):
     summary = set()
     process = subprocess.Popen(args, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, bufsize=1)
-    #for line in iter(process.stdout.readline, b''):
-    for line in iter(process.stderr.readline, b''):
+
+    out, err = process.communicate()
+
+    for line in out.split('\n'):
         line = line.strip()
         if 'ERROR' in line:
             s = line[line.index('ERROR'):]
@@ -40,8 +42,10 @@ def run(*args):
             summary.add(t.yellow(s))
             line = t.yellow(line)
         print line
+
     process.stdout.close()
     process.wait()
+
     if summary:
         print t.bold('\nWARNING AND ERROR SUMMARY:')
         print '\n'.join(sorted(list(summary)))
@@ -124,6 +128,9 @@ def process_actions(actions):
 
             # Check version
             if version <= trytond_version and version > from_version:
+                continue
+
+            if not script:
                 continue
 
             # Check tables
