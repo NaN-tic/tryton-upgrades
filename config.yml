@@ -30,7 +30,7 @@ to_uninstall:
 #to_install:
 
 before:
-  - ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;
+
   - UPDATE ir_model_data SET module = 'aeat_303' WHERE module = 'aeat_303_es';
   - UPDATE ir_model_data SET module = 'aeat_349' WHERE module = 'aeat_349_es';
   - UPDATE ir_translation SET module = 'aeat_303' WHERE module = 'aeat_303_es';
@@ -41,6 +41,10 @@ before:
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
   - comment: -> 4.0
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
+
+  - tables:
+    - query: ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;
+    - version: 3.2
   - tables: stock_location
     query: INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
   - comment: # Rename table name - 3.6 migration
@@ -82,7 +86,6 @@ before:
     query: ALTER TABLE shipment_work RENAME COLUMN project TO work_project
   - fields: sale_sale.project
     query: ALTER TABLE sale_sale RENAME COLUMN project TO work_project
-
 
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es';
