@@ -3,6 +3,7 @@ import os
 import sys
 import yaml
 import argparse
+from itertools import chain
 from urlparse import urlparse
 import psycopg2
 import subprocess
@@ -31,7 +32,8 @@ def run(*args):
 
     out, err = process.communicate()
 
-    for line in out.split('\n'):
+    in_traceback = False
+    for line in chain(out.split('\n'), err.split('\n')):
         line = line.strip()
         if 'ERROR' in line:
             s = line[line.index('ERROR'):]
@@ -41,6 +43,12 @@ def run(*args):
             s = line[line.index('WARNING'):]
             summary.add(t.yellow(s))
             line = t.yellow(line)
+        elif 'Traceback' in line or in_traceback:
+            in_traceback = True
+            summary.add(t.red(s))
+            line = t.red(line)
+            if line.startswith('Exception'):
+                in_traceback = False
         print line
 
     process.stdout.close()
