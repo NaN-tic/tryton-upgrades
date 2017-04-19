@@ -70,6 +70,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
         code = (work_projects and work_projects[0] != None and
             work_projects[0].code or None)
         project = projects.get(code, None)
+        print "code:", code
         if not project:
             print "*"*10, "CHECK", "*"*10
             print "group:", group.code, "projects:", work_projects, code

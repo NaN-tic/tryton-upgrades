@@ -31,6 +31,10 @@ to_uninstall:
 
 before:
 
+  # - tables: ir_model_data
+  #   version: 3.2
+  #   query: ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;
+
   - UPDATE ir_model_data SET module = 'aeat_303' WHERE module = 'aeat_303_es';
   - UPDATE ir_model_data SET module = 'aeat_349' WHERE module = 'aeat_349_es';
   - UPDATE ir_translation SET module = 'aeat_303' WHERE module = 'aeat_303_es';
@@ -41,10 +45,6 @@ before:
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
   - comment: -> 4.0
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
-
-  - tables:
-    - query: ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;
-    - version: 3.2
   - tables: stock_location
     query: INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
   - comment: # Rename table name - 3.6 migration
@@ -105,7 +105,7 @@ after:
   - tables: account_move_reconciliation
     query: ALTER TABLE account_move_reconciliation ALTER COLUMN date SET NOT NULL;
   - tables: contract
-    query: UPDATE contract SET first_invoice_date=start_period_date WHERE first_invoice_date IS NULL AND state = 'cancelled';
+    query: UPDATE contract SET first_invoice_date=start_period_date WHERE first_invoice_date IS NULL;
   - tables: asset
     query: ALTER TABLE asset ALTER COLUMN company SET NOT NULL;
   - tables: timesheet_line
@@ -116,27 +116,25 @@ after:
     query: ALTER TABLE contract ALTER COLUMN first_invoice_date SET NOT NULL;
   - tables: asset
     query: UPDATE asset SET company = 1 WHERE company IS NULL;
-  - script: ./upgrades/after/convert_domain_rules.py
-  - tables: work_project
-    script: ./upgrades/after/migration_project_product.py
-  - tables: project_work
-    script: ./upgrades/after/purchase_work.py
-  - tables: shipment_work
-    script: ./upgrades/after/migration_shipment_work.py
-  - tables: account_invoice_milestone
-    script: ./upgrades/after/milestone_migration.py
   - comment: Drop category column
     fields: product_template.category
     query: ALTER TABLE product_template DROP COLUMN category;
   - tables: country_zip
     version: 4.0
     query: update country_zip set country = (select id from country_country where code = 'ES') where country_zip is null;
- # - version: 4.0
-#    query: update ir_action_act_window set domain = '[["parent", "=", null]]', context = "{'babi_tree_view': true}" where context like '%babi%';
-  # - comment: # change code to number electronic mail template
     version: 4.0
   - tables: electronic_mail_template
     query: update electronic_mail_template set subject = regexp_replace(subject, 'record.code', 'record.number', 'g'), plain = regexp_replace(plain, 'record.code', 'record.number', 'g'), html = regexp_replace(html, 'record.code', 'record.number', 'g') where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'));
   - comment: # change code to number electronic mail template
     version: 4.0
     query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
+
+  #- script: ./upgrades/after/convert_domain_rules.py
+  #- tables: work_project
+  #   script: ./upgrades/after/migration_project_product.py
+  # - tables: project_work
+  #   script: ./upgrades/after/purchase_work.py
+  # - tables: shipment_work
+  #   script: ./upgrades/after/migration_shipment_work.py
+  # - tables: account_invoice_milestone
+  #   script: ./upgrades/after/milestone_migration.py

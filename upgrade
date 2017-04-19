@@ -28,7 +28,7 @@ def run(*args):
     print 'RUNING:', ' '.join(args)
     summary = set()
     process = subprocess.Popen(args, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, bufsize=1)
+        stderr=subprocess.PIPE, bufsize=1, shell=False)
 
     out, err = process.communicate()
 
@@ -52,6 +52,7 @@ def run(*args):
         print line
 
     process.stdout.close()
+    process.stderr.close()
     process.wait()
 
     if summary:
@@ -138,8 +139,6 @@ def process_actions(actions):
             if version <= trytond_version and version > from_version:
                 continue
 
-            if not script:
-                continue
 
             # Check tables
             found = True

@@ -116,7 +116,6 @@ with Transaction().start(dbname, 0, context=context) as transaction:
         wp = work_project[project.name]
         childs = {}
         for sale in wp.sales:
-            sale.work = project
             # Update parent_project Sale
             cursor.execute(*table_sale.update(columns=
                 [table_sale.parent_project],
@@ -146,7 +145,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
             p2.parent = project
             to_create.append(p2)
 
-    logger.info('Writing projects %s' % len(to_create))
+    logger.info('Writing projects (sales) %s' % len(to_create))
     offset = 1000
     i = 0
     while i < len(to_create):
