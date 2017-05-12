@@ -34,6 +34,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     WorkProject = pool.get('work.project')
     WorkMilestone = pool.get('account.invoice.milestone')
     WorkMilestoneGroup = pool.get('account.invoice.milestone.group')
+    Sale = pool.get('sale.sale')
 
     Milestone = pool.get('project.invoice_milestone')
     Project = pool.get('project.work')
@@ -64,7 +65,8 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     projects = Project.search([('type', '=', 'project')])
     projects = dict((x.name, x) for x in projects)
 
-    def get_project(group):
+
+    def get_project2(group):
         work_projects = list(set([x.work_project for x in group.sales if x]))
         project = None
         code = (work_projects and work_projects[0] != None and
@@ -76,9 +78,33 @@ with Transaction().start(dbname, 0, context=context) as transaction:
             print "group:", group.code, "projects:", work_projects, code
         return project
 
+    def get_project(group):
+        projects = []
+        for x in group.sales:
+            projects += x.projects
+
+        if len(projects) != 1:
+            print "Check: %s projects for group %s " % \
+                (",".join([x.name for x in projects]), group.code)
+
+        if projects:
+            return projects[0]
+
+        # work_projects = list(set([x.work_project for x in group.sales if x]))
+        # project = None
+        # code = (work_projects and work_projects[0] != None and
+        #     work_projects[0].code or None)
+        # project = projects.get(code, None)
+        # print "code:", code
+        # if not project:
+        #     print "*"*10, "CHECK", "*"*10
+        #     print "group:", group.code, "projects:", work_projects, code
+        # return project
+
     to_create = []
     for group in milestoneGroup:
         project = get_project(group)
+        print "project:", project, group.code
         if not project:
             continue
         for mil in group.milestones:
