@@ -121,6 +121,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
             milestone.currency = group.currency
             milestone.month = mil.month
             milestone.weeks = mil.weeks
+            milestone.trigger_progress = 0
             milestone.weekday = mil.weekday
             milestone.days = mil.days
             milestone.day = mil.day

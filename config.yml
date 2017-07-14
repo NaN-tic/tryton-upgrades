@@ -43,6 +43,7 @@ before:
   - DELETE from ir_ui_view where data = '' and module = 'account_payment_type';
   - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL;
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
+  - DELETE FROM ir_ui_view where module = '%sale%milestone%'
   - comment: -> 4.0
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
   - tables: stock_location
