@@ -130,12 +130,12 @@ after:
     version: 4.0
     query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
 
-  #- script: ./upgrades/after/convert_domain_rules.py
-  #- tables: work_project
-  #   script: ./upgrades/after/migration_project_product.py
-  # - tables: project_work
-  #   script: ./upgrades/after/purchase_work.py
-  # - tables: shipment_work
-  #   script: ./upgrades/after/migration_shipment_work.py
-  # - tables: account_invoice_milestone
-  #   script: ./upgrades/after/milestone_migration.py
+  - script: ./upgrades/after/convert_domain_rules.py
+  - tables: work_project
+    script: ./upgrades/after/migration_project_product.py
+  - tables: project_work
+    script: ./upgrades/after/purchase_work.py
+  - tables: shipment_work
+    script: ./upgrades/after/migration_shipment_work.py
+  - tables: account_invoice_milestone
+    script: ./upgrades/after/milestone_migration.py
