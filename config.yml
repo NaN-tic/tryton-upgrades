@@ -21,11 +21,16 @@ to_uninstall:
   - asset_guarantee
   - asset_estate
   - audit_log
+  - calendar
+  - calendar_classification
+  - calendar_scheduling
+  - calendar_todo
   - guarantee
   - party_identifier
   - product_configuration
   - project_unittest
   - stock_delivery_note_jreport
+  - webdav
 
 #to_install:
 
