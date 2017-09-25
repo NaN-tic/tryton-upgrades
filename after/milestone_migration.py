@@ -102,11 +102,14 @@ with Transaction().start(dbname, 0, context=context) as transaction:
         # return project
 
     to_create = []
+    invoiced_progress = []
     for group in milestoneGroup:
         project = get_project(group)
         print "project:", project, group.code
         if not project:
             continue
+        InvoicedProgress = pool.get('project.work.invoiced_progress')
+
         for mil in group.milestones:
             milestone = Milestone()
             milestone.kind = mil.kind
@@ -134,6 +137,12 @@ with Transaction().start(dbname, 0, context=context) as transaction:
             milestone.invoice = mil.invoice
             milestone.state = states[mil.state]
 
+            if mil.invoice and milestone.invoice_method == 'progress':
+                for line in mil.invoice.lines:
+                    ip = InvoicedProgress(work=project,
+                        quantity=1, invoice_line=line)
+                    invoiced_progress.append(ip)
+
             # TODO: CHECK this domain
             #       Check why invoice.party != project.party
             invoice_party = mil.invoice and mil.invoice.party
@@ -145,3 +154,6 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     logger.info('Writing Milestones')
     Milestone.save(to_create)
     logger.info('%s Milestones created' % len(to_create))
+    logger.info('Writing Invoiced Progress')
+    InvoicedProgress.save(invoiced_progress)
+    logger.info('%s Invoiced Progress created' % len(invoiced_progress))
