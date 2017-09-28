@@ -137,7 +137,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
             milestone.invoice = mil.invoice
             milestone.state = states[mil.state]
 
-            if mil.invoice and milestone.invoice_method == 'progress':
+            if mil.invoice and milestone.invoice_method in ('progress',): #  'remainder'):
                 for line in mil.invoice.lines:
                     ip = InvoicedProgress(work=project,
                         quantity=1, invoice_line=line)
