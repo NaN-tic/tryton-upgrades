@@ -93,6 +93,11 @@ before:
   - fields: sale_sale.project
     query: ALTER TABLE sale_sale RENAME COLUMN project TO work_project
 
+  - comment: # change PYSON context menu
+    version: 4.0
+    tables: babi_report
+    query: UPDATE ir_action_act_window SET domain = '[["parent", "=", null]]', context = '{"babi_tree_view": true}' WHERE context like '%babi%';
+
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es';
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
