@@ -44,8 +44,9 @@ def run(*args):
             summary.add(t.yellow(s))
             line = t.yellow(line)
         elif 'Traceback' in line or in_traceback:
+            #s = line[line.index('Traceback'):]
             in_traceback = True
-            summary.add(t.red(s))
+            #summary.add(t.red(s))
             line = t.red(line)
             if line.startswith('Exception'):
                 in_traceback = False

@@ -32,8 +32,9 @@ to_uninstall:
   - stock_delivery_note_jreport
   - webdav
 
-#to_install:
-
+to_install:
+  - html_report
+  
 before:
 
   # - tables: ir_model_data
@@ -96,7 +97,7 @@ before:
   - comment: # change PYSON context menu
     version: 4.0
     tables: babi_report
-    query: UPDATE ir_action_act_window SET domain = '[["parent", "=", null]]', context = '{"babi_tree_view": true}' WHERE context like '%babi%';
+    query: "UPDATE ir_action_act_window SET domain = '[[\"parent\", \"=\", null]]', context = '{\"babi_tree_view\": true}' WHERE context like '%babi%'"
 
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es';
