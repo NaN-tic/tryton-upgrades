@@ -13,7 +13,6 @@ to_uninstall:
   - account_payment_es_csb_34_01
   - account_payment_es_csb_34_1_la_caixa
   - account_payment_es_csb_34_11
-  - account_payment_es_csb_58
   - account_statement_of_account
   - aeat_303_es
   - aeat_349_es
@@ -94,10 +93,10 @@ before:
   - fields: sale_sale.project
     query: ALTER TABLE sale_sale RENAME COLUMN project TO work_project
 
-  - comment: # change PYSON context menu
-    version: 4.0
-    tables: babi_report
-    query: "UPDATE ir_action_act_window SET domain = '[[\"parent\", \"=\", null]]', context = '{\"babi_tree_view\": true}' WHERE context like '%babi%'"
+  # - comment: # change PYSON context menu
+  #   version: 4.0
+  #   tables: babi_report
+  #   query: UPDATE ir_action_act_window SET domain = '[["parent", "=", null]]', context = '{"babi_tree_view": true}' WHERE context like '%babi%';
 
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es';

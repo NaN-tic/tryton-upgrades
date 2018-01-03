@@ -41,3 +41,5 @@ with Transaction().start(dbname, 0, context=context) as transaction:
         for rule in group.rules:
             rule.domain = PYSONEncoder().encode(eval(rule.domain))
             rule.save()
+
+    pool = Pool()
