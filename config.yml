@@ -33,6 +33,7 @@ to_uninstall:
 
 to_install:
   - html_report
+  - account_invoice_type
   
 before:
 
