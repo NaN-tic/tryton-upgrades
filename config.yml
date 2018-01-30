@@ -34,7 +34,7 @@ to_uninstall:
 to_install:
   - html_report
   - account_invoice_type
-  
+
 before:
 
   # - tables: ir_model_data
@@ -98,6 +98,10 @@ before:
   #   version: 4.0
   #   tables: babi_report
   #   query: UPDATE ir_action_act_window SET domain = '[["parent", "=", null]]', context = '{"babi_tree_view": true}' WHERE context like '%babi%';
+
+  - comment: # set domain to null in account bank statement line
+    version: 4.0
+    query: UPDATE ir_action_act_window SET domain = null where id in (SELECT db_id FROM ir_model_data where fs_id = 'act_account_bank_statement_line');
 
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es';
