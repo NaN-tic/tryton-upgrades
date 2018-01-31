@@ -28,6 +28,8 @@ to_uninstall:
   - party_identifier
   - product_configuration
   - project_unittest
+  - sale_invoices_paid
+  - sale_shipments_done
   - stock_delivery_note_jreport
   - webdav
 
