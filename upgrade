@@ -204,6 +204,9 @@ if not args.config:
     print "Configuration file: %s" % config_file
 else:
     config_file = args.config
+    if not os.path.isfile(config_file):
+        print 'Not found file %s' % config_file
+        sys.exit(1)
 
 url = get_url()
 
