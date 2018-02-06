@@ -1,0 +1,26 @@
+Upgrades
+========
+
+Upgrade trytond version
+
+Upgrades
+--------
+
+.. code-block:: python
+
+    export PYTHONPATH=trytond
+    ./upgrades/upgrade <database_name> <from_version> -c <trytond.conf>
+
+Upgrades
+--------
+
+.. code-block:: python
+
+    export PYTHONPATH=trytond
+    ./upgrades/cron-upgrade <database_source> <database_next> <from_version>
+
+Check
+-----
+
+    export PYTHONPATH=trytond
+    ./upgrades/check <database_name> <trytond.conf>
