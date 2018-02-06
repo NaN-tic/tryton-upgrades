@@ -13,6 +13,7 @@ to_uninstall:
   - account_payment_es_csb_34_01
   - account_payment_es_csb_34_1_la_caixa
   - account_payment_es_csb_34_11
+  - account_payment_es_csb_58
   - account_statement_of_account
   - aeat_303_es
   - aeat_349_es
@@ -25,18 +26,18 @@ to_uninstall:
   - calendar_scheduling
   - calendar_todo
   - guarantee
-  - party_identifier
+  - party_vcarddav
   - product_configuration
   - project_unittest
   - sale_invoices_paid
   - sale_shipments_done
-  - stock_delivery_note_jreport
+  - stock_delivery_note_valued_jreport
   - webdav
 
 to_install:
-  - html_report
-  - account_invoice_type
   - account_statement_of_account
+  - html_report
+  - party_identifier
 
 before:
 
@@ -97,10 +98,10 @@ before:
   - fields: sale_sale.project
     query: ALTER TABLE sale_sale RENAME COLUMN project TO work_project
 
-  # - comment: # change PYSON context menu
-  #   version: 4.0
-  #   tables: babi_report
-  #   query: UPDATE ir_action_act_window SET domain = '[["parent", "=", null]]', context = '{"babi_tree_view": true}' WHERE context like '%babi%';
+  - comment: # change PYSON context menu
+    version: 4.0
+    tables: babi_report
+    query: "UPDATE ir_action_act_window SET domain = '[[\"parent\", \"=\", null]]', context = '{\"babi_tree_view\": true}' WHERE context like '%babi%'"
 
   - comment: # set domain to null in account bank statement
     version: 4.0
@@ -108,6 +109,60 @@ before:
   - comment: # set domain to null in account bank statement line
     version: 4.0
     query: UPDATE ir_action_act_window SET domain = null where id in (SELECT db_id FROM ir_model_data where fs_id = 'act_account_bank_statement_line');
+
+  - comment: # rename locale languages
+    version: 4.2
+    query: UPDATE ir_translation SET lang = 'en' WHERE lang = 'en_US';UPDATE ir_translation SET lang = 'ca' WHERE lang = 'ca_ES';UPDATE ir_translation SET lang = 'es' WHERE lang = 'es_ES';UPDATE ir_translation SET lang = 'pt' WHERE lang = 'pt_PT';UPDATE ir_translation SET lang = 'de' WHERE lang = 'de_DE';UPDATE ir_translation SET lang = 'it' WHERE lang = 'it_IT';UPDATE ir_translation SET lang = 'fr' WHERE lang = 'fr_FR';
+  - comment: # rename configuration locale
+    version: 4.2
+    query: UPDATE ir_configuration SET language = 'en' WHERE language = 'en_US';UPDATE ir_configuration SET language = 'ca' WHERE language = 'ca_ES';
+
+  - comment: # delete modules
+    version: 4.4
+    query: DELETE FROM ir_module WHERE name IN ('webdav', 'calendar', 'calendar_todo', 'calendar_scheduling', 'calendar_classification', 'party_vcarddav');
+  - comment: # delete modules views
+    version: 4.4
+    query: DELETE FROM ir_ui_view WHERE module IN ('webdav', 'calendar', 'calendar_todo', 'calendar_scheduling', 'calendar_classification', 'party_vcarddav');
+  - comment: # update format address
+    version: 4.4
+    query: UPDATE party_address_format SET format_ = REPLACE(format_, '${district}', '${subdivision}');
+  - comment: # delete party ir properties
+    version: 4.4
+    query: DELETE FROM ir_property where res like 'party.party,%' and SUBSTRING(res, POSITION(',' IN res) + 1)::integer not in (select id from party_party);
+  - comment: # delete product category ir properties
+    version: 4.4
+    query: DELETE FROM ir_property where res like 'product.category,%' and SUBSTRING(res, POSITION(',' IN res) + 1)::integer not in (select id from product_category);
+  - comment: # delete product ir properties
+    version: 4.4
+    query: DELETE FROM ir_property where res like 'product.template,%' and SUBSTRING(res, POSITION(',' IN res) + 1)::integer not in (select id from product_template);
+  # - comment: # drop ir properties in case account_asset is installed
+  #   version: 4.4
+  #   script: TODO https://bugs.tryton.org/issue6395
+  - comment: # update default_country ir_property
+    version: 4.4
+    query: UPDATE ir_property SET res = null where field in (select id from ir_model_field where name = 'default_country') and res = 'party.configuration,1';
+
+  - comment: # Update to lower case email of web users
+    version: 4.6
+    tables: web_user
+    query: UPDATE web_user SET email = LOWER(email);
+
+    # account_es and aeat
+  - comment: # add new column in code_uniq constrain when upgrade
+    version: 4.6
+    query: ALTER TABLE account_account_template DROP CONSTRAINT "account_account_template_code_uniq";
+  - comment: # Rename account_es_pyme to account_es
+    version: 4.6
+    query: UPDATE ir_model_data SET module = 'account_es' WHERE module = 'account_es_pyme';
+  - comment: # Rename model data aeat_349
+    version: 4.6
+    query: UPDATE ir_model_data set fs_id = fs_id || (select CASE state WHEN 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_349' and fs_id like 'aeat_349_template%';
+  - comment: # Rename model data aeat_303
+    version: 4.6
+    query: UPDATE ir_model_data set fs_id = fs_id || (select CASE state WHEN 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_303' and fs_id like 'aeat_303_mapping_code_%_val%';
+  - comment: # Rename model data aeat_340
+    version: 4.6
+    query: UPDATE ir_model_data set fs_id = fs_id || '(select CASE state WHEN 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_340' and fs_id like 'aeat_340_template_type_%';
 
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es';
@@ -150,6 +205,16 @@ after:
   - comment: # change code to number electronic mail template
     version: 4.0
     query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
+
+  - comment: # drop purchase invoice line rel
+    version: 4.4
+    query: DROP TABLE purchase_invoice_line_rel;
+  - comment: # delete duplicated party configuration sequence
+    version: 4.4
+    query: DELETE FROM party_configuration_party_sequence where id = 2;
+  # - comment: # delete ir properties
+  #   version: 4.4
+  #   query: DELETE FROM ir_model_data WHERE model = 'ir.property';
 
   # - script: ./upgrades/after/convert_domain_rules.py
   # - tables: work_project
