@@ -4,6 +4,7 @@
 to_uninstall:
   - account_invoice_post_in_tree
   - account_chart_speedup
+  - account_es_pyme
   - account_invoice_data
   - account_invoice_post_in_tree
   - account_move_party_required
@@ -35,7 +36,10 @@ to_uninstall:
   - webdav
 
 to_install:
+  - account_eu
+  - account_es
   - account_statement_of_account
+  - electronic_mail
   - html_report
   - party_identifier
 
