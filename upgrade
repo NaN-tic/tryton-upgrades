@@ -111,8 +111,15 @@ def uninstall_modules():
             print 'DELETING', model
             execute('DELETE FROM "' + model.replace('.', '_')
                 + '" WHERE id=%s', db_id)
+
         execute('DELETE FROM ir_model_data WHERE module=%s', module)
 
+    execute('DELETE FROM mass_editing WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+        module_table)
+    execute('DELETE FROM ir_trigger WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+        module_table)
     execute('DELETE FROM ir_action_act_window WHERE res_model IN (SELECT '
         'model FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
         module_table)
