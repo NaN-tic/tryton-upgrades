@@ -265,6 +265,9 @@ after:
     version: 4.4
     query: DELETE FROM party_configuration_party_sequence where id = 2;
 
+  - comment: # migration from sale_opportunity module to core.
+    query: update sale_sale s  set origin = 'sale.opportunity,'|| o.opportunity from opportunity_sale_rel o where s.id = o.sale
+
   # - comment: # delete ir properties
   #   version: 4.4
   #   query: DELETE FROM ir_model_data WHERE model = 'ir.property';
