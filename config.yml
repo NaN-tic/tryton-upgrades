@@ -28,16 +28,31 @@ to_uninstall:
   - calendar_classification
   - calendar_scheduling
   - calendar_todo
+  - monitoring
   - guarantee
   - party_vcarddav
   - party_identifier
   - product_configuration
   - project_unittest
+  - project_auto_timesheet
   - sale_invoices_paid
   - sale_shipments_done
   - stock_delivery_note_valued_jreport
   - webdav
   - project_current_effort
+  - project_asterisk
+  - account_chart_speedup
+  - account_statement_of_account
+  - project_unittest
+  - monitoring
+  - project_asterisk
+  - account_invoice_type
+  - account_payment_bank
+  - project_auto_timesheet
+  - asset_attribute
+  - project_current_effort
+  - account_payment_type_move
+  - product_price_list_category
 
 to_install:
   - account_move_draft
