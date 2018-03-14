@@ -34,8 +34,9 @@ to_uninstall:
   - webdav
 
 to_install:
-  - html_report
+  - account_invoice_price_list
   - account_statement_of_account
+  - html_report
 
 before:
 
