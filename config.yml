@@ -56,6 +56,7 @@ to_uninstall:
 
 to_install:
   - account_move_draft
+  - account_invoice_price_list
   - electronic_mail
   - html_report
 
