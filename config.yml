@@ -28,7 +28,6 @@ to_uninstall:
   - calendar_classification
   - calendar_scheduling
   - calendar_todo
-  - monitoring
   - guarantee
   - party_vcarddav
   - party_identifier
@@ -44,7 +43,6 @@ to_uninstall:
   - account_chart_speedup
   - account_statement_of_account
   - project_unittest
-  - monitoring
   - project_asterisk
   - account_invoice_type
   - account_payment_bank
@@ -78,12 +76,51 @@ before:
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
 
-  - tables: ir_module
-    version: 4.7
-    query: UPDATE ir_module SET name = 'account_es_normal' WHERE name = 'account_es';
-  - tables: ir_module_module
-    version: 4.7
-    query: UPDATE ir_module_module SET name = 'account_es_normal' WHERE name = 'account_es';
+  - comment: # Tax migration from new tax rules. on 4.7
+    query:  create table mapping_taxes as select
+        t.id as tax_id,
+        t.name as tax_name,
+        t.parent as tax_parent,
+        t.include_347,
+        i.fs_id,
+        i.db_id as template_id,
+        split_part(i.fs_id, '+',1)
+      from
+        ir_model_data i,
+        account_tax_template tt,
+        account_tax t
+      where
+         tt.id = t.template and
+         db_id = tt.id and
+         model='account.tax.template' and module='account_es' and
+         tt.parent is not null and fs_id like '%_child'
+         and  t.include_347 = true
+      UNION ALL
+      select
+          t.id as tax_id,
+          t.name as tax_name,
+          t.parent as tax_parent,
+          t.include_347,
+          i.fs_id,
+          i.db_id as template_id,
+          rtrim(rtrim(rtrim(split_part(i.fs_id, '+',2),'_child'), 'iva'), 'irpf')
+      from
+          ir_model_data i,
+          account_tax_template tt,
+          account_tax t
+      where
+         tt.id = t.template and
+         i.db_id = tt.id and
+         model='account.tax.template' and module='account_es' and
+         tt.parent is not null and fs_id like '%_child'
+         and  t.include_347 = false
+
+  # - tables: ir_module
+  #   version: 4.7
+  #   query: UPDATE ir_module SET name = 'account_es_normal' WHERE name = 'account_es';
+  # - tables: ir_module_module
+  #   version: 4.7
+  #   query: UPDATE ir_module_module SET name = 'account_es_normal' WHERE name = 'account_es';
 
   - comment: -> 4.0
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
@@ -217,49 +254,51 @@ before:
     version: 4.6
     query: ALTER TABLE account_account_template DROP CONSTRAINT "account_account_template_code_uniq";
 
-  - comment: # Rename account_es to account_es_normal
-    version: 4.6
-    query: UPDATE ir_model_data SET module = 'account_es_normal' WHERE module = 'account_es';
+  # - comment: # Rename account_es to account_es_normal
+  #   version: 4.6
+  #   query: UPDATE ir_model_data SET module = 'account_es_normal' WHERE module = 'account_es';
 
   - comment: # Rename account_es_pyme to account_es
     version: 4.6
     query: UPDATE ir_model_data SET module = 'account_es' WHERE module = 'account_es_pyme';
 
 
-  - comment: # Rename model data aeat_349
-    version: 4.6
-    tables: ir_module
-    query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_349' and fs_id like 'aeat_349_template%';
-
-  - comment: # Rename model data aeat_349
-    version: 4.6
-    tables: ir_module_module
-    query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_349' and fs_id like 'aeat_349_template%';
-
-  - comment: # Rename model data aeat_303
-    version: 4.6
-    tables: ir_module
-    query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_303' and fs_id like 'aeat_303_mapping_code_%_val%';
-
-  - comment: # Rename model data aeat_303
-    version: 4.6
-    tables: ir_module_module
-    query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_303' and fs_id like 'aeat_303_mapping_code_%_val%';
-
-  - comment: # Rename model data aeat_340
-    version: 4.6
-    tables: ir_module
-    query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_340' and fs_id like 'aeat_340_template_type_%';
-
-  - comment: # Rename model data aeat_340
-    version: 4.6
-    tables: ir_module_module
-    query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_340' and fs_id like 'aeat_340_template_type_%';
+  # - comment: # Rename model data aeat_349
+  #   version: 4.6
+  #   tables: ir_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_349' and fs_id like 'aeat_349_template%';
+  #
+  # - comment: # Rename model data aeat_349
+  #   version: 4.6
+  #   tables: ir_module_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_349' and fs_id like 'aeat_349_template%';
+  #
+  # - comment: # Rename model data aeat_303
+  #   version: 4.6
+  #   tables: ir_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_303' and fs_id like 'aeat_303_mapping_code_%_val%';
+  #
+  # - comment: # Rename model data aeat_303
+  #   version: 4.6
+  #   tables: ir_module_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_303' and fs_id like 'aeat_303_mapping_code_%_val%';
+  #
+  # - comment: # Rename model data aeat_340
+  #   version: 4.6
+  #   tables: ir_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_340' and fs_id like 'aeat_340_template_type_%';
+  #
+  # - comment: # Rename model data aeat_340
+  #   version: 4.6
+  #   tables: ir_module_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_340' and fs_id like 'aeat_340_template_type_%';
 
 
 after:
-  - DELETE FROM ir_translation WHERE module = 'account_es';
-  - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
+  # - DELETE FROM ir_translation WHERE module = 'account_es';
+  # - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
+  - query: delete from "aeat_303_mapping-account_tax_code"
+  - query: delete from aeat_303_mapping ;
   - comment: -> 4.0
     version: 4.0
     query: UPDATE account_move_reconciliation SET date=create_date::DATE WHERE date IS NULL;
@@ -310,6 +349,8 @@ after:
     tables: opportunity_sale_rel
     version: 4.7
     query: update sale_sale s  set origin = 'sale.opportunity,'|| o.opportunity from opportunity_sale_rel o where s.id = o.sale
+
+#  - script: ./upgrades/after/update_taxes.py
 
   # - comment: # delete ir properties
   #   version: 4.4
