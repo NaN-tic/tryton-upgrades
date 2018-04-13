@@ -26,7 +26,9 @@ def get_tax(xml_id):
     data, = ModelData.search([('module', '=', 'account_es'),
         ('fs_id', '=', xml_id)], limit=1)
     template = AccountTaxTemplate(data.db_id)
-    tax, = AccountTax.search([('template', '=', template.id)], limit=1)
+    print "template:", template, template.name
+    with Transaction().set_context(active_test=False):
+        tax, = AccountTax.search([('template', '=', template.id)], limit=1)
     return (template, tax)
 
 logger = logging.getLogger(__name__)
@@ -56,6 +58,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
         if '_' == xml_id[-1]:
             xml_id = xml_id[:-1]
 
+        print xml_id, name, fs_id
         new_template, new_tax = get_tax(xml_id)
 
         if xml_id in xml_ids:

@@ -299,6 +299,13 @@ after:
   # - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
   - query: delete from "aeat_303_mapping-account_tax_code"
   - query: delete from aeat_303_mapping ;
+  - query: delete from aeat_303_mapping ;
+  - comment: -> 4.7
+    version: 4.7
+    query: update account_tax_template set update_unit_price = false where update_unit_price
+  - comment: -> 4.7
+    version: 4.7
+    query: update account_tax set update_unit_price = false where update_unit_price
   - comment: -> 4.0
     version: 4.0
     query: UPDATE account_move_reconciliation SET date=create_date::DATE WHERE date IS NULL;
