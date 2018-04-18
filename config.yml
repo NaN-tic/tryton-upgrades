@@ -55,7 +55,7 @@ to_uninstall:
 
 to_install:
   - account_move_draft
-  - account_invoice_price_list
+  #- account_invoice_price_list
   - electronic_mail
   - html_report
 
@@ -228,9 +228,22 @@ before:
     query: DELETE FROM ir_property where value like 'account_tax_rule,%' and SUBSTRING(value, POSITION(',' IN value) + 1)::integer not in (select id from account_tax_rule);
 
 
-  - comment: # delete properties of account_journal withour foreign key
+  - comment: # delete properties of account_journal without foreign key
     version: 4.7
     query: delete from ir_property where id in (select id from ir_property  where res like 'account.journal%' and value like 'ir.sequence%' and split_part(res, ',', 2)::int not in (select id from account_journal));
+
+  - comment: # delete properties of account_journal without foreign key
+    version: 4.7
+    query: delete from ir_property where id in (select id from ir_property  where res like 'account.journal%' and value like 'account.account%' and split_part(res, ',', 2)::int not in (select id from account_journal));
+
+  - comment: # delete properties of stock_sequence without foreign key
+    version: 4.7
+    query: delete from ir_property where id in (select id from ir_property  where res like 'stock.configuration%' and value like 'ir.sequence%' and split_part(res, ',', 2)::int not in (select id from ir_sequence));
+
+  - comment: # delete default properties
+    version: 4.7
+    query: delete from ir_property where res is null;
+
 
   - comment: #
     tables: ir_lang
