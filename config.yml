@@ -4,6 +4,7 @@
 to_uninstall:
   - account_invoice_post_in_tree
   - account_chart_speedup
+  - account_es_pyme
   - account_invoice_data
   - account_invoice_post_in_tree
   - account_move_party_required
@@ -14,6 +15,7 @@ to_uninstall:
   - account_payment_es_csb_34_01
   - account_payment_es_csb_34_1_la_caixa
   - account_payment_es_csb_34_11
+  - account_payment_es_csb_58
   - account_statement_of_account
   - aeat_303_es
   - aeat_349_es
@@ -26,19 +28,36 @@ to_uninstall:
   - calendar_scheduling
   - calendar_todo
   - guarantee
+  - party_vcarddav
   - party_identifier
   - product_configuration
   - project_unittest
+  - project_auto_timesheet
   - sale_invoices_paid
   - sale_shipments_done
-  - stock_delivery_note_jreport
+  - stock_delivery_note_valued_jreport
   - webdav
+  - project_current_effort
+  - project_asterisk
+  - account_chart_speedup
+  - account_statement_of_account
+  - project_unittest
+  - project_asterisk
+  - account_payment_bank
+  - project_auto_timesheet
+  - asset_attribute
+  - project_current_effort
+  - account_payment_type_move
+  - product_price_list_category
+  - party_merge
 
 to_install:
-  - account_invoice_credit_note_related_invoice
-  - account_invoice_price_list
-  - account_statement_of_account
+  - account_move_draft
+  #- account_invoice_price_list
+  - electronic_mail
   - html_report
+  - account_invoice_type
+  - account_statement_of_account
 
 before:
 
@@ -55,6 +74,46 @@ before:
   - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL;
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
+
+  - comment: # Tax migration from new tax rules. on 4.7
+    query:  create table mapping_taxes as select
+        t.id as tax_id,
+        t.name as tax_name,
+        t.parent as tax_parent,
+        t.include_347,
+        i.fs_id,
+        i.db_id as template_id,
+        split_part(i.fs_id, '+',1)
+      from
+        ir_model_data i,
+        account_tax_template tt,
+        account_tax t
+      where
+         tt.id = t.template and
+         db_id = tt.id and
+         model='account.tax.template' and module='account_es' and
+         tt.parent is not null and fs_id like '%_child'
+         and  t.include_347 = true
+      UNION ALL
+      select
+          t.id as tax_id,
+          t.name as tax_name,
+          t.parent as tax_parent,
+          t.include_347,
+          i.fs_id,
+          i.db_id as template_id,
+          rtrim(rtrim(rtrim(split_part(i.fs_id, '+',2),'_child'), 'iva'), 'irpf')
+      from
+          ir_model_data i,
+          account_tax_template tt,
+          account_tax t
+      where
+         tt.id = t.template and
+         i.db_id = tt.id and
+         model='account.tax.template' and module='account_es' and
+         tt.parent is not null and fs_id like '%_child'
+         and  t.include_347 = false
+
   - comment: -> 4.0
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
   - tables: stock_location
@@ -77,6 +136,7 @@ before:
 #      SET
 #          credit_note_base_sign = credit_note_base_sign * -1,
 #          credit_note_tax_sign = credit_note_tax_sign * -1;
+
   - tables: account_tax
     version: 4.0
     query:
@@ -99,10 +159,10 @@ before:
   - fields: sale_sale.project
     query: ALTER TABLE sale_sale RENAME COLUMN project TO work_project
 
-  # - comment: # change PYSON context menu
-  #   version: 4.0
-  #   tables: babi_report
-  #   query: UPDATE ir_action_act_window SET domain = '[["parent", "=", null]]', context = '{"babi_tree_view": true}' WHERE context like '%babi%';
+  - comment: # change PYSON context menu
+    version: 4.0
+    tables: babi_report
+    query: "UPDATE ir_action_act_window SET domain = '[[\"parent\", \"=\", null]]', context = '{\"babi_tree_view\": true}' WHERE context like '%babi%'"
 
   - comment: # set domain to null in account bank statement
     version: 4.0
@@ -110,13 +170,144 @@ before:
   - comment: # set domain to null in account bank statement line
     version: 4.0
     query: UPDATE ir_action_act_window SET domain = null where id in (SELECT db_id FROM ir_model_data where fs_id = 'act_account_bank_statement_line');
+
   - comment: # set update_unit_price to false
     version: 4.0
     query: update account_tax_template set update_unit_price = false where id = (select db_id from ir_model_data where fs_id = 'iva_reagp_compras_12_1');
 
+  - comment: # rename locale languages
+    version: 4.2
+    query: UPDATE ir_translation SET lang = 'en' WHERE lang = 'en_US';UPDATE ir_translation SET lang = 'ca' WHERE lang = 'ca_ES';UPDATE ir_translation SET lang = 'es' WHERE lang = 'es_ES';UPDATE ir_translation SET lang = 'pt' WHERE lang = 'pt_PT';UPDATE ir_translation SET lang = 'de' WHERE lang = 'de_DE';UPDATE ir_translation SET lang = 'it' WHERE lang = 'it_IT';UPDATE ir_translation SET lang = 'fr' WHERE lang = 'fr_FR';
+  - comment: # rename configuration locale
+    version: 4.2
+    query: UPDATE ir_configuration SET language = 'en' WHERE language = 'en_US';UPDATE ir_configuration SET language = 'ca' WHERE language = 'ca_ES';
+
+  - comment: # delete modules
+    version: 4.4
+    tables: ir_module
+    query: DELETE FROM ir_module WHERE name IN ('webdav', 'calendar', 'calendar_todo', 'calendar_scheduling', 'calendar_classification', 'party_vcarddav');
+  - comment: # delete modules
+    tables: ir_module_module
+    version: 4.4
+    query: DELETE FROM ir_module_module WHERE name IN ('webdav', 'calendar', 'calendar_todo', 'calendar_scheduling', 'calendar_classification', 'party_vcarddav');
+
+  - comment: # delete modules views
+    version: 4.4
+    query: DELETE FROM ir_ui_view WHERE module IN ('webdav', 'calendar', 'calendar_todo', 'calendar_scheduling', 'calendar_classification', 'party_vcarddav');
+
+  - comment: # update format address
+    tables: party_address_format
+    version: 4.4
+    query: UPDATE party_address_format SET format_ = REPLACE(format_, '${district}', '${subdivision}');
+
+  - comment: # remove wrong proprties
+    version: 4.4
+    query:  delete from ir_property where res like 'party.party,None';
+
+  - comment: # delete party ir properties
+    version: 4.4
+    query: DELETE FROM ir_property where res like 'party.party,%' and SUBSTRING(res, POSITION(',' IN res) + 1)::integer not in (select id from party_party);
+
+  - comment: # delete product category ir properties
+    version: 4.4
+    query: DELETE FROM ir_property where res like 'product.category,%' and SUBSTRING(res, POSITION(',' IN res) + 1)::integer not in (select id from product_category);
+  - comment: # delete product ir properties
+    version: 4.4
+    query: DELETE FROM ir_property where res like 'product.template,%' and SUBSTRING(res, POSITION(',' IN res) + 1)::integer not in (select id from product_template);
+
+  - comment: # delete account_tax_rule ir properties
+    version: 4.4
+    query: DELETE FROM ir_property where value like 'account_tax_rule,None';
+
+  - comment: # delete account_tax_rule ir properties
+    version: 4.4
+    query: DELETE FROM ir_property where value like 'account_tax_rule,%' and SUBSTRING(value, POSITION(',' IN value) + 1)::integer not in (select id from account_tax_rule);
+
+  - comment: # delete properties of account_journal without foreign key
+    version: 4.7
+    query: delete from ir_property where id in (select id from ir_property  where res like 'account.journal%' and value like 'ir.sequence%' and split_part(res, ',', 2)::int not in (select id from account_journal));
+
+  - comment: # delete properties of account_journal without foreign key
+    version: 4.7
+    query: delete from ir_property where id in (select id from ir_property  where res like 'account.journal%' and value like 'account.account%' and split_part(res, ',', 2)::int not in (select id from account_journal));
+
+  - comment: # delete properties of stock_sequence without foreign key
+    version: 4.7
+    query: delete from ir_property where id in (select id from ir_property  where res like 'stock.configuration%' and value like 'ir.sequence%' and split_part(res, ',', 2)::int not in (select id from ir_sequence));
+
+  - comment: # delete default properties
+    version: 4.7
+    query: delete from ir_property where res is null;
+
+  - comment: #
+    tables: ir_lang
+    query: ALTER TABLE ir_lang ADD parent varchar;
+
+  # - comment: # drop ir properties in case account_asset is installed
+  #   version: 4.4
+  #   script: TODO https://bugs.tryton.org/issue6395
+
+  - comment: # update default_country ir_property
+    version: 4.4
+    query: UPDATE ir_property SET res = null where field in (select id from ir_model_field where name = 'default_country') and res = 'party.configuration,1';
+
+  - comment: # Update to lower case email of web users
+    version: 4.6
+    tables: web_user
+    query: UPDATE web_user SET email = LOWER(email);
+
+  # account_es and aeat
+  - comment: # add new column in code_uniq constrain when upgrade
+    version: 4.6
+    query: ALTER TABLE account_account_template DROP CONSTRAINT "account_account_template_code_uniq";
+
+  - comment: # Rename account_es_pyme to account_es
+    version: 4.6
+    query: UPDATE ir_model_data SET module = 'account_es' WHERE module = 'account_es_pyme';
+
+
+  # - comment: # Rename model data aeat_349
+  #   version: 4.6
+  #   tables: ir_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_349' and fs_id like 'aeat_349_template%';
+  #
+  # - comment: # Rename model data aeat_349
+  #   version: 4.6
+  #   tables: ir_module_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_349' and fs_id like 'aeat_349_template%';
+  #
+  # - comment: # Rename model data aeat_303
+  #   version: 4.6
+  #   tables: ir_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_303' and fs_id like 'aeat_303_mapping_code_%_val%';
+  #
+  # - comment: # Rename model data aeat_303
+  #   version: 4.6
+  #   tables: ir_module_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_303' and fs_id like 'aeat_303_mapping_code_%_val%';
+  #
+  # - comment: # Rename model data aeat_340
+  #   version: 4.6
+  #   tables: ir_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module where name = 'account_es_pyme') where module = 'aeat_340' and fs_id like 'aeat_340_template_type_%';
+  #
+  # - comment: # Rename model data aeat_340
+  #   version: 4.6
+  #   tables: ir_module_module
+  #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_340' and fs_id like 'aeat_340_template_type_%';
+
+
 after:
-  - DELETE FROM ir_translation WHERE module = 'account_es';
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
+  - query: delete from "aeat_303_mapping-account_tax_code"
+  - query: delete from aeat_303_mapping ;
+  - query: delete from aeat_303_mapping ;
+  - comment: -> 4.7
+    version: 4.7
+    query: update account_tax_template set update_unit_price = false where update_unit_price
+  - comment: -> 4.7
+    version: 4.7
+    query: update account_tax set update_unit_price = false where update_unit_price
   - comment: -> 4.0
     version: 4.0
     query: UPDATE account_move_reconciliation SET date=create_date::DATE WHERE date IS NULL;
@@ -155,6 +346,24 @@ after:
   - comment: # change code to number electronic mail template
     version: 4.0
     query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
+
+  - comment: # drop purchase invoice line rel
+    version: 4.4
+    query: DROP TABLE if exists purchase_invoice_line_rel;
+  - comment: # delete duplicated party configuration sequence
+    version: 4.4
+    query: DELETE FROM party_configuration_party_sequence where id = 2;
+
+  - comment: # migration from sale_opportunity module to core.
+    tables: opportunity_sale_rel
+    version: 4.7
+    query: update sale_sale s  set origin = 'sale.opportunity,'|| o.opportunity from opportunity_sale_rel o where s.id = o.sale
+
+#  - script: ./upgrades/after/update_taxes.py
+
+  # - comment: # delete ir properties
+  #   version: 4.4
+  #   query: DELETE FROM ir_model_data WHERE model = 'ir.property';
 
   # - script: ./upgrades/after/convert_domain_rules.py
   # - tables: work_project

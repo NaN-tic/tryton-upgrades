@@ -108,11 +108,53 @@ def uninstall_modules():
         execute('SELECT model, db_id FROM ir_model_data WHERE module=%s',
             module)
         for model, db_id in cursor.fetchall():
-            print 'DELETING', model
+            print 'DELETING', model, db_id
             execute('DELETE FROM "' + model.replace('.', '_')
                 + '" WHERE id=%s', db_id)
+
         execute('DELETE FROM ir_model_data WHERE module=%s', module)
 
+
+    execute('DELETE from babi_filter_parameter where filter in'
+        ' (SELECT id FROM babi_filter WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+        module_table)
+
+
+    execute('DELETE FROM babi_filter WHERE model IN (SELECT '
+            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+            module_table)
+
+    execute('DELETE from babi_order where report in'
+        ' (SELECT id FROM babi_report WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+        module_table)
+
+    execute('DELETE from babi_measure where report in'
+        ' (SELECT id FROM babi_report WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+        module_table)
+
+
+    execute('DELETE from babi_dimension where expression in'
+        ' (SELECT id FROM babi_expression WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+        module_table)
+
+    execute('DELETE FROM babi_expression WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+        module_table)
+
+    execute('DELETE FROM babi_report WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+        module_table)
+
+    execute('DELETE FROM mass_editing WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+        module_table)
+    execute('DELETE FROM ir_trigger WHERE model IN (SELECT '
+        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+        module_table)
     execute('DELETE FROM ir_action_act_window WHERE res_model IN (SELECT '
         'model FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
         module_table)
