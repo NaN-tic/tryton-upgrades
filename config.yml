@@ -57,8 +57,6 @@ to_install:
   #- account_invoice_price_list
   - electronic_mail
   - html_report
-  - account_invoice_type
-  - account_statement_of_account
 
 before:
 
