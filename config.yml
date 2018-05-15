@@ -361,6 +361,10 @@ after:
     version: 4.7
     query: update sale_sale s  set origin = 'sale.opportunity,'|| o.opportunity from opportunity_sale_rel o where s.id = o.sale
 
+  - comment: # update template extension jasper reports
+    version: 4.7
+    query: update ir_action_report set template_extension = 'jrxml' where report like '%jrxml';
+
 #  - script: ./upgrades/after/update_taxes.py
 
   # - comment: # delete ir properties
