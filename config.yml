@@ -297,7 +297,7 @@ before:
 
   - comment: # update jasper translations to report type
     version: 4.7
-    query: update ir_translation set type = 'report' where type = 'jasper';;
+    query: update ir_translation set type = 'report' where type = 'jasper';
 
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
