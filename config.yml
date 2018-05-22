@@ -17,6 +17,9 @@ to_uninstall:
   - account_payment_es_csb_34_11
   - account_payment_es_csb_58
   - account_statement_of_account
+  - asset_attribute
+  - account_payment_bank
+  - account_payment_type_move
   - aeat_340
   - aeat_303_es
   - aeat_349_es
@@ -31,26 +34,19 @@ to_uninstall:
   - guarantee
   - party_vcarddav
   - party_identifier
+  - party_merge
   - product_configuration
-  - project_unittest
   - project_auto_timesheet
+  - project_asterisk
+  - project_current_effort
+  - project_unittest
+  - project_unittest
+  - product_price_list_category
   - sale_invoices_paid
   - sale_shipments_done
   - stock_delivery_note_valued_jreport
+  - stock_picking_box
   - webdav
-  - project_current_effort
-  - project_asterisk
-  - account_chart_speedup
-  - account_statement_of_account
-  - project_unittest
-  - project_asterisk
-  - account_payment_bank
-  - project_auto_timesheet
-  - asset_attribute
-  - project_current_effort
-  - account_payment_type_move
-  - product_price_list_category
-  - party_merge
 
 to_install:
   - account_move_draft
