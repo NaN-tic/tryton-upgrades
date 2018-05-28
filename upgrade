@@ -149,9 +149,10 @@ def uninstall_modules():
         'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
         module_table)
 
-    execute('DELETE FROM mass_editing WHERE model IN (SELECT '
-        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
-        module_table)
+    if table_exists('mass_editing'):
+        execute('DELETE FROM mass_editing WHERE model IN (SELECT '
+            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+            module_table)
     execute('DELETE FROM ir_trigger WHERE model IN (SELECT '
         'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
         module_table)

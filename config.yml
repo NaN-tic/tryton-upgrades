@@ -71,6 +71,7 @@ before:
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
   - comment: # Tax migration from new tax rules. on 4.7
+    tables: aeat_347_record
     query:  create table mapping_taxes as select
         t.id as tax_id,
         t.name as tax_name,
@@ -297,14 +298,17 @@ before:
 
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
-  - query: delete from "aeat_303_mapping-account_tax_code"
-  - query: delete from aeat_303_mapping ;
-  - query: delete from aeat_303_mapping ;
+  - tables: aeat_303_mapping-account_tax_code
+    query: delete from "aeat_303_mapping-account_tax_code"
+  - tables: aeat_303_mapping
+    query: delete from aeat_303_mapping ;
   - comment: -> 4.7
     version: 4.7
+    tables: account_tax_template
     query: update account_tax_template set update_unit_price = false where update_unit_price
   - comment: -> 4.7
     version: 4.7
+    tables: account_tax
     query: update account_tax set update_unit_price = false where update_unit_price
   - comment: -> 4.0
     version: 4.0
@@ -343,6 +347,7 @@ after:
     query: update electronic_mail_template set subject = regexp_replace(subject, 'record.code', 'record.number', 'g'), plain = regexp_replace(plain, 'record.code', 'record.number', 'g'), html = regexp_replace(html, 'record.code', 'record.number', 'g') where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'));
   - comment: # change code to number electronic mail template
     version: 4.0
+    tables: electronic_mail_template
     query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
 
   - comment: # drop purchase invoice line rel
