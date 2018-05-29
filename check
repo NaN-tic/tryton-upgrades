@@ -10,6 +10,7 @@ from trytond.transaction import Transaction
 from trytond.pool import Pool
 import logging
 from lxml import etree
+import pprint
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -21,13 +22,49 @@ logger.addHandler(ch)
 
 from blessings import Terminal
 t = Terminal()
-
-
 Pool.start()
 pool = Pool(dbname)
 pool.init()
 
 context = {'company': 1}
+
+
+def download_fields_view_get():
+    '''
+    Create a file with result of fields_view_get to can diff easily
+    '''
+    logger.info(t.yellow('Checking fields_view_get...'))
+    version = '4.8'
+    filename = "%s_%s"%(dbname, version)
+    log_file = open(filename, 'w')
+    pp = pprint.PrettyPrinter(depth=2, stream=log_file)
+    with Transaction().start(dbname, 1):
+        View = pool.get('ir.ui.view')
+        views = View.search([
+                ('model', '!=', ''),
+                ], order=[('id', 'asc')])
+        for view in views:
+            if view.inherit and view.inherit.model == view.model:
+                view_id = view.inherit.id
+            else:
+                view_id = view.id
+            model = view.model
+            Model = pool.get(model)
+            res = None
+            if model in ('project.test.build.group'):
+                continue
+            try:
+                res = Model.fields_view_get(view_id)
+            except ValueError:
+                logging.error(t.red('ERROR PROCESSING VIEW'))
+                logging.error(t.red('View ID: %d; Model: %s' % (view.id,
+                            view.model)))
+                logging.error(t.red('Arch:\n%s' % view.arch))
+                raise
+
+            r = res.copy()
+            del r['arch']
+            pp.pprint(r)
 
 
 def check_data():
@@ -110,7 +147,9 @@ def check_model_access():
                 'models': list(with_groups - no_groups), })
 
 
-for check in (check_model_access, check_view, check_data):
+
+
+for check in (download_fields_view_get, check_model_access, check_view, check_data):
     try:
         check()
     except:

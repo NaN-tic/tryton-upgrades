@@ -5,6 +5,7 @@ to_uninstall:
   - account_invoice_post_in_tree
   - account_chart_speedup
   - account_es_pyme
+  - account_invoice_type
   - account_invoice_data
   - account_invoice_post_in_tree
   - account_move_party_required
@@ -292,8 +293,11 @@ before:
   #   tables: ir_module_module
   #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_340' and fs_id like 'aeat_340_template_type_%';
 
+  - comment: # delete register with type 'jasper' on core modules
+    version: 4.8
+    query: delete from ir_translation where module in ('account_invoice', 'sale', 'stock', 'purchase') and type = 'jasper';
   - comment: # update jasper translations to report type
-    version: 4.7
+    version: 4.8
     query: update ir_translation set type = 'report' where type = 'jasper';
 
 after:
