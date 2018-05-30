@@ -113,6 +113,8 @@ def uninstall_modules():
             module)
         for model, db_id in cursor.fetchall():
             print 'DELETING', model, db_id
+            if model == 'res.user':
+                continue
             execute('DELETE FROM "' + model.replace('.', '_')
                 + '" WHERE id=%s', db_id)
 
@@ -149,7 +151,6 @@ def uninstall_modules():
         execute('DELETE FROM mass_editing WHERE model IN (SELECT '
             'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
             module_table)
-
     execute('DELETE FROM ir_trigger WHERE model IN (SELECT '
         'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
         module_table)
@@ -180,6 +181,7 @@ def process_actions(actions):
             # Check version
             if version <= trytond_version and version > from_version:
                 continue
+
 
             # Check tables
             found = True

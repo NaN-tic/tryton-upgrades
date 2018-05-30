@@ -92,7 +92,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     tables2 = [
         ('account_invoice_line_account_tax', 'tax'),
         ('sale_line_account_tax', 'tax'),
-        #('purchase_line_account_tax', 'tax')
+        ('purchase_line_account_tax', 'tax')
     ]
 
     for parent, taxes in parent_map.iteritems():

@@ -22,6 +22,8 @@ logger.addHandler(ch)
 
 from blessings import Terminal
 t = Terminal()
+
+
 Pool.start()
 pool = Pool(dbname)
 pool.init()

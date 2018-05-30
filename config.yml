@@ -4,6 +4,7 @@
 to_uninstall:
   - account_invoice_post_in_tree
   - account_chart_speedup
+  - account_es_pyme
   - account_invoice_type
   - account_invoice_data
   - account_invoice_post_in_tree
@@ -33,6 +34,7 @@ to_uninstall:
   - calendar_todo
   - guarantee
   - party_vcarddav
+  - party_identifier
   - party_merge
   - product_configuration
   - project_auto_timesheet
@@ -236,6 +238,10 @@ before:
     version: 4.7
     query: delete from ir_property where res is null;
 
+  - comment: #
+    tables: ir_lang
+    query: ALTER TABLE ir_lang ADD parent varchar;
+
   # - comment: # drop ir properties in case account_asset is installed
   #   version: 4.4
   #   script: TODO https://bugs.tryton.org/issue6395
@@ -253,6 +259,11 @@ before:
   - comment: # add new column in code_uniq constrain when upgrade
     version: 4.6
     query: ALTER TABLE account_account_template DROP CONSTRAINT "account_account_template_code_uniq";
+
+  - comment: # Rename account_es_pyme to account_es
+    version: 4.6
+    query: UPDATE ir_model_data SET module = 'account_es' WHERE module = 'account_es_pyme';
+
 
   # - comment: # Rename model data aeat_349
   #   version: 4.6

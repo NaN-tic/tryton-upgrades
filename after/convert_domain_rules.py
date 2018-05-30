@@ -42,4 +42,19 @@ with Transaction().start(dbname, 0, context=context) as transaction:
             rule.domain = PYSONEncoder().encode(eval(rule.domain))
             rule.save()
 
+
+with Transaction().start(dbname, 0, context=context) as transaction:
+
     pool = Pool()
+    ActWindow = pool.get('ir.action.act_window')
+
+    actions = ActWindow.search([('create_uid', '>', 0)])
+    for action in actions:
+        if action.id in (427, 428):
+            continue
+        print "id:", action.id
+        print "d:", action.domain
+        print "c:", action.context
+        action.domain = PYSONEncoder().encode(eval(action.domain))
+        action.context = PYSONEncoder().encode(eval(action.context))
+        action.save()
