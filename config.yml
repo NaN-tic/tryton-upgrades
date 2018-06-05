@@ -4,7 +4,6 @@
 to_uninstall:
   - account_invoice_post_in_tree
   - account_chart_speedup
-  - account_es_pyme
   - account_invoice_type
   - account_invoice_data
   - account_invoice_post_in_tree
@@ -34,7 +33,6 @@ to_uninstall:
   - calendar_todo
   - guarantee
   - party_vcarddav
-  - party_identifier
   - party_merge
   - product_configuration
   - project_auto_timesheet
@@ -73,6 +71,7 @@ before:
 
   - comment: # Tax migration from new tax rules. on 4.7
     tables: aeat_347_record
+    version: 4.8
     query:  create table mapping_taxes as select
         t.id as tax_id,
         t.name as tax_name,
@@ -257,11 +256,6 @@ before:
   - comment: # add new column in code_uniq constrain when upgrade
     version: 4.6
     query: ALTER TABLE account_account_template DROP CONSTRAINT "account_account_template_code_uniq";
-
-  - comment: # Rename account_es_pyme to account_es
-    version: 4.6
-    query: UPDATE ir_model_data SET module = 'account_es' WHERE module = 'account_es_pyme';
-
 
   # - comment: # Rename model data aeat_349
   #   version: 4.6
