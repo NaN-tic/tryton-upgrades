@@ -294,6 +294,11 @@ before:
     version: 4.8
     query: update ir_translation set type = 'report' where type = 'jasper';
 
+  - comment: # update sale customer_reference to sale reference (sale_reference)
+    fields: sale_sale.customer_reference
+    version: 4.8
+    query: update sale_sale set reference = customer_reference where customer_reference is not null;
+
 after:
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
   - tables: aeat_303_mapping-account_tax_code
