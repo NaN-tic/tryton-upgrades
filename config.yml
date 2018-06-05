@@ -236,10 +236,6 @@ before:
     version: 4.7
     query: delete from ir_property where res is null;
 
-  - comment: #
-    tables: ir_lang
-    query: ALTER TABLE ir_lang ADD parent varchar;
-
   # - comment: # drop ir properties in case account_asset is installed
   #   version: 4.4
   #   script: TODO https://bugs.tryton.org/issue6395
@@ -287,6 +283,11 @@ before:
   #   version: 4.6
   #   tables: ir_module_module
   #   query: UPDATE ir_model_data set fs_id = fs_id || (select CASE WHEN state = 'installed' THEN '_pyme' ELSE '_normal' END FROM ir_module_module where name = 'account_es_pyme') where module = 'aeat_340' and fs_id like 'aeat_340_template_type_%';
+
+  - comment: # Add exceptional parent language (must be run before update
+    version: 4.8
+    tables: ir_lang
+    query: ALTER TABLE ir_lang ADD parent varchar;
 
   - comment: # delete register with type 'jasper' on core modules
     version: 4.8
@@ -354,9 +355,22 @@ after:
     tables: electronic_mail_template
     query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
 
+  - comment: # After property migration old model data should be cleared:
+    version: 4.4
+    query: DELETE FROM ir_model_data WHERE model = 'ir.property';
+
   - comment: # drop purchase invoice line rel
     version: 4.4
     query: DROP TABLE if exists purchase_invoice_line_rel;
+
+  - comment: # Update address formats
+    version: 4.4
+    query: UPDATE party_address_format SET format_ = REPLACE(format_, '${district}', '${subdivision}');
+
+  - comment: # Relation between purchase and invoice_lines must be deleted
+    version: 4.4
+    query: DROP TABLE purchase_invoice_line_rel;
+
   - comment: # delete duplicated party configuration sequence
     version: 4.4
     query: DELETE FROM party_configuration_party_sequence where id = 2;
@@ -369,6 +383,10 @@ after:
   - comment: # update template extension jasper reports
     version: 4.7
     query: update ir_action_report set template_extension = 'jrxml' where report like '%jrxml';
+
+  - comment: # upgrade configuration models from ir_property
+    version: 4.8
+    script: ./upgrades/after/migration_properties.py
 
 #  - script: ./upgrades/after/update_taxes.py
 
