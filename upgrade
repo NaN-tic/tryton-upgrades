@@ -114,45 +114,38 @@ def uninstall_modules():
 
         execute('DELETE FROM ir_model_data WHERE module=%s', module)
 
-
-    execute('DELETE from babi_filter_parameter where filter in'
-        ' (SELECT id FROM babi_filter WHERE model IN (SELECT '
-        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
-        module_table)
-
-
-    execute('DELETE FROM babi_filter WHERE model IN (SELECT '
+    if table_exists('babi_report'):
+        execute('DELETE from babi_filter_parameter where filter in'
+            ' (SELECT id FROM babi_filter WHERE model IN (SELECT '
+            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+            module_table)
+        execute('DELETE FROM babi_filter WHERE model IN (SELECT '
+                'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+                module_table)
+        execute('DELETE from babi_order where report in'
+            ' (SELECT id FROM babi_report WHERE model IN (SELECT '
+            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+            module_table)
+        execute('DELETE from babi_measure where report in'
+            ' (SELECT id FROM babi_report WHERE model IN (SELECT '
+            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+            module_table)
+        execute('DELETE from babi_dimension where expression in'
+            ' (SELECT id FROM babi_expression WHERE model IN (SELECT '
+            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+            module_table)
+        execute('DELETE FROM babi_expression WHERE model IN (SELECT '
             'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
             module_table)
-
-    execute('DELETE from babi_order where report in'
-        ' (SELECT id FROM babi_report WHERE model IN (SELECT '
-        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
-        module_table)
-
-    execute('DELETE from babi_measure where report in'
-        ' (SELECT id FROM babi_report WHERE model IN (SELECT '
-        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
-        module_table)
-
-
-    execute('DELETE from babi_dimension where expression in'
-        ' (SELECT id FROM babi_expression WHERE model IN (SELECT '
-        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
-        module_table)
-
-    execute('DELETE FROM babi_expression WHERE model IN (SELECT '
-        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
-        module_table)
-
-    execute('DELETE FROM babi_report WHERE model IN (SELECT '
-        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
-        module_table)
+        execute('DELETE FROM babi_report WHERE model IN (SELECT '
+            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+            module_table)
 
     if table_exists('mass_editing'):
         execute('DELETE FROM mass_editing WHERE model IN (SELECT '
             'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
             module_table)
+
     execute('DELETE FROM ir_trigger WHERE model IN (SELECT '
         'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
         module_table)
@@ -182,7 +175,6 @@ def process_actions(actions):
             # Check version
             if version <= trytond_version and version > from_version:
                 continue
-
 
             # Check tables
             found = True
