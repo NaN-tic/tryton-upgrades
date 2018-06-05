@@ -91,6 +91,10 @@ def field_exists(field):
         'WHERE table_name=%s AND column_name=%s', table, field)
     return bool(cursor.fetchone()[0])
 
+def where_exists(query):
+    execute(query)
+    return bool(cursor.fetchone()[0])
+
 def uninstall_modules():
     to_uninstall = config.get('to_uninstall')
     module_table = None
@@ -171,6 +175,7 @@ def process_actions(actions):
             version = action.get('version', '')
             query = action.get('query')
             script = action.get('script')
+            where = action.get('where')
 
             # Check version
             if version <= trytond_version and version > from_version:
@@ -196,6 +201,11 @@ def process_actions(actions):
                     found = False
                     break
             if not found:
+                continue
+
+            # Check where
+            if where and not where_exists(where):
+                print "WHERE '%s' NOT FOUND" % where
                 continue
         else:
             query = action
