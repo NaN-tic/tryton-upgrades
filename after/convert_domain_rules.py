@@ -50,8 +50,10 @@ with Transaction().start(dbname, 0, context=context) as transaction:
 
     actions = ActWindow.search([('create_uid', '>', 0)])
     for action in actions:
+
         if action.id in (427, 428):
             continue
+        print "action:", action.domain
         action.domain = PYSONEncoder().encode(eval(action.domain))
         action.context = PYSONEncoder().encode(eval(action.context))
         action.save()

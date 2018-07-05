@@ -1,6 +1,4 @@
 ---
-# asset_work_project
-# work_project
 to_uninstall:
   - account_invoice_post_in_tree
   - account_chart_speedup
@@ -32,6 +30,7 @@ to_uninstall:
   - calendar_classification
   - calendar_scheduling
   - calendar_todo
+  - dbcopy
   - guarantee
   - party_vcarddav
   - party_identifier
@@ -51,7 +50,8 @@ to_uninstall:
 
 to_install:
   - account_move_draft
-  #- account_invoice_price_list
+  - account_invoice_line_description
+  - party_identifier
   - account_invoice_company_currency
   - electronic_mail
   - html_report
@@ -238,10 +238,6 @@ before:
     version: 4.7
     query: delete from ir_property where res is null;
 
-  - comment: #
-    tables: ir_lang
-    query: ALTER TABLE ir_lang ADD parent varchar;
-
   # - comment: # drop ir properties in case account_asset is installed
   #   version: 4.4
   #   script: TODO https://bugs.tryton.org/issue6395
@@ -307,12 +303,13 @@ before:
     version: 4.8
     query: update ir_translation set type = 'report' where type = 'jasper';
 
+after:
+
   - comment: # update sale customer_reference to sale reference (sale_reference)
     fields: sale_sale.customer_reference
     version: 4.8
     query: update sale_sale set reference = customer_reference where customer_reference is not null;
 
-after:
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
   - tables: aeat_303_mapping-account_tax_code
     query: delete from "aeat_303_mapping-account_tax_code"

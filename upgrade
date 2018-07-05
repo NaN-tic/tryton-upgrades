@@ -263,6 +263,7 @@ config.setdefault('to_install', [])
 if os.path.exists('upgrade.yml'):
     override = yaml.load(open('upgrade.yml', 'r').read())
     config['to_install'] += override.get('to_install', [])
+    config['to_uninstall'] += override.get('to_uninstall', [])
     config['before'] += override.get('before', [])
     config['after'] += override.get('after', [])
 
