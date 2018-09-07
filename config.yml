@@ -336,6 +336,10 @@ before:
         UPDATE ir_module set state = 'activated' where name = 'account_es';
         DELETE from ir_module_dependency where name = 'account_es_pyme';
 
+  - comment: # delete ir.export.line that has not export value trytond-issue6551
+    version: 4.4
+    query: DELETE from ir_export_line where export is null;
+
 after:
 
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
