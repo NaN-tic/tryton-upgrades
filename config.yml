@@ -1,6 +1,7 @@
 ---
 to_uninstall:
   - account_invoice_post_in_tree
+  - account_cash_management
   - account_chart_speedup
   - account_invoice_type
   - account_invoice_data
@@ -340,6 +341,14 @@ before:
     version: 4.4
     query: DELETE from ir_export_line where export is null;
 
+  - comment: # upgrade ir.configuration
+    version: 4.2
+    query: update ir_configuration set language = 'es';
+
+  - comment: # alter table aeat_347_report_property column number
+    version: 4.2
+    query: alter table aeat_347_report_property alter column number TYPE varchar;
+
 after:
 
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
@@ -399,17 +408,13 @@ after:
     version: 4.4
     query: DELETE FROM ir_model_data WHERE model = 'ir.property';
 
-  - comment: # drop purchase invoice line rel
+  - comment: # Relation between purchase and invoice_lines must be deleted
     version: 4.4
     query: DROP TABLE if exists purchase_invoice_line_rel;
 
   - comment: # Update address formats
     version: 4.4
     query: UPDATE party_address_format SET format_ = REPLACE(format_, '${district}', '${subdivision}');
-
-  - comment: # Relation between purchase and invoice_lines must be deleted
-    version: 4.4
-    query: DROP TABLE purchase_invoice_line_rel;
 
   - comment: # delete duplicated party configuration sequence
     version: 4.4
@@ -424,16 +429,31 @@ after:
     version: 4.7
     query: update ir_action_report set template_extension = 'jrxml' where report like '%jrxml';
 
-  - comment: # upgrade configuration models from ir_property
+  - comment: # Delete unused users
     version: 4.8
-    script: ./upgrades/after/migration_properties.py
+    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment');
+        DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
 
-#  - script: ./upgrades/after/update_taxes.py
+  # - comment: # upgrade configuration models from ir_property
+  #   version: 4.8
+  #   script: ./upgrades/after/migration_properties.py
+
+  # - comment: # update taxes
+  #   version: 4.4
+  # - script: ./upgrades/after/update_taxes.py
 
   # - comment: # delete ir properties
   #   version: 4.4
   #   query: DELETE FROM ir_model_data WHERE model = 'ir.property';
 
+  # - comment: # delete not found modules in ir.module
+  #   version: 4.8
+    # script: ./upgrades/after/delete_not_found_modules.py
+
+  # - comment: # sync model data
+    # script: ./upgrades/after/sync_model_data.py
+
+  # extra scripts
   # - script: ./upgrades/after/convert_domain_rules.py
   # - tables: work_project
   #   script: ./upgrades/after/migration_project_product.py
