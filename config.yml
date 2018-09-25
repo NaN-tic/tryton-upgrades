@@ -348,6 +348,14 @@ before:
     version: 4.2
     query: alter table aeat_347_report_property alter column number TYPE varchar;
 
+  - comment: # alter table aeat_347_report_property column number
+    version: 4.2
+    query: alter table aeat_347_report_property alter column number TYPE varchar;
+
+  # - comment: # upgrade account products. Warning: required account_product_migration field in product.template and acounting field in product.category (custom module)
+  #   version: 5.0
+  #   script: ./upgrades/before/migration_account_category.py
+
 after:
 
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
@@ -432,6 +440,11 @@ after:
     version: 4.8
     query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment');
         DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
+
+  - comment: # Drop customer/taxes tables don't use
+    version: 5.0
+    query: DROP TABLE if exists product_customer_taxes_rel;
+        DROP TABLE if exists product_supplier_taxes_rel;
 
   # - comment: # upgrade configuration models from ir_property
   #   version: 4.8
