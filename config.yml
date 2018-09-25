@@ -406,11 +406,6 @@ after:
     query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment');
         DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
 
-  - comment: # Drop customer/taxes tables don't use
-    version: 5.0
-    query: DROP TABLE if exists product_customer_taxes_rel;
-        DROP TABLE if exists product_supplier_taxes_rel;
-
   # - comment: # upgrade configuration models from ir_property
   #   version: 4.8
   #   script: ./upgrades/after/migration_properties.py

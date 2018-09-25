@@ -96,6 +96,22 @@ with Transaction().start(dbname, 1, context=context):
             if to_write:
                 Template.write(*to_write)
 
+            logger.info('%s: Upgrading Account Categories' % (company.rec_name))
+
+            for category in Category.search([('accounting', '=', False)]):
+                category.account_expense = None
+                category.account_revenue = None
+                category.save()
+
+    query = "DROP TABLE if exists product_customer_taxes_rel;"
+    cursor.execute(query)
+    query = "DROP TABLE if exists product_supplier_taxes_rel;"
+    cursor.execute(query)
+    query = "DROP TABLE if exists product_category_customer_taxes_rel;"
+    cursor.execute(query)
+    query = "DROP TABLE if exists product_category_supplier_taxes_rel;"
+    cursor.execute(query)
+
     Transaction().cursor.commit()
 
     logger.info('Done')
