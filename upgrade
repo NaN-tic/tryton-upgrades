@@ -4,28 +4,34 @@ import sys
 import yaml
 import argparse
 from itertools import chain
-from urlparse import urlparse
 import psycopg2
 import subprocess
-import ConfigParser
+import logging
 
 from blessings import Terminal
 
 import trytond
+from trytond.config import config as CONFIG, parse_uri
 
 trytond_version = '.'.join(trytond.__version__.split('.')[:2])
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 t = Terminal()
 
 def get_url():
-    config = ConfigParser.ConfigParser()
-    config.read(config_file)
-    url = urlparse(config.get('database', 'uri'))
+    CONFIG.update_etc(config_file)
+    url = parse_uri(CONFIG.get('database', 'uri'))
     return url
 
 def run(*args):
-    print 'RUNING:', ' '.join(args)
+    logger.info('RUNING: %s' % ' '.join(args))
     summary = set()
     process = subprocess.Popen(args, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, bufsize=1, shell=False)
@@ -33,7 +39,7 @@ def run(*args):
     out, err = process.communicate()
 
     in_traceback = False
-    for line in chain(out.split('\n'), err.split('\n')):
+    for line in chain(out.decode("utf-8").split('\n'), err.decode("utf-8").split('\n')):
         line = line.strip()
         if 'ERROR' in line:
             s = line[line.index('ERROR'):]
@@ -50,15 +56,15 @@ def run(*args):
             line = t.red(line)
             if line.startswith('Exception'):
                 in_traceback = False
-        print line
+        logger.info(line)
 
     process.stdout.close()
     process.stderr.close()
     process.wait()
 
     if summary:
-        print t.bold('\nWARNING AND ERROR SUMMARY:')
-        print '\n'.join(sorted(list(summary)))
+        logger.error('WARNING AND ERROR SUMMARY:')
+        logger.error('\n'.join(sorted(list(summary))))
     return process.returncode
 
 def execute(query, *args, **kwargs):
@@ -76,7 +82,7 @@ def run_trytond(to_install=None):
     to_run.append(database_name)
     returncode = run(*to_run)
     if returncode:
-        print t.red('Trytond update failed. Upgrade aborted.')
+        logger.error('Trytond update failed. Upgrade aborted.')
         sys.exit(1)
     return returncode
 
@@ -103,7 +109,7 @@ def uninstall_modules():
             module_table = table
             break
     for module in to_uninstall:
-        print 'Module:', module
+        logger.info('Module: %s' % module)
         execute('DELETE FROM ' + module_table + '_dependency WHERE '
             'module IN (SELECT id FROM ' + module_table + ' WHERE name=%s)',
             module)
@@ -112,7 +118,7 @@ def uninstall_modules():
         execute('SELECT model, db_id FROM ir_model_data WHERE module=%s',
             module)
         for model, db_id in cursor.fetchall():
-            print 'DELETING', model, db_id
+            logger.info('DELETING %s %s' % (model, db_id))
             if model == 'res.user':
                 continue
             execute('DELETE FROM "' + model.replace('.', '_')
@@ -173,22 +179,21 @@ def process_actions(actions):
         if isinstance(action, dict):
             tables = action.get('tables', '')
             fields = action.get('fields', '')
-            version = action.get('version', '')
+            version = action.get('version', trytond_version)
             query = action.get('query')
             script = action.get('script')
             where = action.get('where')
 
             # Check version
-            if version <= trytond_version and version > from_version:
+            if not (float(version) <= float(trytond_version) and float(version) > float(from_version)):
                 continue
-
 
             # Check tables
             found = True
             tables = tables.split()
             for table in tables:
                 if not table_exists(table):
-                    print "TABLE '%s' NOT FOUND" % table
+                    logger.info("TABLE '%s' NOT FOUND" % table)
                     found = False
                     break
             if not found:
@@ -199,7 +204,7 @@ def process_actions(actions):
             fields = fields.split()
             for field in fields:
                 if not field_exists(field):
-                    print "FIELD '%s' NOT FOUND" % field
+                    logger.info("FIELD '%s' NOT FOUND" % field)
                     found = False
                     break
             if not found:
@@ -207,7 +212,7 @@ def process_actions(actions):
 
             # Check where
             if where and not where_exists(where):
-                print "WHERE '%s' NOT FOUND" % where
+                logger.info("WHERE '%s' NOT FOUND" % where)
                 continue
         else:
             query = action
@@ -215,15 +220,14 @@ def process_actions(actions):
 
         if query:
             query = query.replace('%', '%%')
-            print query
+            logger.info(query)
             execute(query)
 
         if script:
             if os.path.isfile(script):
                 run(script, database_name, args.config)
             else:
-                print t.red("Not found script: %s" % script)
-
+                logger.warning("Not found script: %s" % script)
 
 parser = argparse.ArgumentParser(description='Upgrade a Tryton database to the '
     'version of the trytond library available.')
@@ -245,14 +249,14 @@ if not args.config:
         os.environ.get('TRYTOND_CONFIG'),
         )
     for config_file in paths:
-        print 'Checking %s...' % config_file
+        logger.info('Checking %s...' % config_file)
         if os.path.exists(config_file):
             break
-    print "Configuration file: %s" % config_file
+    logger.info("Configuration file: %s" % config_file)
 else:
     config_file = args.config
     if not os.path.isfile(config_file):
-        print 'Not found file %s' % config_file
+        logger.info('Not found file %s' % config_file)
         sys.exit(1)
 
 url = get_url()
@@ -275,20 +279,20 @@ else:
 
 cursor = connection.cursor()
 
-print t.green('\nExecuting actions before update...')
+logger.info('Executing actions before update...')
 process_actions(config.get('before'))
 
-print t.green('\nUninstalling modules...')
+logger.info('Uninstalling modules...')
 uninstall_modules()
 
 connection.commit()
 
-print t.green('\nUpdating trytond...')
+logger.info('Updating trytond...')
 run_trytond(config.get('to_install'))
 
-print t.green('\nExecuting actions after update...')
+logger.info('Executing actions after update...')
 process_actions(config.get('after'))
 connection.commit()
 
-print t.green('\nUpdating trytond again...')
+logger.info('Updating trytond again...')
 run_trytond()
