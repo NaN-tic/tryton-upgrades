@@ -28,6 +28,7 @@ logger.addHandler(ch)
 
 with Transaction().start(dbname, 1, context=context):
     Company = pool.get('company.company')
+    ModelData = pool.get('ir.model.data')
     Category = pool.get('product.category')
     Template = pool.get('product.template')
     Account = pool.get('account.account')
@@ -37,11 +38,14 @@ with Transaction().start(dbname, 1, context=context):
 
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
+            mdata_expense, = ModelData.search([('fs_id', '=', 'pgc_600_child')], limit=1)
+            mdata_revenue, = ModelData.search([('fs_id', '=', 'pgc_7000_child')], limit=1)
+
             categories = dict((
                 (c.account_expense_used, c.account_revenue_used, c.customer_taxes_used, c.supplier_taxes_used), c) for c in Category.search([('accounting', '=', True)]))
 
-            expense, = Account.search([('code', '=', '6000000')], limit=1)
-            revenue, = Account.search([('code', '=', '7000000')], limit=1)
+            expense, = Account.search([('template', '=', mdata_expense.db_id)], limit=1)
+            revenue, = Account.search([('template', '=', mdata_revenue.db_id)], limit=1)
             customer_tax, = Tax.search([('name', '=', 'IVA 21%'), ('group.kind', '=', 'sale')], limit=1)
             supplier_tax, = Tax.search([('name', '=', 'IVA 21% Importaciones bienes corrientes'), ('group.kind', '=', 'purchase')], limit=1)
 
