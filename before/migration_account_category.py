@@ -93,6 +93,8 @@ with Transaction().start(dbname, 1, context=context):
                         'account_category_migration': categories[key],
                         'account_expense': None,
                         'account_revenue': None,
+                        'taxes_category': True,
+                        'account_category': True,
                         }))
 
             logger.info('%s: Upgrading Account Products' % (company.rec_name))
