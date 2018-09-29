@@ -63,6 +63,15 @@ with Transaction().start(dbname, 1, context=context):
                             }))
                         logger.info('%s: %s : ID %s' % (company.rec_name, new_code, account.id))
 
+                for account in Account.search([('template', '=', None)]):
+                    templates = Template.search([('code', '=', account.code), ('kind', '=', account.kind)], limit=1)
+                    if templates:
+                        template, = templates
+                        to_write.extend(([account], {
+                            'template': template,
+                            }))
+                        logger.info('%s: Tpl ID %s : ID %s' % (company.rec_name, template.id, account.id))
+
             logger.info('%s: Upgrading Account from Template' % (company.rec_name))
 
             if to_write:
