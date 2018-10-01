@@ -40,20 +40,23 @@ with Transaction().start(dbname, 1, context=context):
 
             to_write = []
             with Transaction().set_context(active_test=False):
-                for template in Template.search([('kind', '!=', 'view'), ('code', '!=', None)]):
+                for template in Template.search([('code', '!=', None)]):
                     digits = config.default_account_code_digits
                     digits = int(digits - len(template.code))
                     code = template.code
 
-                    if '%' in template.code:
-                        new_code = code.replace('%', '0' * (digits + 1))
+                    if template.kind != 'view':
+                        if '%' in template.code:
+                            new_code = code.replace('%', '0' * (digits + 1))
+                        else:
+                            new_code = code + '0' * digits
                     else:
-                        new_code = code + '0' * digits
+                        new_code = code
 
                     accounts = Account.search([
                         ('code', '=', new_code),
                         ('template', '=', None),
-                        ('kind', '=', template.kind),
+                        # ('kind', '=', template.kind),
                         ], limit=1)
 
                     if accounts:
@@ -64,7 +67,7 @@ with Transaction().start(dbname, 1, context=context):
                         logger.info('%s: %s : ID %s' % (company.rec_name, new_code, account.id))
 
                 for account in Account.search([('template', '=', None)]):
-                    templates = Template.search([('code', '=', account.code), ('kind', '=', account.kind)], limit=1)
+                    templates = Template.search([('code', '=', account.code)], limit=1)
                     if templates:
                         template, = templates
                         to_write.extend(([account], {
