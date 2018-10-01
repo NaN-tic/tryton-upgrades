@@ -296,11 +296,6 @@ before:
     version: 4.8
     query: update ir_translation set type = 'report' where type = 'jasper';
 
-  - comment: # update sale customer_reference to sale reference (sale_reference)
-    fields: sale_sale.customer_reference
-    version: 4.8
-    query: update sale_sale set reference = customer_reference where customer_reference is not null;
-
   - comment: # delete ir.export.line that has not export value trytond-issue6551
     version: 4.4
     query: DELETE from ir_export_line where export is null;
@@ -403,8 +398,9 @@ after:
 
   - comment: # Delete unused users
     version: 4.8
-    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment');
+    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request');
         DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
+        DELETE from ir_model_data where module = 'stock_supply_production' and model = 'res.user';
 
   # - comment: # upgrade configuration models from ir_property
   #   version: 4.8
