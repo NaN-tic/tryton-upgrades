@@ -40,14 +40,16 @@ with Transaction().start(dbname, 1, context=context):
         with Transaction().set_context(company=company.id):
             mdata_expense, = ModelData.search([('fs_id', '=', 'pgc_600_child')], limit=1)
             mdata_revenue, = ModelData.search([('fs_id', '=', 'pgc_7000_child')], limit=1)
+            mdata_customer_tax, = ModelData.search([('fs_id', '=', 'iva_rep_21')], limit=1)
+            mdata_supplier_tax, = ModelData.search([('fs_id', '=', 'iva_sop_21')], limit=1)
 
             categories = dict((
                 (c.account_expense_used, c.account_revenue_used, c.customer_taxes_used, c.supplier_taxes_used), c) for c in Category.search([('accounting', '=', True)]))
 
             expense, = Account.search([('template', '=', mdata_expense.db_id)], limit=1)
             revenue, = Account.search([('template', '=', mdata_revenue.db_id)], limit=1)
-            customer_tax, = Tax.search([('name', '=', 'IVA 21%'), ('group.kind', '=', 'sale')], limit=1)
-            supplier_tax, = Tax.search([('name', '=', 'IVA 21% Importaciones bienes corrientes'), ('group.kind', '=', 'purchase')], limit=1)
+            customer_tax, = Tax.search([('template', '=', mdata_customer_tax.db_id)], limit=1)
+            supplier_tax, = Tax.search([('template', '=', mdata_supplier_tax.db_id)], limit=1)
 
             to_write = []
             with Transaction().set_context(active_test=False):
