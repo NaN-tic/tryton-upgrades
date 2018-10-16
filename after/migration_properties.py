@@ -41,7 +41,7 @@ with Transaction().start(dbname, 0, context=context):
         ])
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
-            print "Company ID %s" % company.id
+            print("Company ID %s" % company.id)
             for model in models:
                 ToSave = pool.get(model.model)
                 toSave = ToSave(1)
@@ -53,6 +53,8 @@ with Transaction().start(dbname, 0, context=context):
                     results = cursor.fetchone()
                     if results:
                         value = results[5]
+                        if not value:
+                            continue
                         if field.ttype in ['many2many', 'one2many']:
                             continue
                         elif field.ttype == 'many2one':
