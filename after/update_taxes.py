@@ -39,14 +39,8 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-with Transaction().start(dbname, 0, context=context):
-    user_obj = pool.get('res.user')
-    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
-    user_id = user.id
-
 with Transaction().start(dbname, 0, context=context) as transaction:
-
-    SaleLine = pool.get('sale.line')
+    Module = pool.get('ir.module')
 
     cursor = Transaction().connection.cursor()
     cursor.execute('select * from mapping_taxes')
@@ -87,13 +81,19 @@ with Transaction().start(dbname, 0, context=context) as transaction:
                 )
             )
 
-
     Transaction().connection.commit()
-    tables2 = [
-        ('account_invoice_line_account_tax', 'tax'),
-        ('sale_line_account_tax', 'tax'),
-        ('purchase_line_account_tax', 'tax')
-    ]
+
+    tables2 = [('account_invoice_line_account_tax', 'tax')]
+    sale, = Module.search([
+        ('name', '=', 'sale'),
+        ('state', '=', 'activated')], limit=1)
+    if sale:
+        tables2.append(('sale_line_account_tax', 'tax'))
+    purchase, = Module.search([
+        ('name', '=', 'purchase'),
+        ('state', '=', 'activated')], limit=1)
+    if purchase:
+        tables2.append(('purchase_line_account_tax', 'tax'))
 
     for parent, taxes in parent_map.items():
         for table, field in tables2:
