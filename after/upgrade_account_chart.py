@@ -4,6 +4,7 @@ import os
 
 dbname = sys.argv[1]
 config_file = sys.argv[2]
+digits = sys.argv[3] if len(sys.argv) == 4 else 6
 from trytond.config import config as CONFIG
 CONFIG.update_etc(config_file)
 
@@ -40,6 +41,11 @@ with Transaction().start(dbname, 1, context=context):
             template = AccountTemplate(ModelData.get_id('account_es', 'pgc_0'))
             account, = Account.search([('template', '=', template)], limit=1)
             config = Configuration(1)
+
+            if not config.default_account_code_digits:
+                config.default_account_code_digits = digits
+                config.force_digits = True
+                config.save()
 
             session_id, _, _ = UpdateChart.create()
             update_chart = UpdateChart(session_id)
