@@ -312,6 +312,10 @@ before:
     version: 4.2
     query: alter table aeat_347_report_property alter column number TYPE varchar;
 
+  - comment: # remove deprecated journal type ir.model.data
+    version: 4.8
+    query: DELETE from ir_model_data  where fs_id in ('journal_type_general', 'journal_type_revenue', 'journal_type_expense', 'journal_type_cash', 'journal_type_situation', 'journal_type_write_off', 'journal_type_statement');
+
   # - comment: # upgrade account products. Warning: required account_product_migration field in product.template and acounting field in product.category (custom module)
   #   version: 5.0
   #   script: ./upgrades/before/migration_account_category.py
