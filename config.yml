@@ -30,7 +30,6 @@ to_uninstall:
   - calendar_scheduling
   - calendar_todo
   - dbcopy
-  - guarantee
   - party_vcarddav
   - party_merge
   - product_configuration
