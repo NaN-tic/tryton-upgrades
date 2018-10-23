@@ -84,15 +84,15 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     Transaction().connection.commit()
 
     tables2 = [('account_invoice_line_account_tax', 'tax')]
-    sale, = Module.search([
+    sales = Module.search([
         ('name', '=', 'sale'),
         ('state', '=', 'activated')], limit=1)
-    if sale:
+    if sales:
         tables2.append(('sale_line_account_tax', 'tax'))
-    purchase, = Module.search([
+    purchases = Module.search([
         ('name', '=', 'purchase'),
         ('state', '=', 'activated')], limit=1)
-    if purchase:
+    if purchases:
         tables2.append(('purchase_line_account_tax', 'tax'))
 
     for parent, taxes in parent_map.items():
