@@ -7,10 +7,13 @@ config_file = sys.argv[2]
 from trytond.config import config as CONFIG
 CONFIG.update_etc(config_file)
 
+from trytond import __version__
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 import trytond.tools as tools
 import logging
+
+trytond_version = float('.'.join(__version__.split('.')[:2]))
 
 Pool.start()
 pool = Pool(dbname)
@@ -33,7 +36,6 @@ with Transaction().start(dbname, 1, context=context):
     Account = pool.get('account.account')
     AccountTemplate = pool.get('account.account.template')
 
-    cursor = Transaction().cursor
     UpdateChart = pool.get('account.update_chart', type='wizard')
 
     for company in Company.search([]):
@@ -50,6 +52,9 @@ with Transaction().start(dbname, 1, context=context):
             update_chart.transition_update()
             logger.info('%s: End Account Chart' % (company.rec_name))
 
-    Transaction().cursor.commit()
+    if trytond_version > 3.8:
+        Transaction().commit()
+    else:
+        Transaction().cursor.commit()
 
     logger.info('Done')
