@@ -315,6 +315,17 @@ before:
     version: 4.8
     query: DELETE from ir_model_data  where fs_id in ('journal_type_general', 'journal_type_revenue', 'journal_type_expense', 'journal_type_cash', 'journal_type_situation', 'journal_type_write_off', 'journal_type_statement');
 
+  - comment: # Delete unused crons
+    version: 4.8
+    query: DELETE from ir_cron where function in ('generate_requests', 'generate_internal_shipment');
+        DELETE from ir_model_data where module = 'stock_supply' and model = 'ir.cron';
+
+  - comment: # Delete unused users
+    version: 4.8
+    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request');
+        DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
+        DELETE from ir_model_data where module = 'stock_supply_production' and model = 'res.user';
+
   # - comment: # upgrade account products. Warning: required account_product_migration field in product.template and acounting field in product.category (custom module)
   #   version: 5.0
   #   script: ./upgrades/before/migration_account_category.py
@@ -398,12 +409,6 @@ after:
   - comment: # update template extension jasper reports
     version: 4.7
     query: update ir_action_report set template_extension = 'jrxml' where report like '%jrxml';
-
-  - comment: # Delete unused users
-    version: 4.8
-    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request');
-        DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
-        DELETE from ir_model_data where module = 'stock_supply_production' and model = 'res.user';
 
   # - comment: # upgrade configuration models from ir_property
   #   version: 4.8

@@ -26,7 +26,7 @@ def get_tax(xml_id):
     data, = ModelData.search([('module', '=', 'account_es'),
         ('fs_id', '=', xml_id)], limit=1)
     template = AccountTaxTemplate(data.db_id)
-    print("template:", template, template.name)
+    # print("template:", template, template.name)
     with Transaction().set_context(active_test=False):
         tax, = AccountTax.search([('template', '=', template.id)], limit=1)
     return (template, tax)
