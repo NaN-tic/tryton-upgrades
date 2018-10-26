@@ -115,10 +115,10 @@ with Transaction().start(dbname, 1, context=context):
     cursor.execute(query)
     query = "DROP TABLE if exists product_supplier_taxes_rel;"
     cursor.execute(query)
-    query = "DROP TABLE if exists product_category_customer_taxes_rel;"
-    cursor.execute(query)
-    query = "DROP TABLE if exists product_category_supplier_taxes_rel;"
-    cursor.execute(query)
+    # query = "DROP TABLE if exists product_category_customer_taxes_rel;"
+    # cursor.execute(query)
+    # query = "DROP TABLE if exists product_category_supplier_taxes_rel;"
+    # cursor.execute(query)
 
     Transaction().cursor.commit()
 
