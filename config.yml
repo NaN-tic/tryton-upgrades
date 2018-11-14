@@ -72,22 +72,22 @@ before:
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
   - comment: #Adapat fields from stock_lot_expiry to stock_lot_sled
-    tables: product_template
+    fields: product_template.life_time
     version: 4.8
     query: ALTER TABLE product_template rename column life_time to shelf_life_time;
 
   - comment: #Adapat fields from stock_lot_expiry to stock_lot_sled
-    tables: product_template
+    fields: product_template.expiry_time
     version: 4.8
     query: ALTER TABLE product_template rename column expiry_time to expiration_time;
 
   - comment: #Adapat fields from stock_lot_expiry to stock_lot_sled
-    tables: stock_lot
+    fields: stock_lot.life_date
     version: 4.8
     query: ALTER TABLE stock_lot rename column life_date to shelf_life_expiration_date;
 
   - comment: #Adapat fields from stock_lot_expiry to stock_lot_sled
-    tables: stock_lot
+    fields: stock_lot.expiry_date
     version: 4.8
     query: ALTER TABLE stock_lot rename column expiry_date to expiration_date;
 
