@@ -1,0 +1,17 @@
+#!/bin/bash
+
+FROM_DATABASE=$1
+TO_DATABASE=$2
+FROM_VERSION=$3
+
+if [[ -z "$FROM_DATABASE" || -z "$TO_DATABASE" || -z "$FROM_VERSION" ]]; then
+    echo "Missing argument."
+    echo "Syntax: $0 from_database to_database from_version"
+    exit 1
+fi
+
+#invoke database.drop $TO_DATABASE
+dropdb $TO_DATABASE
+invoke database.copy $FROM_DATABASE $TO_DATABASE
+export PYTHONPATH=trytond
+./upgrades/upgrade $TO_DATABASE $FROM_VERSION
