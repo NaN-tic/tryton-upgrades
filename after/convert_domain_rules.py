@@ -55,9 +55,9 @@ with Transaction().start(dbname, 0, context=context) as transaction:
                 'true', 'True').replace('false', 'False')
             action.domain = PYSONEncoder().encode(eval(domain, {}))
         if action.context:
-            context = action.context.replace('null', 'None').replace('true',
+            context_ = action.context.replace('null', 'None').replace('true',
                 'True').replace('false', 'False')
-            action.context = PYSONEncoder().encode(eval(context, {}))
+            action.context = PYSONEncoder().encode(eval(context_, {}))
         action.save()
 
 with Transaction().start(dbname, 0, context=context) as transaction:
@@ -72,3 +72,16 @@ with Transaction().start(dbname, 0, context=context) as transaction:
             continue
         action.domain = PYSONEncoder().encode(eval(action.domain))
         action.save()
+
+with Transaction().start(dbname, 0, context=context) as transaction:
+
+    pool = Pool()
+    Trigger = pool.get('ir.trigger')
+    print "Triggers"
+    triggers = Trigger.search([])
+    for trigger in triggers:
+        print "Update Manaualy:", trigger.id, trigger.condition
+        if not trigger.condition and trigger.condition.strip() == '':
+            continue
+        trigger.condition = PYSONEncoder().encode(eval(trigger.condition))
+        trigger.save()

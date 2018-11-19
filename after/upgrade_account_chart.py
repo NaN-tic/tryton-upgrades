@@ -33,11 +33,33 @@ with Transaction().start(dbname, 1, context=context):
     Configuration = pool.get('account.configuration')
     Account = pool.get('account.account')
     AccountTemplate = pool.get('account.account.template')
+    Party = pool.get('party.party')
+
+    party = Party.search([('name', '=', 'Generic for Party required Accoutns')])
+    if not party:
+        party = Party(name='Generic for Party required Accoutns')
+        party.save()
+    else:
+        party, = party
+
+    cursor = Transaction().connection.cursor()
+    cursor.execute(''' update account_move_line set party=%s where id in (
+        select l.id from account_move_line l, account_account a where
+        l.account=a.id and a.party_required and l.party is null) ''' %
+        party.id)
 
     UpdateChart = pool.get('account.update_chart', type='wizard')
 
-    for company in Company.search([]):
+    Account.parent.left = None
+    Account.parent.right = None
+
+    for company in Company.search([('parent', '!=', None)]):
+        if company.id < 39:
+            continue
+
+        print "company", company.id
         with Transaction().set_context(company=company.id):
+
             template = AccountTemplate(ModelData.get_id('account_es', 'pgc_0'))
             account, = Account.search([('template', '=', template)], limit=1)
             config = Configuration(1)
@@ -56,6 +78,13 @@ with Transaction().start(dbname, 1, context=context):
             update_chart.transition_update()
             logger.info('%s: End Account Chart' % (company.rec_name))
 
-    Transaction().commit()
+            Transaction().commit()
+
+    Account.parent.left = 'left'
+    Account.parent.right = 'right'
+
+    for company in Company.search([]):
+        with Transaction().set_context(company=company.id):
+            Account._rebuild_tree('parent', None, 0)
 
     logger.info('Done')
