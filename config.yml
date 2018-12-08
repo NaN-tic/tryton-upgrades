@@ -254,6 +254,10 @@ before:
     version: 4.7
     query: delete from ir_property where id in (select id from ir_property  where res like 'stock.configuration%' and value like 'ir.sequence%' and split_part(res, ',', 2)::int not in (select id from ir_sequence));
 
+  - comment: # delete properties of party and account without foreign key
+    version: 4.7
+    query: delete from ir_property where id in (select id from ir_property  where res like 'party.party%' and value like 'account.account%' and split_part(value, ',', 2)::int not in (select id from account_account));
+
   - comment: # delete default properties
     version: 4.7
     query: delete from ir_property where res is null;
