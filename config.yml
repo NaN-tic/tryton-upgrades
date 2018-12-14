@@ -334,10 +334,6 @@ before:
     version: 4.2
     query: alter table aeat_347_report_property alter column number TYPE varchar;
 
-  - comment: # alter table aeat_347_report_property column number
-    version: 4.2
-    query: alter table aeat_347_report_property alter column number TYPE varchar;
-
   - comment: # remove deprecated journal type ir.model.data
     version: 5.0
     query: DELETE from ir_model_data  where fs_id in ('journal_type_general', 'journal_type_revenue', 'journal_type_expense', 'journal_type_cash', 'journal_type_situation', 'journal_type_write_off', 'journal_type_statement');
