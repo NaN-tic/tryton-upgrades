@@ -332,7 +332,13 @@ before:
 
   - comment: # alter table aeat_347_report_property column number
     version: 4.2
-    query: alter table aeat_347_report_property alter column number TYPE varchar;
+    tables: aeat_347_report_property
+    query: ALTER table aeat_347_report_property alter column number TYPE varchar(5);
+
+  - comment: # alter table aeat_303_report column previous_declaration_receipt
+    version: 4.2
+    tables: aeat_303_report
+    query: ALTER table aeat_303_report alter column previous_declaration_receipt TYPE varchar(13);
 
   - comment: # remove deprecated journal type ir.model.data
     version: 5.0
