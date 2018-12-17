@@ -35,9 +35,9 @@ with Transaction().start(dbname, 1, context=context):
     AccountTemplate = pool.get('account.account.template')
     Party = pool.get('party.party')
 
-    party = Party.search([('name', '=', 'Generic for Party required Accoutns')])
+    party = Party.search([('name', '=', 'Generic for Party required Accounts')])
     if not party:
-        party = Party(name='Generic for Party required Accoutns')
+        party = Party(name='Generic for Party required Accounts')
         party.save()
     else:
         party, = party
@@ -54,9 +54,6 @@ with Transaction().start(dbname, 1, context=context):
     Account.parent.right = None
 
     for company in Company.search([('parent', '!=', None)]):
-        if company.id < 39:
-            continue
-
         print "company", company.id
         with Transaction().set_context(company=company.id):
 
