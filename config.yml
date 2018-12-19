@@ -95,7 +95,7 @@ before:
   - comment: # Tax migration from new tax rules. on 4.7
     tables: aeat_347_record
     version: 4.8
-    query:  create table mapping_taxes as select
+    query:  create table if not exists mapping_taxes as select
         t.id as tax_id,
         t.name as tax_name,
         t.parent as tax_parent,
@@ -278,7 +278,7 @@ before:
   # account_es and aeat
   - comment: # add new column in code_uniq constrain when upgrade
     version: 4.6
-    query: ALTER TABLE account_account_template DROP CONSTRAINT "account_account_template_code_uniq";
+    query: ALTER TABLE account_account_template DROP CONSTRAINT if exists "account_account_template_code_uniq";
 
   # - comment: # Rename model data aeat_349
   #   version: 4.6
@@ -313,7 +313,7 @@ before:
   - comment: # Add exceptional parent language (must be run before update
     version: 4.8
     tables: ir_lang
-    query: ALTER TABLE ir_lang ADD parent varchar;
+    query: ALTER TABLE ir_lang ADD  if not exists parent varchar;
 
   - comment: # delete register with type 'jasper' on core modules
     version: 4.8
@@ -438,6 +438,11 @@ after:
   - comment: # update template extension jasper reports
     version: 4.7
     query: update ir_action_report set template_extension = 'jrxml' where report like '%jrxml';
+
+  - comment: # Set product as producible
+    version: 4.7
+    tables: "product_product-production_bom"
+    query: update product_template set producible = true where id in(select p.template from "product_product-production_bom" pb, product_product p where pb.product=p.id)
 
   # - comment: # upgrade configuration models from ir_property
   #   version: 4.8
