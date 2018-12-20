@@ -53,8 +53,13 @@ with Transaction().start(dbname, 1, context=context):
     Account.parent.left = None
     Account.parent.right = None
 
-    for company in Company.search([('parent', '!=', None)]):
-        print "company", company.id
+    domain = []
+    child_companies = Company.search([('parent', '!=', None)])
+    if child_companies:
+        domain.append(('parent', '!=', None))
+
+    for company in Company.search(domain):
+        logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):
 
             template = AccountTemplate(ModelData.get_id('account_es', 'pgc_0'))
@@ -70,7 +75,7 @@ with Transaction().start(dbname, 1, context=context):
             update_chart = UpdateChart(session_id)
             update_chart.start.account = account
             update_chart.start.account_code_digits = config.default_account_code_digits
-            print(update_chart.start.account_code_digits)
+            #print(update_chart.start.account_code_digits)
             logger.info('%s: Upgrading Account Chart' % (company.rec_name))
             update_chart.transition_update()
             logger.info('%s: End Account Chart' % (company.rec_name))
@@ -80,8 +85,11 @@ with Transaction().start(dbname, 1, context=context):
     Account.parent.left = 'left'
     Account.parent.right = 'right'
 
-    for company in Company.search([]):
+    for company in Company.search(domain):
+        logger.info("company %s" % company.id)
+        logger.info('%s: Rebuild tree' % (company.rec_name))
         with Transaction().set_context(company=company.id):
             Account._rebuild_tree('parent', None, 0)
+        logger.info('%s: End rebuild tree' % (company.rec_name))
 
     logger.info('Done')
