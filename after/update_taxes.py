@@ -53,7 +53,7 @@ with Transaction().start(dbname, 1, context=context) as transaction:
     for company in Company.search(domain):
         logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):
-            cursor.execute('select * from mapping_taxes')
+            cursor.execute('select mt.tax_id, mt.tax_name, mt.tax_parent, mt.include_347, mt.fs_id, mt.template_id, mt.split_part from mapping_taxes as mt left join account_tax as at on at.id = mt.tax_id where at.company = %s' % company.id)
 
             xml_ids = {}
             parent_map = {}
