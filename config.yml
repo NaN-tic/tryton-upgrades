@@ -355,6 +355,10 @@ before:
         DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
         DELETE from ir_model_data where module = 'stock_supply_production' and model = 'res.user';
 
+  - comment: # Remove error translations
+    version: 5.2
+    query: DELETE FROM "ir_translation" WHERE "type" = 'error';
+
   # - comment: # upgrade account products. Warning: required account_product_migration field in product.template and acounting field in product.category (custom module)
   #   version: 5.0
   #   script: ./upgrades/before/migration_account_category.py
