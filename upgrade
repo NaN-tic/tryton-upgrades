@@ -249,6 +249,8 @@ if not args.config:
         os.environ.get('TRYTOND_CONFIG'),
         )
     for config_file in paths:
+        if not config_file:
+            continue
         logger.info('Checking %s...' % config_file)
         if os.path.exists(config_file):
             break
