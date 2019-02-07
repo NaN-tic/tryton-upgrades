@@ -4,9 +4,13 @@ import os
 
 dbname = sys.argv[1]
 config_file = sys.argv[2]
-digits = sys.argv[3] if len(sys.argv) == 4 else 6
+digits = sys.argv[3] if len(sys.argv) == 4 else 8
+domain = sys.argv[4] if len(sys.argv) == 5 else []
+domain = eval(domain)
+
 from trytond.config import config as CONFIG
 CONFIG.update_etc(config_file)
+
 
 from trytond.transaction import Transaction
 from trytond.pool import Pool
@@ -26,6 +30,7 @@ ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
+
 
 with Transaction().start(dbname, 1, context=context):
     Company = pool.get('company.company')
@@ -53,7 +58,7 @@ with Transaction().start(dbname, 1, context=context):
     Account.parent.left = None
     Account.parent.right = None
 
-    domain = []
+    #domain = []
     child_companies = Company.search([('parent', '!=', None)])
     if child_companies:
         domain.append(('parent', '!=', None))
@@ -71,6 +76,7 @@ with Transaction().start(dbname, 1, context=context):
                 config.force_digits = True
                 config.save()
 
+            print "digits:", digits, config.default_account_code_digits
             session_id, _, _ = UpdateChart.create()
             update_chart = UpdateChart(session_id)
             update_chart.start.account = account
@@ -85,11 +91,42 @@ with Transaction().start(dbname, 1, context=context):
     Account.parent.left = 'left'
     Account.parent.right = 'right'
 
-    for company in Company.search(domain):
-        logger.info("company %s" % company.id)
-        logger.info('%s: Rebuild tree' % (company.rec_name))
-        with Transaction().set_context(company=company.id):
-            Account._rebuild_tree('parent', None, 0)
-        logger.info('%s: End rebuild tree' % (company.rec_name))
+    # for company in Company.search(domain):
+    #      logger.info("company %s" % company.id)
+    #      logger.info('%s: Rebuild tree' % (company.rec_name))
+    #      with Transaction().set_context(company=company.id):
+    #          Account._rebuild_tree('parent', None, 0)
+    #      logger.info('%s: End rebuild tree' % (company.rec_name))
+    #
+    # logger.info('Done')
 
-    logger.info('Done')
+
+    # Fast way to calculate parent_left and right
+    cr = Transaction().connection.cursor()
+
+    def browse_rec(root, pos=0):
+        where = 'parent' + '=' + str(root)
+
+        if not root:
+            where = field + 'IS NULL'
+
+        cr.execute('SELECT id FROM %s WHERE %s \
+            ORDER BY %s' % ('account_account', where, 'parent'))
+        pos2 = pos + 1
+        childs = cr.fetchall()
+        for id in childs:
+            pos2 = browse_rec(id[0], pos2)
+        cr.execute('update %s set "left"=%s, "right"=%s\
+            where id=%s' % ('account_account', pos, pos2, root))
+        return pos2 + 1
+
+    query = 'SELECT id FROM %s WHERE %s IS NULL order by %s' % (
+        'account_account', 'parent', 'parent')
+    pos = 0
+    cr.execute(query)
+    for (root,) in cr.fetchall():
+        pos = browse_rec(root, pos)
+
+    cr.execute(query)
+    for (root,) in cr.fetchall():
+        pos = browse_rec(root, pos)
