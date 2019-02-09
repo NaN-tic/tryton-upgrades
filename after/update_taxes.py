@@ -44,6 +44,7 @@ with Transaction().start(dbname, 1, context=context) as transaction:
     Company = pool.get('company.company')
 
     cursor = Transaction().connection.cursor()
+    cursor.execute('select * from mapping_taxes')
 
     domain = []
     child_companies = Company.search([('parent', '!=', None)])
