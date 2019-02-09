@@ -50,6 +50,14 @@ with Transaction().start(dbname, 0, context=context) as transaction:
 
     actions = ActWindow.search([])
     for action in actions:
+
+#        if action.id in (427, 428):
+#            conteinue
+        if action.domain and 'null' in action.domain:
+            action.domain = action.domain.replace('null', "None")
+        if action.context and 'true' in action.context:
+            action.context = action.context.replace('true', "True")
+        print "action:", action.id, action.domain
         if action.domain:
             domain = action.domain.replace('null', 'None').replace(
                 'true', 'True').replace('false', 'False')

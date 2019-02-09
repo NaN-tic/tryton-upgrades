@@ -41,9 +41,12 @@ with Transaction().start(dbname, 0, context=context):
         ])
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
-            print("Company ID %s" % company.id)
+            print "Company ID %s" % company.id
             for model in models:
-                ToSave = pool.get(model.model)
+                try:
+                    ToSave = pool.get(model.model)
+                except:
+                    continue
                 toSave = ToSave(1)
                 for field in Field.search([('model', '=', model)]):
                     if field.name in ['id', 'create_uid', 'create_date', 'write_uid', 'write_date']:
@@ -53,20 +56,20 @@ with Transaction().start(dbname, 0, context=context):
                     results = cursor.fetchone()
                     if results:
                         value = results[5]
-                        if not value:
-                            continue
                         if field.ttype in ['many2many', 'one2many']:
                             continue
-                        elif field.ttype == 'many2one':
+                        elif field.ttype == 'many2one' and value:
                             model, _id = value.split(',')
                             ValueModel = pool.get(model)
                             valueModel = ValueModel(_id)
                             setattr(toSave, field.name, valueModel)
                         else:
-                            if value.startswith(','):
+                            if value and value.startswith(','):
                                 setattr(toSave, field.name, value.split(',')[1])
                             else:
                                 setattr(toSave, field.name, value)
+                        
+                print model.model, toSave._save_values
                 toSave.save()
     Transaction().commit()
 

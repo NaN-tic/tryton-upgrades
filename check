@@ -3,6 +3,8 @@ import sys
 
 dbname = sys.argv[1]
 config_file = sys.argv[2]
+dbname2 = sys.argv[3]
+
 from trytond.config import config as CONFIG
 CONFIG.update_etc(config_file)
 
@@ -82,6 +84,9 @@ def download_fields_view_get():
             r['fields'] = r['fields'].keys()
 
             to_yaml(r, log_file)
+
+
+
 
 
 def check_data():
