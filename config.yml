@@ -74,6 +74,11 @@ before:
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
+
+  - comment: # copy to migrate default values, must be dropped
+    version: 4.8
+    query: CREATE TABLE ir_property_backup as (select * from ir_property)
+
   - comment: #Adapat fields from stock_lot_expiry to stock_lot_sled
     fields: product_template.life_time
     version: 4.8
@@ -261,9 +266,9 @@ before:
     version: 4.7
     query: delete from ir_property where id in (select id from ir_property  where res like 'party.party%' and value like 'account.account%' and split_part(value, ',', 2)::int not in (select id from account_account));
 
-  - comment: # delete default properties
-    version: 4.7
-    query: delete from ir_property where res is null;
+  # - comment: # delete default properties
+  #   version: 4.7
+  #   query: delete from ir_property where res is null;
 
   # - comment: # drop ir properties in case account_asset is installed
   #   version: 4.4
@@ -461,9 +466,9 @@ after:
     tables: electronic_mail_template
     query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
 
-  - comment: # After property migration old model data should be cleared:
-    version: 4.4
-    query: DELETE FROM ir_model_data WHERE model = 'ir.property';
+  # - comment: # After property migration old model data should be cleared:
+  #   version: 4.4
+  #   query: DELETE FROM ir_model_data WHERE model = 'ir.property';
 
   - comment: # Relation between purchase and invoice_lines must be deleted
     version: 4.4
