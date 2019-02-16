@@ -57,6 +57,7 @@ with Transaction().start(dbname, 0, context=context):
     Field = pool.get('ir.model.field')
     AccountConfiguration = pool.get('account.configuration')
     Account = pool.get('account.account')
+    Sequence = pool.get('ir.sequence')
 
     cursor = Transaction().connection.cursor()
     mapping = {
@@ -77,56 +78,63 @@ with Transaction().start(dbname, 0, context=context):
                     continue
                 setattr(accountConfig, mapping[field], value)
 
-            print accountConfig._save_values
+            asset_sequence = Sequence.search([
+                ('code','=', 'account.asset'), ('company', '=', company.id)])
+            asset_sequence2 = Sequence.search([
+                ('code','=', 'account.asset'), ('company', '=', None)])
+            if asset_sequence:
+                accountConfig.asset_sequence = asset_sequence[0]
+            else:
+                accountConfig.asset_sequence = asset_sequence2[0]
+
             accountConfig.save()
+        Transaction().commit()
 
-    Transaction().commit()
-
-with Transaction().start(dbname, 0, context=context):
-    Company = pool.get('company.company')
-    Model = pool.get('ir.model')
-    Field = pool.get('ir.model.field')
-
-    cursor = Transaction().connection.cursor()
-
-    models = Model.search([
-        ('model', 'like', '%_configuration'),
-        ])
-    for company in Company.search([]):
-        with Transaction().set_context(company=company.id):
-            save = {}
-            for model in models:
-                try:
-                    ToSave = pool.get(model.model)
-                except:
-                    continue
-                if model in save:
-                    to_save = save[model]
-                else:
-                    toSave = ToSave(1)
-                    save[model] = toSave
-                for field in Field.search([('model', '=', model)]):
-                    if field.name in ['id', 'create_uid', 'create_date', 'write_uid', 'write_date']:
-                        continue
-                    query = 'select * from ir_property where field = %s and company = %s;' % (field.id, company.id)
-                    cursor.execute(query)
-                    results = cursor.fetchone()
-                    if results:
-                        value = results[5]
-                        if field.ttype in ['many2many', 'one2many']:
-                            continue
-                        elif field.ttype == 'many2one' and value:
-                            model, _id = value.split(',')
-                            ValueModel = pool.get(model)
-                            valueModel = ValueModel(_id)
-                            setattr(toSave, field.name, valueModel)
-                        else:
-                            if value and value.startswith(','):
-                                setattr(toSave, field.name, value.split(',')[1])
-                            else:
-                                setattr(toSave, field.name, value)
-            for model, toSave in save.items():
-                toSave.save()
-    Transaction().commit()
+# with Transaction().start(dbname, 0, context=context):
+#     Company = pool.get('company.company')
+#     Model = pool.get('ir.model')
+#     Field = pool.get('ir.model.field')
+#
+#     cursor = Transaction().connection.cursor()
+#
+#     models = Model.search([
+#         ('model', 'like', '%_configuration'),
+#         ])
+#     for company in Company.search([]):
+#         with Transaction().set_context(company=company.id):
+#             save = {}
+#             for model in models:
+#                 try:
+#                     ToSave = pool.get(model.model)
+#                 except:
+#                     continue
+#                 if model in save:
+#                     to_save = save[model]
+#                 else:
+#                     toSave = ToSave(1)
+#                     save[model] = toSave
+#                 for field in Field.search([('model', '=', model)]):
+#                     if field.name in ['id', 'create_uid', 'create_date', 'write_uid', 'write_date']:
+#                         continue
+#                     query = 'select * from ir_property where field = %s and company = %s;' % (field.id, company.id)
+#                     cursor.execute(query)
+#                     results = cursor.fetchone()
+#                     if results:
+#                         value = results[5]
+#                         if field.ttype in ['many2many', 'one2many']:
+#                             continue
+#                         elif field.ttype == 'many2one' and value:
+#                             model, _id = value.split(',')
+#                             ValueModel = pool.get(model)
+#                             valueModel = ValueModel(_id)
+#                             setattr(toSave, field.name, valueModel)
+#                         else:
+#                             if value and value.startswith(','):
+#                                 setattr(toSave, field.name, value.split(',')[1])
+#                             else:
+#                                 setattr(toSave, field.name, value)
+#             for model, toSave in save.items():
+#                 toSave.save()
+#     Transaction().commit()
 
     logger.info('Done')

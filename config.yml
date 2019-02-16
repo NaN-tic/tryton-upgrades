@@ -266,9 +266,9 @@ before:
     version: 4.7
     query: delete from ir_property where id in (select id from ir_property  where res like 'party.party%' and value like 'account.account%' and split_part(value, ',', 2)::int not in (select id from account_account));
 
-  # - comment: # delete default properties
-  #   version: 4.7
-  #   query: delete from ir_property where res is null;
+  - comment: # delete default properties
+    version: 4.7
+    query: delete from ir_property where res is null;
 
   # - comment: # drop ir properties in case account_asset is installed
   #   version: 4.4
