@@ -55,7 +55,6 @@ with Transaction().start(dbname, 1, context=context) as transaction:
     if child_companies:
         domain.append(('parent', '!=', None))
 
-    domain = [('id', '=', 14)]
     for company in Company.search(domain):
         logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):
