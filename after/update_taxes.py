@@ -17,18 +17,22 @@ pool.init()
 
 context = {}
 
-def get_tax(xml_id):
+def get_tax(xml_id, company):
     pool = Pool()
     ModelData = pool.get('ir.model.data')
     AccountTax = pool.get('account.tax')
     AccountTaxTemplate = pool.get('account.tax.template')
 
+    if xml_id[-3:] == '_re':
+        xml_id = xml_id.replace('_re','')
     data, = ModelData.search([('module', '=', 'account_es'),
         ('fs_id', '=', xml_id)], limit=1)
     template = AccountTaxTemplate(data.db_id)
     # print("template:", template, template.name)
     with Transaction().set_context(active_test=False):
-        tax, = AccountTax.search([('template', '=', template.id)], limit=1)
+        tax, = AccountTax.search([
+            ('template', '=', template.id),
+            ('company', '=', company)], limit=1)
     return (template, tax)
 
 logger = logging.getLogger(__name__)
@@ -51,20 +55,34 @@ with Transaction().start(dbname, 1, context=context) as transaction:
     if child_companies:
         domain.append(('parent', '!=', None))
 
+    domain = [('id', '=', 14)]
     for company in Company.search(domain):
         logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):
-            cursor.execute('select mt.tax_id, mt.tax_name, mt.tax_parent, mt.include_347, mt.fs_id, mt.template_id, mt.split_part from mapping_taxes as mt left join account_tax as at on at.id = mt.tax_id where at.company = %s' % company.id)
+            cursor.execute("""
+            select mt.tax_id,
+                mt.tax_name,
+                mt.tax_parent,
+                mt.include_347,
+                mt.fs_id,
+                mt.template_id,
+                mt.parent_template,
+                mt.split_part
+            from mapping_taxes as mt
+                left join account_tax as at on at.id = mt.tax_id
+                 where at.company = %s
+            """ % company.id)
 
             xml_ids = {}
             parent_map = {}
+            template_map = {}
             for x in cursor.fetchall():
-                tax_id, name, parent, i347, fs_id, template_id, xml_id = x
+                tax_id, name, parent, i347, fs_id, template_id, parent_template, xml_id = x
                 if '_' == xml_id[-1]:
                     xml_id = xml_id[:-1]
 
                 # print(xml_id, name, fs_id)
-                new_template, new_tax = get_tax(xml_id)
+                new_template, new_tax = get_tax(xml_id, company.id)
 
                 if xml_id in xml_ids:
                     taxes, nt = xml_ids[xml_id]
@@ -74,9 +92,14 @@ with Transaction().start(dbname, 1, context=context) as transaction:
                     xml_ids[xml_id] = ([str(tax_id)], new_tax.id)
 
                 if parent in parent_map:
-                    parent_map[parent].append(new_tax.id)
+                    template_map[parent_template].append(new_template.id)
                 else:
-                    parent_map[parent] = [new_tax.id]
+                    template_map[parent_template] = [new_template.id]
+
+                if parent in parent_map:
+                    parent_map[parent].append((new_tax.id, new_template.id))
+                else:
+                    parent_map[parent] = [(new_tax.id, new_template.id)]
 
             tables = [
                 ('account_invoice_tax', 'tax'),
@@ -94,31 +117,48 @@ with Transaction().start(dbname, 1, context=context) as transaction:
 
             Transaction().connection.commit()
 
-            tables2 = [('account_invoice_line_account_tax', 'tax')]
+            tables2 = [
+                ('account_invoice_line_account_tax', 'tax', 'line' ),
+                ('product_category_customer_taxes_rel', 'tax', 'category'),
+            ]
+
             sales = Module.search([
                 ('name', '=', 'sale'),
                 ('state', '=', 'activated')], limit=1)
             if sales:
-                tables2.append(('sale_line_account_tax', 'tax'))
+                tables2.append(('sale_line_account_tax', 'tax', 'line'))
             purchases = Module.search([
                 ('name', '=', 'purchase'),
                 ('state', '=', 'activated')], limit=1)
             if purchases:
-                tables2.append(('purchase_line_account_tax', 'tax'))
+                tables2.append(('purchase_line_account_tax', 'tax', 'line'))
 
             for parent, taxes in parent_map.items():
-                for table, field in tables2:
-                    cursor.execute('select id, line from %s where %s = %s' % (
-                        table, field, parent))
+                for table, field, rel in tables2:
+                    cursor.execute('select id, %s from %s where %s = %s' % (
+                        rel, table, field, parent))
 
                     for id_, line in cursor.fetchall():
-                        # cursor.execute('update %s set %s=%s where id=%s' % (
-                        #    table, field, taxes[0], id_))
                         cursor.execute('delete from %s where id=%s'%(table, id_))
-                        for tax in taxes:
-                            cursor.execute('insert into %s(tax,line) values(%s,%s)' % (
-                                table, tax, line
+                        for tax, template in taxes:
+                            cursor.execute('insert into %s(tax,%s) values(%s,%s)' % (
+                                table, rel, tax, line
                             ))
 
-            Transaction().connection.commit()
+            tables3 = [
+                ('product_customer_taxes_template_rel', 'tax', 'product'),
+                ('product_category_customer_taxes_template_rel', 'tax', 'product')
+            ]
 
+            for template, taxes in template_map.items():
+                for table, field, rel in tables3:
+                    cursor.execute('select id, %s from %s where %s = %s' % (
+                        rel, table, field, template))
+
+                    for id_, line in cursor.fetchall():
+                        cursor.execute('delete from %s where id=%s'%(table, id_))
+                        for tax in taxes:
+                            cursor.execute('insert into %s(tax,%s) values(%s,%s)' % (
+                                table, rel, tax, line
+                            ))
+            Transaction().connection.commit()

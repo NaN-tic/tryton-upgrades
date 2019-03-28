@@ -104,42 +104,72 @@ before:
     tables: aeat_347_record
     version: 4.8
     query:  create table if not exists mapping_taxes as select
-        t.id as tax_id,
-        t.name as tax_name,
-        t.parent as tax_parent,
-        t.include_347,
-        i.fs_id,
-        i.db_id as template_id,
-        split_part(i.fs_id, '+',1)
-      from
-        ir_model_data i,
-        account_tax_template tt,
-        account_tax t
-      where
-         tt.id = t.template and
-         db_id = tt.id and
-         model='account.tax.template' and module='account_es' and
-         tt.parent is not null and fs_id like '%_child'
-         and  t.include_347 = true
-      UNION ALL
-      select
-          t.id as tax_id,
-          t.name as tax_name,
-          t.parent as tax_parent,
-          t.include_347,
-          i.fs_id,
-          i.db_id as template_id,
-          rtrim(rtrim(rtrim(split_part(i.fs_id, '+',2),'_child'), 'iva'), 'irpf')
-      from
-          ir_model_data i,
-          account_tax_template tt,
-          account_tax t
-      where
-         tt.id = t.template and
-         i.db_id = tt.id and
-         model='account.tax.template' and module='account_es' and
-         tt.parent is not null and fs_id like '%_child'
-         and  t.include_347 = false
+        a.*,
+        t.template as parent_template,
+        t.name
+        from (
+        select
+            t.id as tax_id,
+            t.name as tax_name,
+            t.parent as tax_parent,
+            t.include_347,
+            t.recargo_equivalencia,
+            i.fs_id,
+            i.db_id as template_id,
+            split_part(i.fs_id, '+',1)
+          from
+            ir_model_data i,
+            account_tax_template tt,
+            account_tax t
+          where
+             tt.id = t.template and
+             db_id = tt.id and
+             model='account.tax.template' and module='account_es' and
+             tt.parent is not null and fs_id like '%_child'
+             and  t.include_347 = true  and t.recargo_equivalencia=False
+          UNION ALL
+          select
+              t.id as tax_id,
+              t.name as tax_name,
+              t.parent as tax_parent,
+              t.include_347,
+              t.recargo_equivalencia,
+              i.fs_id,
+              i.db_id as template_id,
+              rtrim(rtrim(rtrim(split_part(i.fs_id, '+',2),'_child'), 'iva'), 'irpf')
+          from
+              ir_model_data i,
+              account_tax_template tt,
+              account_tax t
+          where
+             tt.id = t.template and
+             i.db_id = tt.id and
+             model='account.tax.template' and module='account_es' and
+             tt.parent is not null and fs_id like '%_child'
+             and  t.include_347 = false
+          UNION ALL
+          select
+              t.id as tax_id,
+              t.name as tax_name,
+              t.parent as tax_parent,
+              t.include_347,
+              t.recargo_equivalencia,
+              i.fs_id,
+              i.db_id as template_id,
+              rtrim(rtrim(rtrim(split_part(i.fs_id, '+',2),'_child'), 'iva'), '_re')
+          from
+              ir_model_data i,
+              account_tax_template tt,
+              account_tax t
+          where
+             tt.id = t.template and
+             i.db_id = tt.id and
+             model='account.tax.template' and module='account_es' and
+             tt.parent is not null and fs_id like '%_child'
+             and  t.include_347 = true  and t.recargo_equivalencia=true
+       ) as a,
+       account_tax t
+       where a.tax_parent = t.id
 
   - comment: -> 4.0
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
