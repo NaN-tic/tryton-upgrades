@@ -35,8 +35,10 @@ with Transaction().start(dbname, 0, context=context):
         with Transaction().set_context(company=company.id):
                 admin, = User.search([('login', '=', 'admin'),], limit=1)
                 u, = User.copy([admin])
-                u.name = company.party.name
+                u.name = company.party.name + " (Usuari d'empresa)"
                 u.login = company.party.name
+                u.company = company
+                u.main_company = company
                 u.save()
                 company.company_user = u
                 company.save()
