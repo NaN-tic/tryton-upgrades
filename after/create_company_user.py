@@ -34,13 +34,14 @@ with Transaction().start(dbname, 0, context=context):
         logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):
                 admin, = User.search([('login', '=', 'admin'),], limit=1)
-                u, = User.copy([admin])
-                u.name = company.party.name + " (Usuari d'empresa)"
-                u.login = company.party.name
-                u.company = company
-                u.main_company = company
-                u.save()
-                company.company_user = u
+                user, = User.copy([admin])
+                user.name = company.party.name + " (Usuari d'empresa)"
+                user.login = company.party.name
+                user.company = company.id
+                user.main_company = company.id
+                user.save()
+
+                company.intercompany_user = user.id
                 company.save()
 
     Transaction().commit()
