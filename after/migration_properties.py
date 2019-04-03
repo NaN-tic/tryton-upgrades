@@ -69,7 +69,6 @@ with Transaction().start(dbname, 0, context=context):
 
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
-            print "Company ID %s" % company.id
             accountConfig = AccountConfiguration(1)
             for field in ('account_receivable', 'account_payable',
                     'account_expense', 'account_revenue'):

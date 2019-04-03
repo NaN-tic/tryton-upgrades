@@ -76,7 +76,7 @@ with Transaction().start(dbname, 1, context=context):
                 config.force_digits = True
                 config.save()
 
-            print "digits:", digits, config.default_account_code_digits
+            print("digits:", digits, config.default_account_code_digits)
             session_id, _, _ = UpdateChart.create()
             update_chart = UpdateChart(session_id)
             update_chart.start.account = account

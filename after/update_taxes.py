@@ -28,7 +28,6 @@ def get_tax(xml_id, company):
     data, = ModelData.search([('module', '=', 'account_es'),
         ('fs_id', '=', xml_id)], limit=1)
     template = AccountTaxTemplate(data.db_id)
-    # print("template:", template, template.name)
     with Transaction().set_context(active_test=False):
         tax, = AccountTax.search([
             ('template', '=', template.id),
@@ -80,7 +79,6 @@ with Transaction().start(dbname, 1, context=context) as transaction:
                 if '_' == xml_id[-1]:
                     xml_id = xml_id[:-1]
 
-                # print(xml_id, name, fs_id)
                 new_template, new_tax = get_tax(xml_id, company.id)
 
                 if xml_id in xml_ids:
@@ -104,7 +102,6 @@ with Transaction().start(dbname, 1, context=context) as transaction:
                 ('account_invoice_tax', 'tax'),
                 ('account_tax_line', 'tax')
             ]
-            # print(xml_ids)
             for x in xml_ids:
                 taxes, new_tax = xml_ids[x]
                 for table, field in tables:

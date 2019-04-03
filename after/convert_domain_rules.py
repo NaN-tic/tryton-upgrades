@@ -51,13 +51,10 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     actions = ActWindow.search([])
     for action in actions:
 
-#        if action.id in (427, 428):
-#            conteinue
         if action.domain and 'null' in action.domain:
             action.domain = action.domain.replace('null', "None")
         if action.context and 'true' in action.context:
             action.context = action.context.replace('true', "True")
-        print "action:", action.id, action.domain
         if action.domain:
             domain = action.domain.replace('null', 'None').replace(
                 'true', 'True').replace('false', 'False')
@@ -75,7 +72,6 @@ with Transaction().start(dbname, 0, context=context) as transaction:
 
     actions = ActWindowDomain.search([('create_uid', '>', 0)])
     for action in actions:
-        print action.id, action.domain
         if not action.domain and action.domain.strip() == '':
             continue
         action.domain = PYSONEncoder().encode(eval(action.domain))
@@ -85,10 +81,9 @@ with Transaction().start(dbname, 0, context=context) as transaction:
 
     pool = Pool()
     Trigger = pool.get('ir.trigger')
-    print "Triggers"
     triggers = Trigger.search([])
     for trigger in triggers:
-        print "Update Manaualy:", trigger.id, trigger.condition
+        print("Update Manaualy:", trigger.id, trigger.condition)
         if not trigger.condition and trigger.condition.strip() == '':
             continue
         trigger.condition = PYSONEncoder().encode(eval(trigger.condition))
