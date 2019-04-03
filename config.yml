@@ -52,6 +52,7 @@ to_uninstall:
 
 to_install:
   - account_move_draft
+  - account_product_accounting
   - account_invoice_line_description
   - party_identifier
   - account_invoice_company_currency
@@ -77,7 +78,7 @@ before:
 
   - comment: # copy to migrate default values, must be dropped
     version: 4.8
-    query: CREATE TABLE ir_property_backup as (select * from ir_property)
+    query: CREATE TABLE if not exists ir_property_backup as (select * from ir_property)
 
   - comment: #Adapat fields from stock_lot_expiry to stock_lot_sled
     fields: product_template.life_time
@@ -434,12 +435,27 @@ before:
         DELETE from ir_model_data where module = 'stock_supply_production' and model = 'res.user';
 
   - comment: # Remove error translations
-    version: 5.2
+    version: 5.1
     query: DELETE FROM "ir_translation" WHERE "type" = 'error';
 
-  # - comment: # upgrade account products. Warning: required account_product_migration field in product.template and acounting field in product.category (custom module)
-  #   version: 5.0
-  #   script: ./upgrades/before/migration_account_category.py
+  - comment: # Remove src_md5 from ir_translation
+    version: 5.1
+    query: ALTER TABLE "ir_translation" DROP CONSTRAINT if exists "ir_translation_translation_md5_uniq";
+
+  - comment: # Remove src_md5 from ir_translation
+    version: 5.1
+    query: ALTER TABLE "ir_translation" DROP COLUMN if exists "src_md5";
+
+  - comment: # Rename account_category from product, if migrating from 4.0 or higher thtows error because accounts_category already exists
+    version: 4.0
+    query: ALTER TABLE product_template RENAME column account_category TO accounts_category;
+
+  - comment: # Change cast of month on account_invoice_payment_termº_line
+    version: 5.1
+    query: alter table account_invoice_payment_term_line alter COLUMN month type integer using month::int
+  - comment: # Change cast of weekday on account_invoice_payment_term_line
+    version: 5.1
+    query: alter table account_invoice_payment_term_line alter COLUMN weekday type integer using weekday::int
 
 after:
 
@@ -546,12 +562,12 @@ after:
     # script: ./upgrades/after/sync_model_data.py
 
   # extra scripts
-  # - script: ./upgrades/after/convert_domain_rules.py
-  # - tables: work_project
-  #   script: ./upgrades/after/migration_project_product.py
-  # - tables: project_work
-  #   script: ./upgrades/after/purchase_work.py
-  # - tables: shipment_work
-  #   script: ./upgrades/after/migration_shipment_work.py
-  # - tables: account_invoice_milestone
-  #   script: ./upgrades/after/milestone_migration.py
+  - script: ./upgrades/after/convert_domain_rules.py
+  - tables: ir_property
+  - version: 4.8
+    script: ./upgrades/after/migration_properties.py
+  - script: ./upgrades/after/upgrade_account_chart.py
+  - version: 4.8
+    script: ./upgrades/after/update_taxes.py
+  - script: ./upgrades/after/delete_not_found_modules.py
+  - script: ./upgrades/after/convert_domain_rules.py
