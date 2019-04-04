@@ -571,3 +571,5 @@ after:
     script: ./upgrades/after/update_taxes.py
   - script: ./upgrades/after/delete_not_found_modules.py
   - script: ./upgrades/after/convert_domain_rules.py
+  - version: 5.1
+    script: ./upgrades/after/create_account_invoice_payment_method.py
