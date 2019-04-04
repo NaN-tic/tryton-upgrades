@@ -563,8 +563,8 @@ after:
 
   # extra scripts
   - script: ./upgrades/after/convert_domain_rules.py
-  - tables: ir_property
   - version: 4.8
+    tables: ir_property
     script: ./upgrades/after/migration_properties.py
   - script: ./upgrades/after/upgrade_account_chart.py
   - version: 4.8
