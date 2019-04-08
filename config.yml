@@ -542,6 +542,11 @@ after:
     tables: "product_product-production_bom"
     query: update product_template set producible = true where id in(select p.template from "product_product-production_bom" pb, product_product p where pb.product=p.id)
 
+  - comment: # Set account in account bank statement journal. Get value from ir_propery and try find credit or debit account because in ir_model_field there is no available ID field
+    version: 4.7
+    tables: "account_bank_statement_journal"
+    query: update account_bank_statement_journal set account = substring(sub.value, 17)::int from (select ip.value, ip.res from account_bank_statement_journal as absj left join account_journal as aj on absj.journal = aj.id  inner join ir_property_backup as ip on ip.res = concat('account.journal,', aj.id)  and ip.value like 'account.account,%') as sub where journal = substring(sub.res, 17)::int;
+
   # - comment: # upgrade configuration models from ir_property
   #   version: 4.8
   #   script: ./upgrades/after/migration_properties.py
