@@ -69,10 +69,12 @@ with Transaction().start(dbname, 0, context=context):
 
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
+            print("company:", company.id)
             accountConfig = AccountConfiguration(1)
             for field in ('account_receivable', 'account_payable',
                     'account_expense', 'account_revenue'):
                 value = get_property_value(field, company.id)
+                print("Account:", field, value)
                 if not value:
                     continue
                 setattr(accountConfig, mapping[field], value)
@@ -89,7 +91,7 @@ with Transaction().start(dbname, 0, context=context):
             accountConfig.save()
         Transaction().commit()
 
-# with Transaction().start(dbname, 0, context=context):
+#with Transaction().start(dbname, 0, context=context):
 #     Company = pool.get('company.company')
 #     Model = pool.get('ir.model')
 #     Field = pool.get('ir.model.field')

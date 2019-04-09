@@ -456,6 +456,9 @@ before:
   - comment: # Change cast of weekday on account_invoice_payment_term_line
     version: 5.1
     query: alter table account_invoice_payment_term_line alter COLUMN weekday type integer using weekday::int
+  - comment: # Set Second Currency of account_Account null if it's equal of company currency
+    version: 5.1
+    query: update account_account set second_currency = null where second_currency=(select currency from company_company where id=company) 
 
 after:
 

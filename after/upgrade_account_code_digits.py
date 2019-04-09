@@ -38,7 +38,7 @@ with Transaction().start(dbname, 1, context=context):
             config = Configuration(1)
             cdigits = config.default_account_code_digits or 8
 
-            for account in Account.search([('kind', '!=', 'view')]):
+            for account in Account.search([('type', '!=', None)]):
                 if account.code and len(account.code) < cdigits:
                     digits = int(cdigits - len(account.code))
                     if '%' in account.code:
