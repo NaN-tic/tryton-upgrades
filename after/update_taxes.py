@@ -15,6 +15,10 @@ Pool.start()
 pool = Pool(dbname)
 pool.init()
 
+
+#TODO: tax.rule
+#TODO: account.move.template
+
 context = {}
 
 def get_tax(xml_id, company):
@@ -53,7 +57,6 @@ with Transaction().start(dbname, 1, context=context) as transaction:
     child_companies = Company.search([('parent', '!=', None)])
     if child_companies:
         domain.append(('parent', '!=', None))
-
     for company in Company.search(domain):
         logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):

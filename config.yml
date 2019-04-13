@@ -75,6 +75,17 @@ before:
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
+  - comment: Remove name from account journal period
+    version: 5.1
+    query: ALTER TABLE account_journal_period Drop column name;
+
+  - comment: Remove type from account templet with code 0
+    version: 5.1
+    query: update account_account_template set type=null where code ='0'
+
+  - comment: drop constraint, new ones applied on module
+    version: 5.1
+    query: alter table account_account drop constraint account_account_code_uniq;
 
   - comment: # copy to migrate default values, must be dropped
     version: 4.8
@@ -458,7 +469,7 @@ before:
     query: alter table account_invoice_payment_term_line alter COLUMN weekday type integer using weekday::int
   - comment: # Set Second Currency of account_Account null if it's equal of company currency
     version: 5.1
-    query: update account_account set second_currency = null where second_currency=(select currency from company_company where id=company) 
+    query: update account_account set second_currency = null where second_currency=(select currency from company_company where id=company)
 
 after:
 
