@@ -61,28 +61,35 @@ with Transaction().start(dbname, 1, context=context):
     for company in Company.search([]):
         logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):
-            account_570, = Account.search([
+            account_570 = Account.search([
                 ('template', '=', pgc_570_child.db_id),
+                ('company', '=', company.id),
                 ], limit=1)
+
+            if account_570:
+                account_570, = account_570
 
             to_create = []
             for journal in Journal.search([('type', '=', 'cash')]):
 
-                query = "select value from ir_property where res = 'account.journal,%s' and field = %s" % (journal.id, credit_account_field_id);
+                query = "select value from ir_property where res = 'account.journal,%s' and field = %s and company=%s" % (journal.id, credit_account_field_id, company.id);
                 cursor.execute(query)
                 credit_results = cursor.fetchone()
-                credit_account = int(credit_results[0][16:]) if results else account_570.id
-                query = "select value from ir_property where res = 'account.journal,%s' and field = %s" % (journal.id, debit_account_field_id);
+                credit_account = int(credit_results[0][16:]) if results else account_570 and account_570.id
+                query = "select value from ir_property where res = 'account.journal,%s' and field = %s and company=%s" % (journal.id, debit_account_field_id, company.id);
                 cursor.execute(query)
                 debit_results = cursor.fetchone()
-                debit_account = int(debit_results[0][16:]) if results else account_570.id
+                debit_account = int(debit_results[0][16:]) if results else account_570 and account_570.id
 
+                if not (credit_account and debit_account):
+                    continue
                 payment_method = PaymentMethod()
                 payment_method.name = journal.name
                 payment_method.company = company
                 payment_method.journal = journal
                 payment_method.credit_account = credit_account
                 payment_method.debit_account = debit_account
+
                 to_create.append(payment_method._save_values)
 
             if to_create:
