@@ -36,7 +36,7 @@ with Transaction().start(dbname, 1, context=context):
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
             config = Configuration(1)
-            cdigits = config.default_account_code_digits or 8
+            cdigits = config.default_account_code_digits or 7
 
             for account in Account.search([('type', '!=', None)]):
                 if account.code and len(account.code) < cdigits:

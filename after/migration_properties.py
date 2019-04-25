@@ -74,9 +74,11 @@ with Transaction().start(dbname, 0, context=context):
             for field in ('account_receivable', 'account_payable',
                     'account_expense', 'account_revenue'):
                 value = get_property_value(field, company.id)
-                print("Account:", field, value)
+
                 if not value:
                     continue
+                a = Account(value)
+                print("Account:", field, value, a.code)
                 setattr(accountConfig, mapping[field], value)
 
             asset_sequence = Sequence.search([
@@ -89,7 +91,7 @@ with Transaction().start(dbname, 0, context=context):
                 accountConfig.asset_sequence = asset_sequence2[0]
 
             accountConfig.save()
-        Transaction().commit()
+            Transaction().commit()
 
 #with Transaction().start(dbname, 0, context=context):
 #     Company = pool.get('company.company')

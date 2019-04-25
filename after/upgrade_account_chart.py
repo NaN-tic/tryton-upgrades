@@ -4,7 +4,7 @@ import os
 
 dbname = sys.argv[1]
 config_file = sys.argv[2]
-digits = sys.argv[3] if len(sys.argv) == 4 else 8
+digits = sys.argv[3] if len(sys.argv) == 4 else 7
 domain = sys.argv[4] if len(sys.argv) == 5 else []
 domain = eval(domain)
 
