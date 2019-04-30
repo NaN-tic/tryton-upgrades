@@ -375,7 +375,7 @@ before:
   - comment: # update sale customer_reference to sale reference (sale_reference)
     fields: sale_sale.customer_reference
     version: 4.8
-    query: update sale_sale set reference = customer_reference where customer_reference is not null;
+    query: update sale_sale set reference = customer_reference where customer_reference is not null and customer_reference != '';
 
   - comment: # uninstall account_es_pyme and install account_es
     version: 4.6

@@ -87,7 +87,7 @@ with Transaction().start(dbname, 0, context=context):
                 ('code','=', 'account.asset'), ('company', '=', None)])
             if asset_sequence:
                 accountConfig.asset_sequence = asset_sequence[0]
-            else:
+            elif asset_sequence2:
                 accountConfig.asset_sequence = asset_sequence2[0]
 
             accountConfig.save()
