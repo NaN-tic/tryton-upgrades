@@ -52,7 +52,6 @@ to_uninstall:
 
 to_install:
   - account_move_draft
-  - account_product_accounting
   - account_invoice_line_description
   - party_identifier
   - account_invoice_company_currency
