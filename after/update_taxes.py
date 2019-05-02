@@ -144,20 +144,24 @@ with Transaction().start(dbname, 1, context=context) as transaction:
                                 table, rel, tax, line
                             ))
 
-            tables3 = [
-                ('product_customer_taxes_template_rel', 'tax', 'product'),
-                ('product_category_customer_taxes_template_rel', 'tax', 'product')
-            ]
+            account_template_product = Module.search([
+                ('name', '=', 'account_template_product'),
+                ('state', '=', 'activated')], limit=1)
+            if account_template_product:
+                tables3 = [
+                    ('product_customer_taxes_template_rel', 'tax', 'product'),
+                    ('product_category_customer_taxes_template_rel', 'tax', 'product')
+                ]
 
-            for template, taxes in template_map.items():
-                for table, field, rel in tables3:
-                    cursor.execute('select id, %s from %s where %s = %s' % (
-                        rel, table, field, template))
+                for template, taxes in template_map.items():
+                    for table, field, rel in tables3:
+                        cursor.execute('select id, %s from %s where %s = %s' % (
+                            rel, table, field, template))
 
-                    for id_, line in cursor.fetchall():
-                        cursor.execute('delete from %s where id=%s'%(table, id_))
-                        for tax in taxes:
-                            cursor.execute('insert into %s(tax,%s) values(%s,%s)' % (
-                                table, rel, tax, line
-                            ))
+                        for id_, line in cursor.fetchall():
+                            cursor.execute('delete from %s where id=%s'%(table, id_))
+                            for tax in taxes:
+                                cursor.execute('insert into %s(tax,%s) values(%s,%s)' % (
+                                    table, rel, tax, line
+                                ))
             Transaction().connection.commit()
