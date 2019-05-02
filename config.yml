@@ -469,6 +469,12 @@ before:
   - comment: # Set Second Currency of account_Account null if it's equal of company currency
     version: 5.1
     query: update account_account set second_currency = null where second_currency=(select currency from company_company where id=company)
+  - comment: # remove style option in ir.action.window
+    version: 4.8
+    query: UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style",""],', '') where fs_id like 'report_%' and model = 'ir.action.report';
+        UPDATE ir_model_data set values = REPLACE(fs_values, '["style",""],', '') where fs_id like 'report_%' and model = 'ir.action.report';
+        UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
+        UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
 
 after:
 
@@ -559,6 +565,10 @@ after:
     version: 4.7
     tables: "account_bank_statement_journal"
     query: update account_bank_statement_journal set account = substring(sub.value, 17)::int from (select ip.value, ip.res from account_bank_statement_journal as absj left join account_journal as aj on absj.journal = aj.id  inner join ir_property_backup as ip on ip.res = concat('account.journal,', aj.id)  and ip.value like 'account.account,%') as sub where journal = substring(sub.res, 17)::int;
+
+  - comment: # deprecated model
+    version: 4.7
+    query: DELETE from ir_model_data where model = 'account.journal.type'
 
   # - comment: # upgrade configuration models from ir_property
   #   version: 4.8
