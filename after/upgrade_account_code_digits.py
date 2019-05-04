@@ -36,12 +36,17 @@ with Transaction().start(dbname, 1, context=context):
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
             config = Configuration(1)
-            cdigits = config.default_account_code_digits or 7
+            cdigits = config.default_account_code_digits or 8
 
-            for account in Account.search([('type', '!=', None)]):
-                if account.code and len(account.code) < cdigits:
+            for account in Account.search([]):
+                if len(account.childs) != 0:
+                    continue
+                if account.code and (len(account.code) < cdigits or len(account.code) > cdigits):
                     digits = int(cdigits - len(account.code))
-                    if '%' in account.code:
+                    if digits < 0:
+                        digits = cdigits-4
+                        code = account.code[0:4] + account.code[-digits:]
+                    elif '%' in account.code:
                         code = account.code.replace('%', '0' * (digits + 1))
                     else:
                         code = account.code + '0' * digits

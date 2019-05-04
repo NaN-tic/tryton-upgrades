@@ -78,10 +78,6 @@ before:
     version: 5.1
     query: ALTER TABLE account_journal_period Drop column name;
 
-  - comment: Remove type from account templet with code 0
-    version: 5.1
-    query: update account_account_template set type=null where code ='0'
-
   - comment: drop constraint, new ones applied on module
     version: 5.1
     query: alter table account_account drop constraint account_account_code_uniq;
