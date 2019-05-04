@@ -72,7 +72,7 @@ with Transaction().start(dbname, 1, context=context):
 
             if not config.default_account_code_digits:
                 config.default_account_code_digits = digits
-                config.force_digits = True
+                config.force_digits = False
                 config.save()
 
             print("digits:", digits, config.default_account_code_digits)
