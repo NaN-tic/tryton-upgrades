@@ -133,7 +133,7 @@ before:
              db_id = tt.id and
              model='account.tax.template' and module='account_es' and
              tt.parent is not null and fs_id like '%_child'
-             and  t.include_347 = true  and t.recargo_equivalencia=False
+             and (t.include_347=true or t.recargo_equivalencia=true)
           UNION ALL
           select
               t.id as tax_id,
