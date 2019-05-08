@@ -75,7 +75,7 @@ before:
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
   - comment: Remove name from account journal period
-    version: 5.1
+    version: 4.8
     query: ALTER TABLE account_journal_period Drop column name;
 
   - comment: drop constraint, new ones applied on module
@@ -457,13 +457,13 @@ before:
     query: ALTER TABLE product_template RENAME column account_category TO accounts_category;
 
   - comment: # Change cast of month on account_invoice_payment_termº_line
-    version: 5.1
+    version: 4.8
     query: alter table account_invoice_payment_term_line alter COLUMN month type integer using month::int
   - comment: # Change cast of weekday on account_invoice_payment_term_line
-    version: 5.1
+    version: 4.8
     query: alter table account_invoice_payment_term_line alter COLUMN weekday type integer using weekday::int
   - comment: # Set Second Currency of account_Account null if it's equal of company currency
-    version: 5.1
+    version: 4.8
     query: update account_account set second_currency = null where second_currency=(select currency from company_company where id=company)
   - comment: # remove style option in ir.action.window
     version: 4.8
