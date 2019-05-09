@@ -68,6 +68,9 @@ with Transaction().start(dbname, 0, context=context):
     }
 
     for company in Company.search([]):
+        user.main_company=company.id
+        user.company = company.id
+        user.save()
         with Transaction().set_context(company=company.id):
             print("company:", company.id)
             accountConfig = AccountConfiguration(1)
@@ -78,7 +81,7 @@ with Transaction().start(dbname, 0, context=context):
                 if not value:
                     continue
                 a = Account(value)
-                print("Account:", field, value, a.code)
+                print("Account:", field, value, a.code, a.type.receivable, a.type.payable)
                 setattr(accountConfig, mapping[field], value)
 
             asset_sequence = Sequence.search([

@@ -5,8 +5,9 @@ import os
 dbname = sys.argv[1]
 config_file = sys.argv[2]
 digits = sys.argv[3] if len(sys.argv) == 4 else 7
-domain = sys.argv[4] if len(sys.argv) == 5 else '[]'
-domain = eval(domain)
+domain = sys.argv[4] if len(sys.argv) == 5 else None
+if domain:
+    domain = eval(domain)
 
 from trytond.config import config as CONFIG
 CONFIG.update_etc(config_file)
@@ -47,6 +48,10 @@ with Transaction().start(dbname, 1, context=context):
     else:
         party, = party
 
+    user_obj = pool.get('res.user')
+    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
+    user_id = user.id
+
     cursor = Transaction().connection.cursor()
     cursor.execute(''' update account_move_line set party=%s where id in (
         select l.id from account_move_line l, account_account a where
@@ -58,16 +63,30 @@ with Transaction().start(dbname, 1, context=context):
     Account.parent.left = None
     Account.parent.right = None
 
-    child_companies = Company.search([('parent', '!=', None)])
-    if child_companies:
-        domain.append(('parent', '!=', None))
+    print("domain:", domain)
+    if domain is None:
+        print("Get childs")
+        child_companies = Company.search([('parent', '!=', None)])
+        if child_companies:
+            domain=[('parent', '!=', None)]
 
     for company in Company.search(domain):
         logger.info("company %s" % company.id)
+        user.main_company=company.id
+        user.company = company.id
+        user.save()
         with Transaction().set_context(company=company.id):
 
             template = AccountTemplate(ModelData.get_id('account_es', 'pgc_0'))
-            account, = Account.search([('template', '=', template)], limit=1)
+            account = Account.search([('template', '=', template),
+                ('company','=', company.id)], limit=1)
+
+            if not account:
+                print("No Account Found for company:", company.id)
+                continue
+
+            account = account[0]
+
             config = Configuration(1)
 
             if not config.default_account_code_digits:
@@ -129,3 +148,5 @@ with Transaction().start(dbname, 1, context=context):
     cr.execute(query)
     for (root,) in cr.fetchall():
         pos = browse_rec(root, pos)
+
+    Transaction().commit()
