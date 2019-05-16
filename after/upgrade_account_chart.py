@@ -53,6 +53,36 @@ with Transaction().start(dbname, 1, context=context):
     user_id = user.id
 
     cursor = Transaction().connection.cursor()
+
+    cursor.execute('''select t.id from account_account_template t
+        where  t.id not in (select db_id from ir_model_data where
+        module='account_es' and model='account.account.template')
+        and t.code != '' ''')
+
+    template_ids = [x[0] for x in cursor.fetchall()]
+
+    to_save = []
+    for template in AccountTemplate.browse(template_ids):
+        if not template.type:
+            continue
+        code = template.code[0:4] + "0"*(len(template.code) -4)
+
+        similar = AccountTemplate.search(['code', '=', code])
+        if not similar:
+            code = template.code[0:3] + "0"*(len(template.code) -3)
+            similar = AccountTemplate.search(['code', '=', code])
+        if not similar:
+            code = template.code[0:2] + "0"*(len(template.code) -2)
+            similar = AccountTemplate.search(['code', '=', code])
+        if not similar:
+            print("not found last:", template.code, code)
+            continue
+
+        template.type = similar[0].type
+        to_save.append(template)
+
+    AccountTemplate.save(to_save)
+
     cursor.execute(''' update account_move_line set party=%s where id in (
         select l.id from account_move_line l, account_account a where
         l.account=a.id and a.party_required and l.party is null) ''' %
