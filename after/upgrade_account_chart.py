@@ -57,7 +57,7 @@ with Transaction().start(dbname, 1, context=context):
     cursor.execute('''select t.id from account_account_template t
         where  t.id not in (select db_id from ir_model_data where
         module='account_es' and model='account.account.template')
-        and t.code != '' ''')
+        and t.code != '' order by t.code asc''' )
 
     template_ids = [x[0] for x in cursor.fetchall()]
 
@@ -65,15 +65,21 @@ with Transaction().start(dbname, 1, context=context):
     for template in AccountTemplate.browse(template_ids):
         if not template.type:
             continue
-        code = template.code[0:4] + "0"*(len(template.code) -4)
 
-        similar = AccountTemplate.search(['code', '=', code])
+        code = template.code[0:4] + "0"*(len(template.code) -4)
+        # print("code:", template.code, code)
+        similar = AccountTemplate.search([('code', '=', code),
+            ('id', 'not in', template_ids)])
         if not similar:
             code = template.code[0:3] + "0"*(len(template.code) -3)
-            similar = AccountTemplate.search(['code', '=', code])
+            # print("code 1:", template.code, code)
+            similar = AccountTemplate.search([('code', '=', code),
+                ('id', 'not in', template_ids)])
         if not similar:
             code = template.code[0:2] + "0"*(len(template.code) -2)
-            similar = AccountTemplate.search(['code', '=', code])
+            # print("code 2:", template.code, code)
+            similar = AccountTemplate.search([('code', '=', code),
+                ('id', 'not in', template_ids)])
         if not similar:
             print("not found last:", template.code, code)
             continue
@@ -82,6 +88,7 @@ with Transaction().start(dbname, 1, context=context):
         to_save.append(template)
 
     AccountTemplate.save(to_save)
+    Transaction().commit()
 
     cursor.execute(''' update account_move_line set party=%s where id in (
         select l.id from account_move_line l, account_account a where
