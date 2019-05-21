@@ -178,6 +178,13 @@ before:
        account_tax t
        where a.tax_parent = t.id
 
+  - comment: remove deferral value in ir_model_data
+    version: 4.0
+    query: UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["deferral", false], ', '') where fs_values ilike '%["deferral", false],%' and module = 'account_es';
+      UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["deferral", true], ', '') where fs_values ilike '%["deferral", true],%' and module = 'account_es';
+      UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["deferral",true],', '') where fs_values ilike '%["deferral",true],%' and module = 'account_es';
+      UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["deferral",false],', '') where fs_values ilike '%["deferral",false],%' and module = 'account_es';
+
   - comment: -> 4.0
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
   - tables: stock_location
@@ -436,9 +443,10 @@ before:
 
   - comment: # Delete unused users
     version: 4.8
-    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request');
+    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger');
         DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
         DELETE from ir_model_data where module = 'stock_supply_production' and model = 'res.user';
+        DELETE from ir_model_data where module = 'res' and model = 'res.user' and fs_id = 'user_trigger';
 
   - comment: # Remove error translations
     version: 5.1
@@ -471,6 +479,9 @@ before:
         UPDATE ir_model_data set values = REPLACE(fs_values, '["style",""],', '') where fs_id like 'report_%' and model = 'ir.action.report';
         UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
         UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
+  - comment: # remove deprecated module
+    version: 4.8
+    query: DELETE FROM ir_model_data where module = 'stock_reservation';
 
 after:
 
