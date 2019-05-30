@@ -441,13 +441,6 @@ before:
     query: DELETE from ir_cron where function in ('generate_requests', 'generate_internal_shipment');
         DELETE from ir_model_data where module = 'stock_supply' and model = 'ir.cron';
 
-  - comment: # Delete unused users
-    version: 4.8
-    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger');
-        DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
-        DELETE from ir_model_data where module = 'stock_supply_production' and model = 'res.user';
-        DELETE from ir_model_data where module = 'res' and model = 'res.user' and fs_id = 'user_trigger';
-
   - comment: # Remove error translations
     version: 5.1
     query: DELETE FROM "ir_translation" WHERE "type" = 'error';
@@ -576,6 +569,13 @@ after:
   - comment: # deprecated model
     version: 4.7
     query: DELETE from ir_model_data where model = 'account.journal.type'
+
+  - comment: # Delete unused users
+    version: 4.8
+    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger');
+        DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
+        DELETE from ir_model_data where module = 'stock_supply_production' and model = 'res.user';
+        DELETE from ir_model_data where module = 'res' and model = 'res.user' and fs_id = 'user_trigger';
 
   # - comment: # upgrade configuration models from ir_property
   #   version: 4.8
