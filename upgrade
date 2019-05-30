@@ -254,6 +254,9 @@ if not args.config:
         logger.info('Checking %s...' % config_file)
         if os.path.exists(config_file):
             break
+    if not config_file:
+        logger.info('Not found file %s' % config_file)
+        sys.exit(1)
     logger.info("Configuration file: %s" % config_file)
 else:
     config_file = args.config
