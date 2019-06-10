@@ -92,14 +92,12 @@ with Transaction().start(dbname, 1, context=context) as transaction:
                     xml_ids[xml_id] = ([str(tax_id)], new_tax.id)
 
                 if parent in parent_map:
-                    template_map[parent_template].append(new_template.id)
-                else:
-                    template_map[parent_template] = [new_template.id]
-
-                if parent in parent_map:
+                    if not new_template.id in template_map[parent_template]:
+                        template_map[parent_template].append(new_template.id)
                     if not (new_tax.id, new_template.id) in parent_map[parent]:
                         parent_map[parent].append((new_tax.id, new_template.id))
                 else:
+                    template_map[parent_template] = [new_template.id]
                     parent_map[parent] = [(new_tax.id, new_template.id)]
 
             tables = [
