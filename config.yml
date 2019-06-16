@@ -80,7 +80,7 @@ before:
 
   - comment: drop constraint, new ones applied on module
     version: 5.1
-    query: alter table account_account drop constraint account_account_code_uniq;
+    query: ALTER TABLE account_account DROP CONSTRAINT IF EXISTS account_account_code_uniq;
 
   - comment: # copy to migrate default values, must be dropped
     version: 4.8
