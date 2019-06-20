@@ -66,17 +66,30 @@ with Transaction().start(dbname, 1, context=context):
         if not template.type:
             continue
 
-        code = template.code[0:4] + "0"*(len(template.code) -4)
-        # print("code:", template.code, code)
+        code = template.code[:-1].replace('%','0') +'0'
+        code = code[0:4]
         similar = AccountTemplate.search([('code', '=', code),
             ('id', 'not in', template_ids)])
+
         if not similar:
-            code = template.code[0:3] + "0"*(len(template.code) -3)
-            # print("code 1:", template.code, code)
+            code = code[:-1]
+            similar = AccountTemplate.search([('code', '=', code),
+            ('id', 'not in', template_ids)])
+
+        if not similar:
+            code = code[:-2] + "00"
             similar = AccountTemplate.search([('code', '=', code),
                 ('id', 'not in', template_ids)])
         if not similar:
-            code = template.code[0:2] + "0"*(len(template.code) -2)
+            code = code[:-1]
+            similar = AccountTemplate.search([('code', '=', code),
+                ('id', 'not in', template_ids)])
+        if not similar:
+            code = code[:-3] + "000"
+            similar = AccountTemplate.search([('code', '=', code),
+                ('id', 'not in', template_ids)])
+        if not similar:
+            code = code[:-1]
             # print("code 2:", template.code, code)
             similar = AccountTemplate.search([('code', '=', code),
                 ('id', 'not in', template_ids)])
@@ -85,9 +98,13 @@ with Transaction().start(dbname, 1, context=context):
             continue
 
         template.type = similar[0].type
-        to_save.append(template)
+        try:
+            template.save()
+        except:
+            print("a revisar:", template.code)
+        #to_save.append(template)
 
-    AccountTemplate.save(to_save)
+    #AccountTemplate.save(to_save)
     Transaction().commit()
 
     cursor.execute(''' update account_move_line set party=%s where id in (
