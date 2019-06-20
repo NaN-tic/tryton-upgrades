@@ -29,13 +29,17 @@ def get_tax(xml_id, company):
 
     if xml_id[-3:] == '_re':
         xml_id = xml_id.replace('_re','')
-    data, = ModelData.search([('module', '=', 'account_es'),
+    data = ModelData.search([('module', '=', 'account_es'),
         ('fs_id', '=', xml_id)], limit=1)
+    if not data:
+        return (None, None)
+    data, = data
     template = AccountTaxTemplate(data.db_id)
-    with Transaction().set_context(active_test=False):
-        tax, = AccountTax.search([
+    with Transaction().set_context(): #active_test=False):
+        tax = AccountTax.search([
             ('template', '=', template.id),
             ('company', '=', company)], limit=1)
+        tax, = tax
     return (template, tax)
 
 logger = logging.getLogger(__name__)
@@ -57,6 +61,7 @@ with Transaction().start(dbname, 1, context=context) as transaction:
     child_companies = Company.search([('parent', '!=', None)])
     if child_companies:
         domain.append(('parent', '!=', None))
+
     for company in Company.search(domain):
         logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):
@@ -72,18 +77,25 @@ with Transaction().start(dbname, 1, context=context) as transaction:
             from mapping_taxes as mt
                 left join account_tax as at on at.id = mt.tax_id
                  where at.company = %s
-            """ % company.id)
+                 """% str(company.id))
 
             xml_ids = {}
             parent_map = {}
             template_map = {}
             for x in cursor.fetchall():
                 tax_id, name, parent, i347, fs_id, template_id, parent_template, xml_id = x
+                # print(name, xml_id, parent_template, template_id, fs_id)
+                # import pdb; pdb.set_trace()
+
                 if '_' == xml_id[-1]:
                     xml_id = xml_id[:-1]
 
                 new_template, new_tax = get_tax(xml_id, company.id)
 
+                if not new_template:
+                    continue
+
+                # print("xml_id:", xml_id, new_template.name, new_tax.name)
                 if xml_id in xml_ids:
                     taxes, nt = xml_ids[xml_id]
                     taxes.append(str(tax_id))
@@ -107,14 +119,14 @@ with Transaction().start(dbname, 1, context=context) as transaction:
             for x in xml_ids:
                 taxes, new_tax = xml_ids[x]
                 for table, field in tables:
+                    # print('update %s set %s = %s where tax in (%s)' % (
+                    #       table, field, new_tax, ",".join(taxes)))
                     cursor.execute(
-                        'update %s set %s = %s where tax in (%s)' % (
-                            table, field, new_tax, ",".join(taxes)
-                        )
+                     'update %s set %s = %s where tax in (%s)' % (
+                         table, field, new_tax, ",".join(taxes)
+                      )
                     )
-
             Transaction().connection.commit()
-
             tables2 = [
                 ('account_invoice_line_account_tax', 'tax', 'line' ),
                 ('product_category_customer_taxes_rel', 'tax', 'category'),
@@ -163,4 +175,4 @@ with Transaction().start(dbname, 1, context=context) as transaction:
                                 cursor.execute('insert into %s(tax,%s) values(%s,%s)' % (
                                     table, rel, tax, line
                                 ))
-            Transaction().connection.commit()
+        Transaction().connection.commit()
