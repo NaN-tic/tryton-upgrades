@@ -54,57 +54,26 @@ with Transaction().start(dbname, 1, context=context):
 
     cursor = Transaction().connection.cursor()
 
-    cursor.execute('''select t.id from account_account_template t
-        where  t.id not in (select db_id from ir_model_data where
-        module='account_es' and model='account.account.template')
-        and t.code != '' order by t.code asc''' )
-
-    template_ids = [x[0] for x in cursor.fetchall()]
-
     to_save = []
-    for template in AccountTemplate.browse(template_ids):
-        if not template.type:
+    for template in AccountTemplate.search([]):
+        if template.type or template.childs:
             continue
-
-        code = template.code[:-1].replace('%','0') +'0'
-        code = code[0:4]
-        similar = AccountTemplate.search([('code', '=', code),
-            ('id', 'not in', template_ids)])
-
-        if not similar:
+        code = template.code[:-1]
+        cursor.execute(
+            "select id, code, type  from account_account_template where code like '%s' and type > 0 limit 1" % code)
+        res = cursor.fetchone()
+        if not res:
             code = code[:-1]
-            similar = AccountTemplate.search([('code', '=', code),
-            ('id', 'not in', template_ids)])
+            cursor.execute(
+                "select id, code, type  from account_account_template where code like '%s' and type > 0 limit 1" % code)
+            res = cursor.fetchone()
 
-        if not similar:
-            code = code[:-2] + "00"
-            similar = AccountTemplate.search([('code', '=', code),
-                ('id', 'not in', template_ids)])
-        if not similar:
-            code = code[:-1]
-            similar = AccountTemplate.search([('code', '=', code),
-                ('id', 'not in', template_ids)])
-        if not similar:
-            code = code[:-3] + "000"
-            similar = AccountTemplate.search([('code', '=', code),
-                ('id', 'not in', template_ids)])
-        if not similar:
-            code = code[:-1]
-            # print("code 2:", template.code, code)
-            similar = AccountTemplate.search([('code', '=', code),
-                ('id', 'not in', template_ids)])
-        if not similar:
-            print("not found last:", template.code, code)
-            continue
+        if res:
+            id, code, type  = res
+        template.type = type
+        to_save.append(template)
 
-        template.type = similar[0].type
-        try:
-            template.save()
-        except:
-            print("a revisar:", template.code)
-        #to_save.append(template)
-
-    #AccountTemplate.save(to_save)
+    AccountTemplate.save(to_save)
     Transaction().commit()
 
     cursor.execute(''' update account_move_line set party=%s where id in (
