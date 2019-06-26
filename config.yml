@@ -499,6 +499,8 @@ before:
 after:
 
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
+  - comment: # translations fuzzy to false
+    query: UPDATE ir_translation set fuzzy = false where fuzzy = true and res_id = -1;
   - tables: aeat_303_mapping-account_tax_code
     query: delete from "aeat_303_mapping-account_tax_code"
   - tables: aeat_303_mapping
