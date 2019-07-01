@@ -477,7 +477,7 @@ before:
     version: 4.0
     query: ALTER TABLE product_template RENAME column account_category TO accounts_category;
 
-  - comment: # Change cast of month on account_invoice_payment_termº_line
+  - comment: # Change cast of month on account_invoice_payment_term_line
     version: 4.8
     query: alter table account_invoice_payment_term_line alter COLUMN month type integer using month::int
   - comment: # Change cast of weekday on account_invoice_payment_term_line
@@ -495,6 +495,18 @@ before:
   - comment: # remove deprecated module
     version: 4.8
     query: DELETE FROM ir_model_data where module = 'stock_reservation';
+  - comment: # Change cast of lead_time on stock_location_lead_time
+    version: 3.4
+    tables: stock_location_lead_time
+    query: alter table stock_location_lead_time alter COLUMN lead_time type integer USING (lead_time::integer);
+  - comment: # Change cast of lead_time on stock_location_lead_time
+    version: 3.4
+    tables: production_lead_time
+    query: alter table production_lead_time alter COLUMN lead_time type integer USING (lead_time::integer);
+  - comment: # Change cast of previous_declaration_receipt on aeat_303_report
+    version: 3.4
+    tables: aeat_303_report
+    query: alter table aeat_303_report alter COLUMN previous_declaration_receipt type varchar(13) USING (previous_declaration_receipt::varchar);
 
 after:
 
