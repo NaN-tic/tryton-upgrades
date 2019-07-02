@@ -70,7 +70,7 @@ with Transaction().start(dbname, 1, context=context):
 
         if res:
             id, code, type  = res
-        template.type = type
+            template.type = type
         to_save.append(template)
 
     AccountTemplate.save(to_save)
