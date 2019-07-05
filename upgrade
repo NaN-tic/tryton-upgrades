@@ -247,13 +247,21 @@ class Upgrade:
 
             if script:
                 if os.path.isfile(script):
-                    # We must commit before executing the script so the script is
-                    # not locked by our transaction
+                    # We must commit before executing the script so the script
+                    # is not locked by our transaction
                     connection.commit()
                     logger.info(t.green('Executing: %s' % script))
-                    run(script, self.database_name, self.config_file)
+                    res = run(script, self.database_name, self.config_file)
+                    if res:
+                        logger.error(t.red('Script "%s" returned the following '
+                                'error code: %d. Upgrade aborted.') % (script,
+                                res))
+                        sys.exit(1)
                 else:
                     logger.warning("Not found script: %s" % script)
+                    logger.error(t.red('Script "%s" not found. Upgrade '
+                            'aborted.') % script)
+                    sys.exit(1)
 
     def run(self):
 
