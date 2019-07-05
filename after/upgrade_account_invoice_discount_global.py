@@ -9,7 +9,6 @@ CONFIG.update_etc(config_file)
 from decimal import Decimal
 from trytond.transaction import Transaction
 from trytond.pool import Pool
-import logging
 
 Pool.start()
 pool = Pool(dbname)

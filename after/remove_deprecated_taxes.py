@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from xml.dom.minidom import parseString, parse
+from xml.dom.minidom import parse
 
 dbname = sys.argv[1]
 config_file = sys.argv[2]
