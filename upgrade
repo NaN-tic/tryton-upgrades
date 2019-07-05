@@ -7,6 +7,7 @@ from itertools import chain
 import psycopg2
 import subprocess
 import logging
+import time
 from enum import Enum
 
 from blessings import Terminal
@@ -364,6 +365,7 @@ if url.username:
 else:
     connection = psycopg2.connect(dbname=database_name)
 
+start = time.time()
 cursor = connection.cursor()
 upgrade = Upgrade(connection)
 upgrade.before = config.get('before', [])
@@ -373,4 +375,8 @@ upgrade.to_uninstall = config.get('to_uninstall', [])
 upgrade.database_name = database_name
 upgrade.config_file = config_file
 upgrade.steps = steps_to_run
-exit(upgrade.run() or 0)
+returncode = upgrade.run()
+end = time.time()
+logger.info(t.cyan('Elapsed time: %.1fs' % (end - start)))
+
+exit(returncode or 0)
