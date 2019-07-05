@@ -71,7 +71,7 @@ before:
   - UPDATE ir_translation SET module = 'aeat_349' WHERE module = 'aeat_349_es';
   - DELETE from ir_ui_view where module = '';
   - DELETE from ir_ui_view where data = '' and module = 'account_payment_type';
-  - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL;
+  - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL AND module <> 'farm';
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
