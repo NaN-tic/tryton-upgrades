@@ -7,6 +7,7 @@ from itertools import chain
 import psycopg2
 import subprocess
 import logging
+from enum import Enum
 
 from blessings import Terminal
 
@@ -22,6 +23,15 @@ ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
+
+
+class Step(Enum):
+    BEFORE = 'before'
+    UNINSTALL = 'uninstall'
+    FIRST_UPDATE = 'first-update'
+    AFTER = 'after'
+    SECOND_UPDATE = 'second-update'
+
 
 t = Terminal()
 
@@ -101,138 +111,181 @@ def where_exists(query):
     execute(query)
     return bool(cursor.fetchone()[0])
 
-def uninstall_modules():
-    to_uninstall = config.get('to_uninstall')
-    module_table = None
-    for table in ('ir_module_module', 'ir_module'):
-        if table_exists(table):
-            module_table = table
-            break
-    for module in to_uninstall:
-        logger.info('Module: %s' % module)
-        execute('DELETE FROM ' + module_table + '_dependency WHERE '
-            'module IN (SELECT id FROM ' + module_table + ' WHERE name=%s)',
-            module)
-        execute('DELETE FROM ' + module_table + ' WHERE name=%s', module)
 
-        execute('SELECT model, db_id FROM ir_model_data WHERE module=%s',
-            module)
-        for model, db_id in cursor.fetchall():
-            logger.info('DELETING %s %s' % (model, db_id))
-            if model == 'res.user':
-                continue
-            execute('DELETE FROM "' + model.replace('.', '_')
-                + '" WHERE id=%s', db_id)
+class Upgrade:
 
-        execute('DELETE FROM ir_model_data WHERE module=%s', module)
+    def __init__(self, connection):
+        self.connection = connection
+        self.steps = None
+        self.before = None
+        self.after = None
+        self.to_install = None
+        self.to_uninstall = None
+        self.database_name = None
+        self.config_file = None
 
-    if table_exists('babi_report'):
-        execute('DELETE from babi_filter_parameter where filter in'
-            ' (SELECT id FROM babi_filter WHERE model IN (SELECT '
-            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
-            module_table)
-        execute('DELETE FROM babi_filter WHERE model IN (SELECT '
+    def uninstall_modules(self):
+        module_table = None
+        for table in ('ir_module_module', 'ir_module'):
+            if table_exists(table):
+                module_table = table
+                break
+        for module in self.to_uninstall:
+            logger.info('Module: %s' % module)
+            execute('DELETE FROM ' + module_table + '_dependency WHERE '
+                'module IN (SELECT id FROM ' + module_table + ' WHERE name=%s)',
+                module)
+            execute('DELETE FROM ' + module_table + ' WHERE name=%s', module)
+
+            execute('SELECT model, db_id FROM ir_model_data WHERE module=%s',
+                module)
+            for model, db_id in cursor.fetchall():
+                logger.info('DELETING %s %s' % (model, db_id))
+                if model == 'res.user':
+                    continue
+                execute('DELETE FROM "' + model.replace('.', '_')
+                    + '" WHERE id=%s', db_id)
+
+            execute('DELETE FROM ir_model_data WHERE module=%s', module)
+
+        if table_exists('babi_report'):
+            execute('DELETE from babi_filter_parameter where filter in'
+                ' (SELECT id FROM babi_filter WHERE model IN (SELECT '
+                'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+                module_table)
+            execute('DELETE FROM babi_filter WHERE model IN (SELECT '
+                    'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+                    module_table)
+            execute('DELETE from babi_order where report in'
+                ' (SELECT id FROM babi_report WHERE model IN (SELECT '
+                'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+                module_table)
+            execute('DELETE from babi_measure where report in'
+                ' (SELECT id FROM babi_report WHERE model IN (SELECT '
+                'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+                module_table)
+            execute('DELETE from babi_dimension where expression in'
+                ' (SELECT id FROM babi_expression WHERE model IN (SELECT '
+                'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
+                module_table)
+            execute('DELETE FROM babi_expression WHERE model IN (SELECT '
                 'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
                 module_table)
-        execute('DELETE from babi_order where report in'
-            ' (SELECT id FROM babi_report WHERE model IN (SELECT '
-            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
-            module_table)
-        execute('DELETE from babi_measure where report in'
-            ' (SELECT id FROM babi_report WHERE model IN (SELECT '
-            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
-            module_table)
-        execute('DELETE from babi_dimension where expression in'
-            ' (SELECT id FROM babi_expression WHERE model IN (SELECT '
-            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s)))' %
-            module_table)
-        execute('DELETE FROM babi_expression WHERE model IN (SELECT '
+            execute('DELETE FROM babi_report WHERE model IN (SELECT '
+                'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+                module_table)
+
+        if table_exists('mass_editing'):
+            execute('DELETE FROM mass_editing WHERE model IN (SELECT '
+                'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+                module_table)
+        execute('DELETE FROM ir_trigger WHERE model IN (SELECT '
             'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
             module_table)
-        execute('DELETE FROM babi_report WHERE model IN (SELECT '
-            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+        execute('DELETE FROM ir_action_act_window WHERE res_model IN (SELECT '
+            'model FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
             module_table)
+        execute('DELETE FROM ir_action_wizard WHERE model in (SELECT model FROM '
+            'ir_model WHERE module NOT IN (SELECT name FROM %s))' % module_table)
+        execute('DELETE FROM ir_model WHERE module NOT IN (SELECT name FROM '
+            '%s)' % module_table)
+        execute('DELETE FROM ir_model_field WHERE module NOT IN (SELECT name FROM '
+            '%s)' % module_table)
+        execute('DELETE FROM ir_ui_view WHERE module NOT IN (SELECT name FROM '
+            '%s)' % module_table)
 
-    if table_exists('mass_editing'):
-        execute('DELETE FROM mass_editing WHERE model IN (SELECT '
-            'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
-            module_table)
-    execute('DELETE FROM ir_trigger WHERE model IN (SELECT '
-        'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
-        module_table)
-    execute('DELETE FROM ir_action_act_window WHERE res_model IN (SELECT '
-        'model FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
-        module_table)
-    execute('DELETE FROM ir_action_wizard WHERE model in (SELECT model FROM '
-        'ir_model WHERE module NOT IN (SELECT name FROM %s))' % module_table)
-    execute('DELETE FROM ir_model WHERE module NOT IN (SELECT name FROM '
-        '%s)' % module_table)
-    execute('DELETE FROM ir_model_field WHERE module NOT IN (SELECT name FROM '
-        '%s)' % module_table)
-    execute('DELETE FROM ir_ui_view WHERE module NOT IN (SELECT name FROM '
-        '%s)' % module_table)
+    def process_actions(self, actions):
+        if not actions:
+            return
+        for action in actions:
+            if isinstance(action, dict):
+                tables = action.get('tables', '')
+                fields = action.get('fields', '')
+                version = action.get('version', trytond_version)
+                query = action.get('query')
+                script = action.get('script')
+                where = action.get('where')
 
-def process_actions(actions):
-    if not actions:
-        return
-    for action in actions:
-        if isinstance(action, dict):
-            tables = action.get('tables', '')
-            fields = action.get('fields', '')
-            version = action.get('version', trytond_version)
-            query = action.get('query')
-            script = action.get('script')
-            where = action.get('where')
+                # Check version
+                if not (float(version) <= float(trytond_version) and float(version) > float(from_version)):
+                    continue
 
-            # Check version
-            if not (float(version) <= float(trytond_version) and float(version) > float(from_version)):
-                continue
+                # Check tables
+                found = True
+                tables = tables.split()
+                for table in tables:
+                    if not table_exists(table):
+                        logger.info("TABLE '%s' NOT FOUND" % table)
+                        found = False
+                        break
+                if not found:
+                    continue
 
-            # Check tables
-            found = True
-            tables = tables.split()
-            for table in tables:
-                if not table_exists(table):
-                    logger.info("TABLE '%s' NOT FOUND" % table)
-                    found = False
-                    break
-            if not found:
-                continue
+                # Check fields
+                found = True
+                fields = fields.split()
+                for field in fields:
+                    if not field_exists(field):
+                        logger.info("FIELD '%s' NOT FOUND" % field)
+                        found = False
+                        break
+                if not found:
+                    continue
 
-            # Check fields
-            found = True
-            fields = fields.split()
-            for field in fields:
-                if not field_exists(field):
-                    logger.info("FIELD '%s' NOT FOUND" % field)
-                    found = False
-                    break
-            if not found:
-                continue
-
-            # Check where
-            if where and not where_exists(where):
-                logger.info("WHERE '%s' NOT FOUND" % where)
-                continue
-        else:
-            query = action
-            script = None
-
-        if query:
-            logger.info(query)
-            query = query.replace('%', '%%')
-            execute(query)
-
-        if script:
-            if os.path.isfile(script):
-                # We must commit before executing the script so the script is
-                # not locked by our transaction
-                connection.commit()
-                logger.info(t.green('Executing: %s' % script))
-                run(script, database_name, config_file)
-                global cursor = connection.cursor()
+                # Check where
+                if where and not where_exists(where):
+                    logger.info("WHERE '%s' NOT FOUND" % where)
+                    continue
             else:
-                logger.warning("Not found script: %s" % script)
+                query = action
+                script = None
+
+            if query:
+                logger.info(query)
+                query = query.replace('%', '%%')
+                execute(query)
+
+            if script:
+                if os.path.isfile(script):
+                    # We must commit before executing the script so the script is
+                    # not locked by our transaction
+                    connection.commit()
+                    logger.info(t.green('Executing: %s' % script))
+                    run(script, self.database_name, self.config_file)
+                else:
+                    logger.warning("Not found script: %s" % script)
+
+    def run(self):
+
+        self.cursor = self.connection.cursor()
+
+        for step in self.steps:
+            logger.info(t.green('Executing step %s...') % step.value)
+            if step == Step.BEFORE:
+                self.process_actions(self.before)
+                self.connection.commit()
+            elif step == Step.UNINSTALL:
+                logger.info(t.green('Uninstalling modules...'))
+                self.uninstall_modules()
+                self.connection.commit()
+            elif step == Step.FIRST_UPDATE:
+                logger.info(t.green('Updating trytond...'))
+                run_trytond(config.get('to_install'))
+            elif step == Step.AFTER:
+                logger.info(t.green('Executing actions after update...'))
+                self.process_actions(config.get('after'))
+                self.connection.commit()
+            elif step == Step.SECOND_UPDATE:
+                logger.info(t.green('Updating trytond again...'))
+                run_trytond()
+
+        if not self.steps:
+            logger.error(t.red('No steps executed. Invalid from/until steps'))
+            return 1
+
+        logger.info(t.green('Finished executing steps: %s'
+                % ', '.join([x.value for x in steps_to_run])))
+
 
 parser = argparse.ArgumentParser(description='Upgrade a Tryton database to the '
     'version of the trytond library available.')
@@ -240,9 +293,25 @@ parser.add_argument('database', nargs=1, help='PostgreSQL database to upgrade')
 parser.add_argument('from_version', nargs=1, help='Tryton version of the '
     'database to be migrated')
 parser.add_argument('-c', '--config', default=None,
-        help='path to the trytond configuration file')
+    help='path to the trytond configuration file')
+
+steps = ', '.join([x.value for x in Step])
+parser.add_argument('--until', default=None, help='Run the upgrade process '
+    'only until the given step. Possible steps include: %s' % steps)
+parser.add_argument('--from', dest='from_', default=None, help='Run the '
+    'upgrade process from the given step. Possible steps include: %s' % steps)
 
 args = parser.parse_args()
+
+# Compute from steps_to_run
+from_ = args.from_
+steps_to_run = []
+for step in Step:
+    if not from_ or step.value == from_ or steps_to_run:
+        steps_to_run.append(step)
+    if args.until and step.value == args.until:
+        break
+
 
 database_name, = args.database
 from_version, = args.from_version
@@ -288,22 +357,12 @@ else:
     connection = psycopg2.connect(dbname=database_name)
 
 cursor = connection.cursor()
-
-logger.info('Executing actions before update...')
-process_actions(config.get('before'))
-
-logger.info('Uninstalling modules...')
-uninstall_modules()
-
-connection.commit()
-
-logger.info('Updating trytond...')
-run_trytond(config.get('to_install'))
-
-logger.info('Executing actions after update...')
-cursor = connection.cursor()
-process_actions(config.get('after'))
-connection.commit()
-
-logger.info('Updating trytond again...')
-run_trytond()
+upgrade = Upgrade(connection)
+upgrade.before = config.get('before', [])
+upgrade.after = config.get('after', [])
+upgrade.to_install = config.get('to_install', [])
+upgrade.to_uninstall = config.get('to_uninstall', [])
+upgrade.database_name = database_name
+upgrade.config_file = config_file
+upgrade.steps = steps_to_run
+exit(upgrade.run() or 0)
