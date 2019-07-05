@@ -72,7 +72,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
 
     actions = ActWindowDomain.search([('create_uid', '>', 0)])
     for action in actions:
-        if not action.domain and action.domain.strip() == '':
+        if not action.domain or action.domain.strip() == '':
             continue
         action.domain = PYSONEncoder().encode(eval(action.domain))
         action.save()
