@@ -611,35 +611,20 @@ after:
     version: 4.8
     query: update sale_sale set reference = customer_reference where customer_reference is not null and customer_reference != '';
 
+  - script: ./upgrades/after/upgrade_account_chart.py
 
-  # - comment: # upgrade configuration models from ir_property
-  #   version: 4.8
-  #   script: ./upgrades/after/migration_properties.py
+  - comment: # upgrade configuration models from ir_property
+    version: 4.8
+    script: ./upgrades/after/migration_properties.py
 
-  # - comment: # update taxes
-  #   version: 4.4
-  # - script: ./upgrades/after/update_taxes.py
+  - comment: # update taxes
+    version: 4.4
+    script: ./upgrades/after/update_taxes.py
 
-  # - comment: # delete ir properties
-  #   version: 4.4
-  #   query: DELETE FROM ir_model_data WHERE model = 'ir.property';
+  - script: ./upgrades/after/convert_domain_rules.py
 
-  # - comment: # delete not found modules in ir.module
-  #   version: 4.8
-    # script: ./upgrades/after/delete_not_found_modules.py
+  - script: ./upgrades/after/sync_model_data.py
 
-  # - comment: # sync model data
-    # script: ./upgrades/after/sync_model_data.py
+  - script: ./upgrades/after/create_company_user.py
 
-  # extra scripts
-  #- script: ./upgrades/after/convert_domain_rules.py
-  # - version: 4.8
-  #   tables: ir_property
-  #  script: ./upgrades/after/migration_properties.py
-  #- script: ./upgrades/after/upgrade_account_chart.py
-  #- version: 4.8
-  #  script: ./upgrades/after/update_taxes.py
-  #- script: ./upgrades/after/delete_not_found_modules.py
-  #- script: ./upgrades/after/convert_domain_rules.py
-  #- version: 5.1
-  #  script: ./upgrades/after/create_account_invoice_payment_method.py
+  - script: ./upgrades/after/create_account_invoice_payment_method.py
