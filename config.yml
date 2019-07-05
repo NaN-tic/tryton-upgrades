@@ -60,7 +60,6 @@ to_install:
   - html_report
 
 before:
-
   # - tables: ir_model_data
   #   version: 3.2
   #   query: ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;

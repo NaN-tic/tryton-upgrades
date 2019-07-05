@@ -94,7 +94,6 @@ def run_trytond(to_install=None):
     returncode = run(*to_run)
     if returncode:
         logger.error('Trytond update failed. Upgrade aborted.')
-        sys.exit(1)
     return returncode
 
 def table_exists(table):
@@ -257,12 +256,12 @@ class Upgrade:
                         logger.error(t.red('Script "%s" returned the following '
                                 'error code: %d. Upgrade aborted.') % (script,
                                 res))
-                        sys.exit(1)
+                        return 1
                 else:
                     logger.warning("Not found script: %s" % script)
                     logger.error(t.red('Script "%s" not found. Upgrade '
                             'aborted.') % script)
-                    sys.exit(1)
+                    return 1
 
     def run(self):
 
@@ -271,22 +270,25 @@ class Upgrade:
         for step in self.steps:
             logger.info(t.green('Executing step %s...') % step.value)
             if step == Step.BEFORE:
-                self.process_actions(self.before)
+                res = self.process_actions(self.before)
                 self.connection.commit()
             elif step == Step.UNINSTALL:
                 logger.info(t.green('Uninstalling modules...'))
-                self.uninstall_modules()
+                res = self.uninstall_modules()
                 self.connection.commit()
             elif step == Step.FIRST_UPDATE:
                 logger.info(t.green('Updating trytond...'))
-                run_trytond(config.get('to_install'))
+                res = run_trytond(config.get('to_install'))
             elif step == Step.AFTER:
                 logger.info(t.green('Executing actions after update...'))
-                self.process_actions(config.get('after'))
+                res = self.process_actions(config.get('after'))
                 self.connection.commit()
             elif step == Step.SECOND_UPDATE:
                 logger.info(t.green('Updating trytond again...'))
-                run_trytond()
+                res = run_trytond()
+
+            if res:
+                return res
 
         if not self.steps:
             logger.error(t.red('No steps executed. Invalid from/until steps'))
