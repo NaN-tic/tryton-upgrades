@@ -273,18 +273,14 @@ class Upgrade:
                 res = self.process_actions(self.before)
                 self.connection.commit()
             elif step == Step.UNINSTALL:
-                logger.info(t.green('Uninstalling modules...'))
                 res = self.uninstall_modules()
                 self.connection.commit()
             elif step == Step.FIRST_UPDATE:
-                logger.info(t.green('Updating trytond...'))
                 res = run_trytond(config.get('to_install'))
             elif step == Step.AFTER:
-                logger.info(t.green('Executing actions after update...'))
                 res = self.process_actions(config.get('after'))
                 self.connection.commit()
             elif step == Step.SECOND_UPDATE:
-                logger.info(t.green('Updating trytond again...'))
                 res = run_trytond()
 
             if res:
