@@ -219,13 +219,18 @@ def process_actions(actions):
             script = None
 
         if query:
-            query = query.replace('%', '%%')
             logger.info(query)
+            query = query.replace('%', '%%')
             execute(query)
 
         if script:
             if os.path.isfile(script):
-                run(script, database_name, args.config)
+                # We must commit before executing the script so the script is
+                # not locked by our transaction
+                connection.commit()
+                logger.info(t.green('Executing: %s' % script))
+                run(script, database_name, config_file)
+                global cursor = connection.cursor()
             else:
                 logger.warning("Not found script: %s" % script)
 
@@ -296,6 +301,7 @@ logger.info('Updating trytond...')
 run_trytond(config.get('to_install'))
 
 logger.info('Executing actions after update...')
+cursor = connection.cursor()
 process_actions(config.get('after'))
 connection.commit()
 
