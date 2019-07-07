@@ -32,8 +32,11 @@ with Transaction().start(dbname, 1, context=context):
     Company = Pool().get('company.company')
     Journal = Pool().get('account.journal')
     PaymentMethod = Pool().get('account.invoice.payment.method')
+    User = pool.get('res.user')
 
     cursor = Transaction().connection.cursor()
+
+    user, = User.search([('login', '=', 'admin')], limit=1)
 
     # credit_account_field, = ModelField.search([
     #     ('name', '=', 'credit_account'),
@@ -60,6 +63,9 @@ with Transaction().start(dbname, 1, context=context):
 
     for company in Company.search([]):
         logger.info("company %s" % company.id)
+        user.main_company=company.id
+        user.company = company.id
+        user.save()
         with Transaction().set_context(company=company.id):
             account_570 = Account.search([
                 ('template', '=', pgc_570_child.db_id),
