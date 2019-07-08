@@ -611,6 +611,10 @@ after:
     version: 4.8
     query: update sale_sale set reference = customer_reference where customer_reference is not null and customer_reference != '';
 
+  - comment: # Remove account_bank_reconciliation that the bank_reconcile is False in account
+    version: 4.8
+    tables: "account_bank_reconciliation"
+    query: delete from account_bank_reconciliation where id in (select abr.id from account_bank_reconciliation as abr left join account_move_line as aml on abr.move_line = aml.id left join account_account as aa on aa.id = aml.account where aa.bank_reconcile = False);
 
   # - comment: # upgrade configuration models from ir_property
   #   version: 4.8
