@@ -69,7 +69,7 @@ before:
   - UPDATE ir_translation SET module = 'aeat_349' WHERE module = 'aeat_349_es';
   - DELETE from ir_ui_view where module = '';
   - DELETE from ir_ui_view where data = '' and module = 'account_payment_type';
-  - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL AND module <> 'farm';
+  - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL;
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
@@ -628,6 +628,15 @@ after:
 
   - script: ./upgrades/after/sync_model_data.py
 
-  - script: ./upgrades/after/create_company_user.py
-
-  - script: ./upgrades/after/create_account_invoice_payment_method.py
+  # extra scripts
+  #- script: ./upgrades/after/convert_domain_rules.py
+  # - version: 4.8
+  #   tables: ir_property
+  #  script: ./upgrades/after/migration_properties.py
+  #- script: ./upgrades/after/upgrade_account_chart.py
+  #- version: 4.8
+  #  script: ./upgrades/after/update_taxes.py
+  #- script: ./upgrades/after/delete_not_found_modules.py
+  #- script: ./upgrades/after/convert_domain_rules.py
+  #- version: 5.1
+  #  script: ./upgrades/after/create_account_invoice_payment_method.py
