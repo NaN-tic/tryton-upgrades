@@ -27,7 +27,8 @@ logger.addHandler(ch)
 with Transaction().start(dbname, 0, context=context):
     Data = pool.get('ir.model.data')
 
-    datas = Data.search([('out_of_sync', '=', True)])
+    #datas = Data.search([('out_of_sync', '=', True)])
+    datas = Data.search([])
     Data.sync(datas)
 
     Transaction().commit()
