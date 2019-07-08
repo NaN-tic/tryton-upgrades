@@ -40,33 +40,16 @@ with Transaction().start(dbname, 1, context=context) as transaction:
 
     cursor = Transaction().connection.cursor()
 
-    taxes_data = dict((d.fs_id, d) for d in Data.search([
-        ('module', '=', 'account_es'),
-        ('model', '=', 'account.tax.template'),
-        ]))
+    taxes_data = dict((x.fs_id, x.db_id) for x in Data.search([
+                ('module', '=', 'account_es'),
+                ('model', '=', 'account.tax.template'),
+                ('fs_id', 'not in', tax_ids),
+                ]))
 
-    tables = [
-        ('account_invoice_tax', 'tax'),
-        ('account_tax_line', 'tax'),
-        ('account_invoice_line_account_tax', 'tax'),
-        ('product_category_customer_taxes_rel', 'tax'),
-        ]
-    sales = Module.search([
-        ('name', '=', 'sale'),
-        ('state', '=', 'activated')], limit=1)
-    if sales:
-        tables.append(('sale_line_account_tax', 'tax'))
-    purchases = Module.search([
-        ('name', '=', 'purchase'),
-        ('state', '=', 'activated')], limit=1)
-    if purchases:
-        tables.append(('purchase_line_account_tax', 'tax'))
-    account_product_accounting = Module.search([
-        ('name', '=', 'account_product_accounting'),
-        ('state', '=', 'activated')], limit=1)
-    if account_product_accounting:
-        tables.append(('product_customer_taxes_rel', 'tax'))
-        tables.append(('product_supplier_taxes_rel', 'tax'))
+    print('Not found: %s' % taxes_data.keys())
+
+    import sys
+    sys.exit(1)
 
     tax_to_check_ids = []
     template_to_remove = []
