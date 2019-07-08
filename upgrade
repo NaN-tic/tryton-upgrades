@@ -249,9 +249,11 @@ class Upgrade:
                 if os.path.isfile(script):
                     # We must commit before executing the script so the script
                     # is not locked by our transaction
-                    connection.commit()
                     logger.info(t.green('Executing: %s' % script))
+                    self.connection.commit()
                     res = run(script, self.database_name, self.config_file)
+                    self.cursor = self.connection.cursor()
+
                     if res:
                         logger.error(t.red('Script "%s" returned the following '
                                 'error code: %d. Upgrade aborted.') % (script,
@@ -265,9 +267,9 @@ class Upgrade:
 
     def run(self):
 
-        self.cursor = self.connection.cursor()
 
         for step in self.steps:
+            self.cursor = self.connection.cursor()
             logger.info(t.green('Executing step %s...') % step.value)
             if step == Step.BEFORE:
                 res = self.process_actions(self.before)
