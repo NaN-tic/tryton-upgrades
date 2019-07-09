@@ -253,6 +253,11 @@ before:
     tables: babi_report
     query: "UPDATE ir_action_act_window SET domain = '[[\"parent\", \"=\", null]]', context = '{\"babi_tree_view\": true}' WHERE context like '%babi%'"
 
+  - comment: babi introduces the company field with NOT NULL to babi_report_execution so we drop all data to ensure the constraint can be added
+    version: 4.2
+    tables: babi_report_execution
+    query: DELETE FROM babi_report_execution;
+
   - comment: # set domain to null in account bank statement
     version: 4.0
     query: UPDATE ir_action_act_window SET domain = null where id in (SELECT db_id FROM ir_model_data where fs_id = 'act_account_bank_statement');
