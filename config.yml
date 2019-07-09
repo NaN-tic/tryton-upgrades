@@ -564,9 +564,9 @@ after:
     tables: electronic_mail_template
     query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
 
-  # - comment: # After property migration old model data should be cleared:
-  #   version: 4.4
-  #   query: DELETE FROM ir_model_data WHERE model = 'ir.property';
+  - comment: # After property migration old model data should be cleared:
+    version: 4.4
+    query: DELETE FROM ir_model_data WHERE model = 'ir.property';
 
   - comment: # Relation between purchase and invoice_lines must be deleted
     version: 4.4
