@@ -500,6 +500,7 @@ before:
     version: 3.4
     tables: aeat_303_report
     query: alter table aeat_303_report alter COLUMN previous_declaration_receipt type varchar(13) USING (previous_declaration_receipt::varchar);
+  - script: ./upgrades/before/remove_deprecated_taxes.py
 
 after:
 
