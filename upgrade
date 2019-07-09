@@ -74,7 +74,7 @@ def run(*args):
     process.wait()
 
     if summary:
-        logger.error('WARNING AND ERROR SUMMARY:')
+        logger.error('WARNING AND ERROR SUMMARY (%d):' % len(summary))
         logger.error('\n'.join(sorted(list(summary))))
     return process.returncode
 
