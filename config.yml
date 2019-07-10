@@ -48,6 +48,7 @@ to_uninstall:
   - stock_delivery_note_valued_jreport
   - stock_picking_box
   - stock_lot_expiry
+  - stock_reservation
   - webdav
 
 to_install:
@@ -490,9 +491,6 @@ before:
         UPDATE ir_model_data set values = REPLACE(fs_values, '["style",""],', '') where fs_id like 'report_%' and model = 'ir.action.report';
         UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
         UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
-  - comment: # remove deprecated module
-    version: 4.8
-    query: DELETE FROM ir_model_data where module = 'stock_reservation';
   - comment: # Change cast of lead_time on stock_location_lead_time
     version: 3.4
     tables: stock_location_lead_time
