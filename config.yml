@@ -500,9 +500,9 @@ before:
     fields: production_location_lead_time.lead_time
     query: ALTER TABLE production_lead_time DROP COLUMN lead_time;
   - comment: # Change cast of previous_declaration_receipt on aeat_303_report
-    version: 3.4
+    version: 5.2
     tables: aeat_303_report
-    query: alter table aeat_303_report alter COLUMN previous_declaration_receipt type varchar(13) USING (previous_declaration_receipt::varchar);
+    query: ALTER TABLE aeat_303_report ALTER COLUMN previous_declaration_receipt TYPE VARCHAR(13) USING (previous_declaration_receipt::VARCHAR);
   - script: ./upgrades/before/remove_deprecated_taxes.py
 
 after:
