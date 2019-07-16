@@ -491,14 +491,14 @@ before:
         UPDATE ir_model_data set values = REPLACE(fs_values, '["style",""],', '') where fs_id like 'report_%' and model = 'ir.action.report';
         UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
         UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
-  - comment: # Change cast of lead_time on stock_location_lead_time
-    version: 3.4
-    tables: stock_location_lead_time
-    query: alter table stock_location_lead_time alter COLUMN lead_time type integer USING (lead_time::integer);
-  - comment: # Change cast of lead_time on stock_location_lead_time
-    version: 3.4
-    tables: production_lead_time
-    query: alter table production_lead_time alter COLUMN lead_time type integer USING (lead_time::integer);
+  - comment: Remove lead_time field from stock_location_lead_time. The type was float in our patch in version 3.4 but now it's better to remove and let trytond recreate it as few people are using it.
+    version: 5.2
+    fields: stock_location_lead_time.lead_time
+    query: ALTER TABLE stock_location_lead_time DROP COLUMN lead_time;
+  - comment: Remove lead_time field from production_lead_time. The type was float in our patch in version 3.4 but now it's better to remove and let trytond recreate it as few people are using it.
+    version: 5.2
+    fields: production_location_lead_time.lead_time
+    query: ALTER TABLE production_lead_time DROP COLUMN lead_time;
   - comment: # Change cast of previous_declaration_receipt on aeat_303_report
     version: 3.4
     tables: aeat_303_report
