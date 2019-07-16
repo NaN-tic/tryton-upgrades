@@ -631,3 +631,6 @@ after:
   - script: ./upgrades/after/convert_domain_rules.py
 
   - script: ./upgrades/after/sync_model_data.py
+
+ignore:
+  - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !

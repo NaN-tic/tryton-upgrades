@@ -43,27 +43,25 @@ def get_url():
 
 def run(*args):
     logger.info('RUNING: %s' % ' '.join(args))
-    summary = set()
     process = subprocess.Popen(args, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, bufsize=1, shell=False)
 
     out, err = process.communicate()
 
+    summary = set()
     in_traceback = False
     for line in chain(out.decode("utf-8").split('\n'), err.decode("utf-8").split('\n')):
         line = line.strip()
         if 'ERROR' in line:
             s = line[line.index('ERROR'):]
-            summary.add(t.yellow(s))
+            summary.add(s)
             line = t.red(line)
         elif 'WARNING' in line:
             s = line[line.index('WARNING'):]
-            summary.add(t.yellow(s))
+            summary.add(s)
             line = t.yellow(line)
         elif 'Traceback' in line or in_traceback:
-            #s = line[line.index('Traceback'):]
             in_traceback = True
-            #summary.add(t.red(s))
             line = t.red(line)
             if line.startswith('Exception'):
                 in_traceback = False
@@ -74,8 +72,18 @@ def run(*args):
     process.wait()
 
     if summary:
-        logger.error('WARNING AND ERROR SUMMARY (%d):' % len(summary))
-        logger.error('\n'.join(sorted(list(summary))))
+        summary = sorted(list(summary))
+        total = len(summary)
+        if cmd.show_ignored:
+            ignored = 0
+        else:
+            ignores = config['ignore']
+            summary = [x for x in summary if x.strip() not in ignores]
+            ignored = total - len(summary)
+        logger.error('WARNING AND ERROR SUMMARY (%d + %d ignored):' % (
+                len(summary), ignored))
+        logger.error(t.yellow('\n'.join(summary)))
+
     return process.returncode
 
 def execute(query, *args, **kwargs):
@@ -303,6 +311,11 @@ parser.add_argument('from_version', nargs=1, help='Tryton version of the '
     'database to be migrated')
 parser.add_argument('-c', '--config', default=None,
     help='path to the trytond configuration file')
+parser.add_argument('--show-ignored', dest='show_ignored', default=False,
+    help='Show warnings that would otherwise be ignored')
+parser.add_argument('--override', dest='override', default='upgrade.yml',
+    help='Search on the given filename for values to override default '
+    'configuration. Default: upgrade.yml')
 
 steps = ', '.join([x.value for x in Step])
 parser.add_argument('--until', default=None, help='Run the upgrade process '
@@ -310,21 +323,21 @@ parser.add_argument('--until', default=None, help='Run the upgrade process '
 parser.add_argument('--from', dest='from_', default=None, help='Run the '
     'upgrade process from the given step. Possible steps include: %s' % steps)
 
-args = parser.parse_args()
+cmd = parser.parse_args()
 
 # Compute from steps_to_run
-from_ = args.from_
+from_ = cmd.from_
 steps_to_run = []
 for step in Step:
     if not from_ or step.value == from_ or steps_to_run:
         steps_to_run.append(step)
-    if args.until and step.value == args.until:
+    if cmd.until and step.value == cmd.until:
         break
 
 
-database_name, = args.database
-from_version, = args.from_version
-if not args.config:
+database_name, = cmd.database
+from_version, = cmd.from_version
+if not cmd.config:
     instance = os.path.basename(os.path.realpath(os.path.join(
                 os.path.dirname(os.path.realpath(__file__)), '..')))
     paths = (
@@ -342,22 +355,29 @@ if not args.config:
         sys.exit(1)
     logger.info("Configuration file: %s" % config_file)
 else:
-    config_file = args.config
+    config_file = cmd.config
     if not os.path.isfile(config_file):
-        logger.info('Not found file %s' % config_file)
+        logger.info('File "%s" not found' % config_file)
         sys.exit(1)
+    logger.info('Loading configuration from "%s"' % config_file)
 
 url = get_url()
 
 config = yaml.load(open('upgrades/config.yml', 'r').read())
 config.setdefault('to_uninstall', [])
 config.setdefault('to_install', [])
-if os.path.exists('upgrade.yml'):
-    override = yaml.load(open('upgrade.yml', 'r').read())
+config.setdefault('ignore', [])
+if os.path.exists(cmd.override):
+    logger.info('Overriding configuration using "%s"' % cmd.override)
+    override = yaml.load(open(cmd.override, 'r').read())
+    logger.info
     config['to_install'] += override.get('to_install', [])
     config['to_uninstall'] += override.get('to_uninstall', [])
     config['before'] += override.get('before', [])
     config['after'] += override.get('after', [])
+    config['ignore'] += override.get('ignore', [])
+else:
+    logger.info('Overriding file "%s" not found.' % cmd.override)
 
 if url.username:
     connection = psycopg2.connect(dbname=database_name, host=url.hostname,
