@@ -497,7 +497,7 @@ before:
     query: ALTER TABLE stock_location_lead_time DROP COLUMN lead_time;
   - comment: Remove lead_time field from production_lead_time. The type was float in our patch in version 3.4 but now it's better to remove and let trytond recreate it as few people are using it.
     version: 5.2
-    fields: production_location_lead_time.lead_time
+    fields: production_lead_time.lead_time
     query: ALTER TABLE production_lead_time DROP COLUMN lead_time;
   - script: ./upgrades/before/remove_deprecated_taxes.py
 
