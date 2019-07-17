@@ -449,7 +449,7 @@ before:
   - comment: # alter table aeat_303_report column previous_declaration_receipt
     version: 4.2
     tables: aeat_303_report
-    query: ALTER table aeat_303_report alter column previous_declaration_receipt TYPE varchar(13);
+    query: ALTER TABLE aeat_303_report ALTER COLUMN previous_declaration_receipt TYPE VARCHAR(13);
 
   - comment: # remove deprecated journal type ir.model.data
     version: 5.0
@@ -499,10 +499,6 @@ before:
     version: 5.2
     fields: production_location_lead_time.lead_time
     query: ALTER TABLE production_lead_time DROP COLUMN lead_time;
-  - comment: # Change cast of previous_declaration_receipt on aeat_303_report
-    version: 5.2
-    tables: aeat_303_report
-    query: ALTER TABLE aeat_303_report ALTER COLUMN previous_declaration_receipt TYPE VARCHAR(13) USING (previous_declaration_receipt::VARCHAR);
   - script: ./upgrades/before/remove_deprecated_taxes.py
 
 after:
