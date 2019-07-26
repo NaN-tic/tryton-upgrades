@@ -3,6 +3,8 @@
 FROM_DATABASE=$1
 TO_DATABASE=$2
 FROM_VERSION=$3
+# Pick any arguments after the required ones to pass them to the upgrade script
+OTHER=${*:4}
 
 if [[ -z "$FROM_DATABASE" || -z "$TO_DATABASE" || -z "$FROM_VERSION" ]]; then
     echo "Missing argument."
@@ -14,4 +16,4 @@ fi
 dropdb $TO_DATABASE
 invoke database.copy $FROM_DATABASE $TO_DATABASE
 export PYTHONPATH=trytond
-./upgrades/upgrade $TO_DATABASE $FROM_VERSION
+./upgrades/upgrade $TO_DATABASE $FROM_VERSION $OTHER

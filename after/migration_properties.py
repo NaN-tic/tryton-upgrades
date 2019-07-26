@@ -82,6 +82,12 @@ with Transaction().start(dbname, 0, context=context):
                     continue
                 a = Account(value)
                 print("Account:", field, value, a.code, a.type.receivable, a.type.payable)
+                if 'receivable' in field and not a.type.receivable:
+                    a.type.receivable = True
+                    a.type.save()
+                if 'payable' in field and not a.type.payable:
+                    a.type.payable = True
+                    a.type.save()
                 setattr(accountConfig, mapping[field], value)
 
             asset_sequence = Sequence.search([

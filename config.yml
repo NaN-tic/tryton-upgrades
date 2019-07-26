@@ -48,6 +48,7 @@ to_uninstall:
   - stock_delivery_note_valued_jreport
   - stock_picking_box
   - stock_lot_expiry
+  - stock_reservation
   - webdav
 
 to_install:
@@ -60,18 +61,16 @@ to_install:
   - html_report
 
 before:
-
   # - tables: ir_model_data
   #   version: 3.2
   #   query: ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;
-
   - UPDATE ir_model_data SET module = 'aeat_303' WHERE module = 'aeat_303_es';
   - UPDATE ir_model_data SET module = 'aeat_349' WHERE module = 'aeat_349_es';
   - UPDATE ir_translation SET module = 'aeat_303' WHERE module = 'aeat_303_es';
   - UPDATE ir_translation SET module = 'aeat_349' WHERE module = 'aeat_349_es';
   - DELETE from ir_ui_view where module = '';
   - DELETE from ir_ui_view where data = '' and module = 'account_payment_type';
-  - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL;
+  - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL AND module <> 'farm';
   - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
   - DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
@@ -254,6 +253,11 @@ before:
     version: 4.0
     tables: babi_report
     query: "UPDATE ir_action_act_window SET domain = '[[\"parent\", \"=\", null]]', context = '{\"babi_tree_view\": true}' WHERE context like '%babi%'"
+
+  - comment: babi introduces the company field with NOT NULL to babi_report_execution so we drop all data to ensure the constraint can be added
+    version: 4.2
+    tables: babi_report_execution
+    query: DELETE FROM babi_report_execution;
 
   - comment: # set domain to null in account bank statement
     version: 4.0
@@ -445,7 +449,7 @@ before:
   - comment: # alter table aeat_303_report column previous_declaration_receipt
     version: 4.2
     tables: aeat_303_report
-    query: ALTER table aeat_303_report alter column previous_declaration_receipt TYPE varchar(13);
+    query: ALTER TABLE aeat_303_report ALTER COLUMN previous_declaration_receipt TYPE VARCHAR(13);
 
   - comment: # remove deprecated journal type ir.model.data
     version: 5.0
@@ -473,11 +477,11 @@ before:
     query: ALTER TABLE product_template RENAME column account_category TO accounts_category;
 
   - comment: # Change cast of month on account_invoice_payment_term_line
-    version: 4.8
-    query: alter table account_invoice_payment_term_line alter COLUMN month type integer using month::int
+    version: 4.0
+    query: ALTER TABLE account_invoice_payment_term_line ALTER COLUMN month TYPE INTEGER USING month::INT
   - comment: # Change cast of weekday on account_invoice_payment_term_line
-    version: 4.8
-    query: alter table account_invoice_payment_term_line alter COLUMN weekday type integer using weekday::int
+    version: 4.0
+    query: ALTER TABLE account_invoice_payment_term_line ALTER COLUMN weekday TYPE INTEGER USING weekday::INT
   - comment: # Set Second Currency of account_Account null if it's equal of company currency
     version: 4.8
     query: update account_account set second_currency = null where second_currency=(select currency from company_company where id=company)
@@ -487,21 +491,15 @@ before:
         UPDATE ir_model_data set values = REPLACE(fs_values, '["style",""],', '') where fs_id like 'report_%' and model = 'ir.action.report';
         UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
         UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["style","company/header_A4.odt"],', '') where fs_id like 'report_%' and model = 'ir.action.report';
-  - comment: # remove deprecated module
-    version: 4.8
-    query: DELETE FROM ir_model_data where module = 'stock_reservation';
-  - comment: # Change cast of lead_time on stock_location_lead_time
-    version: 3.4
-    tables: stock_location_lead_time
-    query: alter table stock_location_lead_time alter COLUMN lead_time type integer USING (lead_time::integer);
-  - comment: # Change cast of lead_time on stock_location_lead_time
-    version: 3.4
-    tables: production_lead_time
-    query: alter table production_lead_time alter COLUMN lead_time type integer USING (lead_time::integer);
-  - comment: # Change cast of previous_declaration_receipt on aeat_303_report
-    version: 3.4
-    tables: aeat_303_report
-    query: alter table aeat_303_report alter COLUMN previous_declaration_receipt type varchar(13) USING (previous_declaration_receipt::varchar);
+  - comment: Remove lead_time field from stock_location_lead_time. The type was float in our patch in version 3.4 but now it's better to remove and let trytond recreate it as few people are using it.
+    version: 5.2
+    fields: stock_location_lead_time.lead_time
+    query: ALTER TABLE stock_location_lead_time DROP COLUMN lead_time;
+  - comment: Remove lead_time field from production_lead_time. The type was float in our patch in version 3.4 but now it's better to remove and let trytond recreate it as few people are using it.
+    version: 5.2
+    fields: production_lead_time.lead_time
+    query: ALTER TABLE production_lead_time DROP COLUMN lead_time;
+  - script: ./upgrades/before/remove_deprecated_taxes.py
 
 after:
 
@@ -560,9 +558,9 @@ after:
     tables: electronic_mail_template
     query: update ir_translation set value = regexp_replace(value, 'record.code', 'record.number', 'g') where res_id in (select id from electronic_mail_template where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'))) and name like 'electronic.mail.template,%';
 
-  # - comment: # After property migration old model data should be cleared:
-  #   version: 4.4
-  #   query: DELETE FROM ir_model_data WHERE model = 'ir.property';
+  - comment: # After property migration old model data should be cleared:
+    version: 4.4
+    query: DELETE FROM ir_model_data WHERE model = 'ir.property';
 
   - comment: # Relation between purchase and invoice_lines must be deleted
     version: 4.4
@@ -623,34 +621,26 @@ after:
         update account_tax set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
         update account_tax set end_date = current_date, template_override = True where active = False and end_date is null;
 
-  # - comment: # upgrade configuration models from ir_property
-  #   version: 4.8
-  #   script: ./upgrades/after/migration_properties.py
+  - comment: # Set end_date inactive account taxes and accounts
+    version: 5.0
+    query: update account_account set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
+        update account_account set end_date = current_date where active = False and end_date is null;
+        update account_tax set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
+        update account_tax set end_date = current_date, template_override = True where active = False and end_date is null;
 
-  # - comment: # update taxes
-  #   version: 4.4
-  # - script: ./upgrades/after/update_taxes.py
+  - script: ./upgrades/after/upgrade_account_chart.py
 
-  # - comment: # delete ir properties
-  #   version: 4.4
-  #   query: DELETE FROM ir_model_data WHERE model = 'ir.property';
+  - comment: # upgrade configuration models from ir_property
+    version: 4.8
+    script: ./upgrades/after/migration_properties.py
 
-  # - comment: # delete not found modules in ir.module
-  #   version: 4.8
-    # script: ./upgrades/after/delete_not_found_modules.py
+  - comment: # update taxes
+    version: 4.4
+    script: ./upgrades/after/update_taxes.py
 
-  # - comment: # sync model data
-    # script: ./upgrades/after/sync_model_data.py
+  - script: ./upgrades/after/convert_domain_rules.py
 
-  # extra scripts
-  #- script: ./upgrades/after/convert_domain_rules.py
-  # - version: 4.8
-  #   tables: ir_property
-  #  script: ./upgrades/after/migration_properties.py
-  #- script: ./upgrades/after/upgrade_account_chart.py
-  #- version: 4.8
-  #  script: ./upgrades/after/update_taxes.py
-  #- script: ./upgrades/after/delete_not_found_modules.py
-  #- script: ./upgrades/after/convert_domain_rules.py
-  #- version: 5.1
-  #  script: ./upgrades/after/create_account_invoice_payment_method.py
+  - script: ./upgrades/after/sync_model_data.py
+
+ignore:
+  - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
