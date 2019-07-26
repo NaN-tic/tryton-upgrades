@@ -614,6 +614,13 @@ after:
     tables: "account_bank_reconciliation"
     query: delete from account_bank_reconciliation where id in (select abr.id from account_bank_reconciliation as abr left join account_move_line as aml on abr.move_line = aml.id left join account_account as aa on aa.id = aml.account where aa.bank_reconcile = False);
 
+  - comment: # Set end_date inactive account taxes and accounts
+    version: 5.0
+    query: update account_account set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
+        update account_account set end_date = current_date where active = False and end_date is null;
+        update account_tax set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
+        update account_tax set end_date = current_date, template_override = True where active = False and end_date is null;
+
   - script: ./upgrades/after/upgrade_account_chart.py
 
   - comment: # upgrade configuration models from ir_property
