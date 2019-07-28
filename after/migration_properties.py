@@ -67,7 +67,13 @@ with Transaction().start(dbname, 0, context=context):
         'account_revenue': 'default_product_account_revenue',
     }
 
-    for company in Company.search([]):
+    domain=[]
+    child_companies = Company.search([('parent', '!=', None)])
+    if child_companies:
+        domain=[('parent', '!=', None)]
+
+
+    for company in Company.search(domain):
         user.main_company=company.id
         user.company = company.id
         user.save()
