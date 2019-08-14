@@ -39,7 +39,10 @@ def get_tax(xml_id, company):
         tax = AccountTax.search([
             ('template', '=', template.id),
             ('company', '=', company)], limit=1)
-        tax, = tax
+        if tax:
+            tax, = tax
+        else:
+            None
     return (template, tax)
 
 logger = logging.getLogger(__name__)
@@ -92,6 +95,8 @@ with Transaction().start(dbname, 1, context=context) as transaction:
 
                 new_template, new_tax = get_tax(xml_id, company.id)
 
+                if not new_tax:
+                    continue
                 if not new_template:
                     continue
 
