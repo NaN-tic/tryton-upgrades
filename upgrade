@@ -286,9 +286,9 @@ class Upgrade:
                 res = self.uninstall_modules()
                 self.connection.commit()
             elif step == Step.FIRST_UPDATE:
-                res = run_trytond(config.get('to_install'))
+                res = run_trytond(self.to_install)
             elif step == Step.AFTER:
-                res = self.process_actions(config.get('after'))
+                res = self.process_actions(self.after)
                 self.connection.commit()
             elif step == Step.SECOND_UPDATE:
                 res = run_trytond()
