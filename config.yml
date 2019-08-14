@@ -478,9 +478,11 @@ before:
 
   - comment: # Change cast of month on account_invoice_payment_term_line
     version: 4.0
+    fields: account_invoice_payment_term_line.month
     query: ALTER TABLE account_invoice_payment_term_line ALTER COLUMN month TYPE INTEGER USING month::INT
   - comment: # Change cast of weekday on account_invoice_payment_term_line
     version: 4.0
+    fields: account_invoice_payment_term_line.weekday
     query: ALTER TABLE account_invoice_payment_term_line ALTER COLUMN weekday TYPE INTEGER USING weekday::INT
   - comment: # Set Second Currency of account_Account null if it's equal of company currency
     version: 4.8
