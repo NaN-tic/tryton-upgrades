@@ -35,7 +35,8 @@ def get_tax(xml_id, company):
         return (None, None)
     data, = data
     template = AccountTaxTemplate(data.db_id)
-    with Transaction().set_context(): #active_test=False):
+
+    with Transaction().set_user(0): 
         tax = AccountTax.search([
             ('template', '=', template.id),
             ('company', '=', company)], limit=1)
@@ -64,7 +65,7 @@ with Transaction().start(dbname, 1, context=context) as transaction:
     child_companies = Company.search([('parent', '!=', None)])
     if child_companies:
         domain.append(('parent', '!=', None))
-
+    domain = [('id', '=', 3)]
     for company in Company.search(domain):
         logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):
@@ -88,13 +89,14 @@ with Transaction().start(dbname, 1, context=context) as transaction:
             for x in cursor.fetchall():
                 tax_id, name, parent, i347, fs_id, template_id, parent_template, xml_id = x
                 # print(name, xml_id, parent_template, template_id, fs_id)
-                # import pdb; pdb.set_trace()
+
 
                 if '_' == xml_id[-1]:
                     xml_id = xml_id[:-1]
 
                 new_template, new_tax = get_tax(xml_id, company.id)
 
+                # print("new_template", new_template, new_template and new_template.name,  "new_tax", new_tax, new_tax and new_tax.name)
                 if not new_tax:
                     continue
                 if not new_template:
