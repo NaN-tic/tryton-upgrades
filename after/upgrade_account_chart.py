@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import sys
+import os
 
 dbname = sys.argv[1]
 config_file = sys.argv[2]
-digits = sys.argv[3] if len(sys.argv) == 4 else 7
-domain = sys.argv[4] if len(sys.argv) == 5 else None
+digits = int(os.environ['upgrade_account_chart_digits'])
+domain = os.environ.get('upgrade_account_chart_domain')
 if domain:
     domain = eval(domain)
 

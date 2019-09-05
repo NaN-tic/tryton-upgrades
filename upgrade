@@ -367,6 +367,7 @@ config = yaml.load(open('upgrades/config.yml', 'r').read())
 config.setdefault('to_uninstall', [])
 config.setdefault('to_install', [])
 config.setdefault('ignore', [])
+config.setdefault('vars', {})
 if os.path.exists(cmd.override):
     logger.info('Overriding configuration using "%s"' % cmd.override)
     override = yaml.load(open(cmd.override, 'r').read())
@@ -376,6 +377,7 @@ if os.path.exists(cmd.override):
     config['before'] += override.get('before', [])
     config['after'] += override.get('after', [])
     config['ignore'] += override.get('ignore', [])
+    config['vars'].update(override.get('vars', {}))
 else:
     logger.info('Overriding file "%s" not found.' % cmd.override)
 
@@ -384,6 +386,12 @@ if url.username:
         port=url.port, user=url.username, password=url.password)
 else:
     connection = psycopg2.connect(dbname=database_name)
+
+
+# Ensure variable values are of type str
+config['vars'] = {k: str(v) for k, v in config['vars'].items()}
+# Set environment variables
+os.environ.update(config['vars'])
 
 start = time.time()
 cursor = connection.cursor()
