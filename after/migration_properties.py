@@ -86,7 +86,13 @@ with Transaction().start(dbname, 0, context=context):
 
                 if not value:
                     continue
-                a = Account(value)
+
+                # Given property's weak consistency, the account set as default
+                # may no longer exist
+                accounts = Account.search([('id', '=', value)], limit=1)
+                if not accounts:
+                    continue
+                a, = accounts
                 print("Account:", field, value, a.code, a.type.receivable, a.type.payable)
                 if 'receivable' in field and not a.type.receivable:
                     a.type.receivable = True
