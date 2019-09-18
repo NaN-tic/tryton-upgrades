@@ -630,6 +630,10 @@ after:
         update account_tax set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
         update account_tax set end_date = current_date, template_override = True where active = False and end_date is null;
 
+  - comment: #disable old taxes not contempled.
+    version: 5.0
+    query: update account_tax set active=false, end_date=now()::date where name like '%IRPF%+%IVA%' and active = True
+
   - script: ./upgrades/after/upgrade_account_chart.py
 
   - comment: # upgrade configuration models from ir_property
