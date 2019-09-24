@@ -90,7 +90,7 @@ with Transaction().start(dbname, 1, context=context):
                 if not (credit_account and debit_account):
                     continue
                 payment_method = PaymentMethod()
-                payment_method.name = journal.name
+                payment_method.name = journal.code + "-" + (company.party.name)
                 payment_method.company = company
                 payment_method.journal = journal
                 payment_method.credit_account = credit_account
