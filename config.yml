@@ -207,6 +207,7 @@ before:
   - comment: -> 4.0
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
   - tables: stock_location
+    version: -> 4.0
     query: INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
   - comment: # Rename table name - 3.6 migration
     tables: account_financial_statement
@@ -245,8 +246,10 @@ before:
       WHERE amount_second_currency IS NOT NULL
           AND SIGN(amount_second_currency) != SIGN(debit - credit)
   - tables: shipment_work
+    version: 4.0
     query: ALTER TABLE shipment_work RENAME COLUMN project TO work_project
   - fields: sale_sale.project
+    version: 4.0
     query: ALTER TABLE sale_sale RENAME COLUMN project TO work_project
 
   - comment: # change PYSON context menu
@@ -635,6 +638,7 @@ after:
     query: update account_tax set active=false, end_date=now()::date where name like '%IRPF%+%IVA%' and active = True
 
   - script: ./upgrades/after/upgrade_account_chart.py
+    version: 4.8
 
   - comment: # upgrade configuration models from ir_property
     version: 4.8
