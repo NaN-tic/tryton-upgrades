@@ -204,10 +204,11 @@ before:
       UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["deferral",true],', '') where fs_values ilike '%["deferral",true],%' and module = 'account_es';
       UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["deferral",false],', '') where fs_values ilike '%["deferral",false],%' and module = 'account_es';
 
-  - comment: -> 4.0
+  - comment: 
+    vestion: 4.0
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
   - tables: stock_location
-    version: -> 4.0
+    version: 4.0
     query: INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
   - comment: # Rename table name - 3.6 migration
     tables: account_financial_statement
@@ -553,10 +554,10 @@ after:
     fields: product_template.category
     query: ALTER TABLE product_template DROP COLUMN category;
   - tables: country_zip
-    version: 4.0
     query: update country_zip set country = (select id from country_country where code = 'ES') where country_zip is null;
     version: 4.0
   - tables: electronic_mail_template
+    version: 4.0
     query: update electronic_mail_template set subject = regexp_replace(subject, 'record.code', 'record.number', 'g'), plain = regexp_replace(plain, 'record.code', 'record.number', 'g'), html = regexp_replace(html, 'record.code', 'record.number', 'g') where model in (select id from ir_model where model in ('account.invoice', 'sale.sale', 'purchase.purchase', 'stock.shipment.in', 'stock.shipment.out', 'stock.shipment.in'));
   - comment: # change code to number electronic mail template
     version: 4.0
@@ -649,10 +650,13 @@ after:
     script: ./upgrades/after/update_taxes.py
 
   - script: ./upgrades/after/convert_domain_rules.py
+    version: 4.8
 
   - script: ./upgrades/after/sync_model_data.py
+    version: 4.8
   - script: ./upgrades/after/upload_sii.py
   - script: ./upgrades/after/upgrade_account_invoice_discount_global.py
+    version: 4.8
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
