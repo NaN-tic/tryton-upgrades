@@ -9,7 +9,10 @@ CONFIG.update_etc(config_file)
 from trytond.transaction import Transaction
 from trytond.pool import Pool
 import logging
-from trytond.pyson import PYSONEncoder
+from trytond.pyson import PYSONEncoder, Eval
+
+# Avoid pyflakes warnings and use Eval which may be needed by 'eval()'
+Eval
 
 Pool.start()
 pool = Pool(dbname)
@@ -58,7 +61,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
         if action.domain:
             domain = action.domain.replace('null', 'None').replace(
                 'true', 'True').replace('false', 'False')
-            action.domain = PYSONEncoder().encode(eval(domain, {}))
+            action.domain = PYSONEncoder().encode(eval(domain, {'Eval': Eval}))
         if action.context:
             context_ = action.context.replace('null', 'None').replace('true',
                 'True').replace('false', 'False')

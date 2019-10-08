@@ -658,7 +658,10 @@ after:
 
   - script: ./upgrades/after/sync_model_data.py
     version: 4.8
-  - script: ./upgrades/after/upload_sii.py
+
+#  - script: ./upgrades/after/upload_sii.py
+#    tables: aeat_sii_report_lines
+
   - script: ./upgrades/after/upgrade_account_invoice_discount_global.py
     version: 4.8
 
