@@ -512,7 +512,12 @@ before:
     query: ALTER TABLE account_payment_sepa_message ALTER COLUMN message TYPE BYTEA USING message::BYTEA;
 
 after:
-
+  - comment: We need this query before 'after' scripts are executed as otherwise the ./upgrades/after/sync_model_data.py script fails
+    version: 5.2
+    query: update ir_model_data set fs_values = REPLACE(fs_values, '["update_unit_price",true]', '["update_unit_price",false]') WHERE fs_values like '%["update_unit_price",true]%';
+  - comment: We need this query before 'after' scripts are executed as otherwise the ./upgrades/after/sync_model_data.py script fails
+    query: update ir_model_data set values = REPLACE(values, '["update_unit_price",true]', '["update_unit_price",false]') WHERE values like '%["update_unit_price",true]%';
+    version: 5.2
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
   - comment: # translations fuzzy to false
     query: UPDATE ir_translation set fuzzy = false where fuzzy = true and res_id = -1;
