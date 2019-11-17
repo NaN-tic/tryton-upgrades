@@ -3,6 +3,7 @@ to_uninstall:
   - account_invoice_post_in_tree
   - account_cash_management
   - account_chart_speedup
+  - account_invoice_consecutive
   - account_invoice_type
   - account_invoice_data
   - account_invoice_post_in_tree
@@ -32,6 +33,7 @@ to_uninstall:
   - calendar_classification
   - calendar_scheduling
   - calendar_todo
+  - country_zip_es
   - dbcopy
   - guarantee
   - party_vcarddav
