@@ -512,7 +512,13 @@ before:
     query: ALTER TABLE account_payment_sepa_message ALTER COLUMN message TYPE BYTEA USING message::BYTEA;
 
 after:
+  - comment: Remove include_347 from diferent models:
+    version: 5.1
+    query: alter table party_party drop column include_347; alter table account_tax_rule drop column include_347;alter table account_tax_rule_template drop column include_347;
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
+  - comment: -> Change sign on account_tax_line
+    version: 3.8 # TODO: check i 3.8 needs.
+    query:  update account_tax_line set amount=amount*-1 where type = 'tax' and tax in (select id from account_tax where name ilike '%(2)%');
   - comment: # translations fuzzy to false
     query: UPDATE ir_translation set fuzzy = false where fuzzy = true and res_id = -1;
   - tables: aeat_303_mapping-account_tax_code
