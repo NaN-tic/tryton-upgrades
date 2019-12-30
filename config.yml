@@ -510,6 +510,12 @@ before:
     version: 5.4
     tables: account_payment_sepa_message
     query: ALTER TABLE account_payment_sepa_message ALTER COLUMN message TYPE BYTEA USING message::BYTEA;
+  - comment: # Delete unused users
+    version: 4.8
+    query: DELETE FROM ir_model_data WHERE module = 'stock_supply' AND model = 'res.user';
+        DELETE FROM ir_model_data WHERE module = 'stock_supply_production' AND model = 'res.user';
+        DELETE FROM ir_model_data WHERE module = 'res' AND model = 'res.user' AND fs_id IN ('user_trigger', 'user_cron_trigger');
+
 
 after:
   - comment: Remove include_347 from diferent models
@@ -612,13 +618,6 @@ after:
     version: 4.7
     query: DELETE from ir_model_data where model = 'account.journal.type'
 
-  - comment: # Delete unused users
-    version: 4.8
-    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger');
-        DELETE from ir_model_data where module = 'stock_supply' and model = 'res.user';
-        DELETE from ir_model_data where module = 'stock_supply_production' and model = 'res.user';
-        DELETE from ir_model_data where module = 'res' and model = 'res.user' and fs_id = 'user_trigger';
-
   - comment: # update sale customer_reference to sale reference (sale_reference)
     fields: sale_sale.customer_reference
     version: 4.8
@@ -661,21 +660,15 @@ after:
   - script: ./upgrades/after/convert_domain_rules.py
     version: 4.8
 
-  - comment: We need this query before sync_model_data.py otherwise it fails
-    version: 5.2
-    query: update ir_model_data set fs_values = REPLACE(fs_values, '["update_unit_price",true]', '["update_unit_price",false]') WHERE fs_values like '%["update_unit_price",true]%';
-  - comment: We need this query before sync_model_data.py otherwise it fails
-    version: 5.2
-    query: update ir_model_data set values = REPLACE(values, '["update_unit_price",true]', '["update_unit_price",false]') WHERE values like '%["update_unit_price",true]%';
-
-  - script: ./upgrades/after/sync_model_data.py
-    version: 4.8
-
 #  - script: ./upgrades/after/upload_sii.py
 #    tables: aeat_sii_report_lines
 
   - script: ./upgrades/after/upgrade_account_invoice_discount_global.py
     version: 4.8
+
+  - comment: # Delete unused users
+    version: 4.8
+    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger');
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
