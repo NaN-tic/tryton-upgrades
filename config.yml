@@ -76,7 +76,7 @@ before:
 
   - comment: Remove name from account journal period
     version: 4.8
-    query: ALTER TABLE account_journal_period Drop column name;
+    query: ALTER TABLE account_journal_period DROP COLUMN IF EXISTS name;
 
   - comment: drop constraint, new ones applied on module
     version: 5.1
