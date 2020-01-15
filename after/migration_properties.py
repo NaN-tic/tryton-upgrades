@@ -31,45 +31,45 @@ with Transaction().start(dbname, 0, context=context):
     user_id = user.id
 
 def get_property_value(field_name, company_id, default=True):
-        query = """
-            select
-        	   p.value
-            from ir_property_backup p,
-                ir_model_field f
-            where p.field = f.id
-              and f.name = '%s'
-        """ % (field_name)
-        if default:
-            query += ' and res is null'
-        if company_id:
-            query += " and company = %s" % company_id
-        else:
-            query += " and company is null"
-        cursor.execute(query)
-        results = cursor.fetchone()
-
-        result = results and results[0]
-        if not result:
-            return
-
-        return result.split(',')[1]
-
-# Change account_configuration
-with Transaction().start(dbname, 0, context=context):
-    Company = pool.get('company.company')
-    Model = pool.get('ir.model')
-    Field = pool.get('ir.model.field')
-    AccountConfiguration = pool.get('account.configuration')
-    Account = pool.get('account.account')
-    Sequence = pool.get('ir.sequence')
-
+    query = """
+        select
+               p.value
+        from ir_property_backup p,
+            ir_model_field f
+        where p.field = f.id
+          and f.name = '%s'
+    """ % (field_name)
+    if default:
+        query += ' and res is null'
+    if company_id:
+        query += " and company = %s" % company_id
+    else:
+        query += " and company is null"
     cursor = Transaction().connection.cursor()
+    cursor.execute(query)
+    results = cursor.fetchone()
+
+    result = results and results[0]
+    if not result:
+        return
+
+    return result.split(',')[1]
+
+def account_configuration():
+    try:
+        Company = pool.get('company.company')
+        AccountConfiguration = pool.get('account.configuration')
+        Account = pool.get('account.account')
+        Sequence = pool.get('ir.sequence')
+    except KeyError:
+        return
+
     mapping = {
         'account_receivable': 'default_account_receivable',
         'account_payable': 'default_account_payable',
         'account_expense': 'default_product_account_expense',
         'account_revenue': 'default_product_account_revenue',
-    }
+        }
 
     domain=[]
     child_companies = Company.search([('parent', '!=', None)])
@@ -118,13 +118,15 @@ with Transaction().start(dbname, 0, context=context):
             accountConfig.save()
             Transaction().commit()
 
-with Transaction().start(dbname, 0, context=context):
+def party_configuration():
+    try:
+        Company = pool.get('company.company')
+        PartyConfiguration = pool.get('party.configuration')
+    except KeyError:
+        return
     mapping = {
         'party_lang': 'party_lang',
-    }
-
-    PartyConfiguration = pool.get('party.configuration')
-    cursor = Transaction().connection.cursor()
+        }
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
             partyConfig = PartyConfiguration(1)
@@ -137,14 +139,17 @@ with Transaction().start(dbname, 0, context=context):
         partyConfig.save()
         Transaction().commit()
 
-with Transaction().start(dbname, 0, context=context):
+def sale_configuration():
     mapping = {
         'sale_invoice_method': 'sale_invoice_method',
         'sale_shipment_method': 'sale_shipment_method',
         'sale_sequence': 'sale_sequence'
-    }
-    SaleConfiguration = pool.get('sale.configuration')
-    cursor = Transaction().connection.cursor()
+        }
+    try:
+        Company = pool.get('company.company')
+        SaleConfiguration = pool.get('sale.configuration')
+    except KeyError:
+        return
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
             saleConfig = SaleConfiguration(1)
@@ -160,25 +165,34 @@ with Transaction().start(dbname, 0, context=context):
         Transaction().commit()
 
 
-with Transaction().start(dbname, 0, context=context):
-    StockConfiguration = pool.get('stock.configuration')
-    cursor = Transaction().connection.cursor()
+def stock_configuration():
+    try:
+        Company = pool.get('company.company')
+        StockConfiguration = pool.get('stock.configuration')
+    except KeyError:
+        return
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
             stockConfig = StockConfiguration(1)
-            stockConfig.valued_origin = True
+            try:
+                stockConfig.valued_origin = True
+            except AttributeError:
+                pass
         stockConfig.save()
         Transaction().commit()
 
 
-with Transaction().start(dbname, 0, context=context):
+def purchase_configuration():
+    try:
+        Company = pool.get('company.company')
+        PurchaseConfiguration = pool.get('purchase.configuration')
+    except KeyError:
+        return
     mapping = {
         'purchase_invoice_method': 'purchase_invoice_method',
         'supply_period': 'supply_period',
         'purchase_sequence': 'purchase_sequence'
-    }
-    PurchaseConfiguration = pool.get('purchase.configuration')
-    cursor = Transaction().connection.cursor()
+        }
     for company in Company.search([]):
         with Transaction().set_context(company=company.id):
             purchaseConfig = PurchaseConfiguration(1)
@@ -191,10 +205,30 @@ with Transaction().start(dbname, 0, context=context):
                 if field == 'purchase_sequence':
                     value = int(value)
                 print("Purchae:", field, value)
-                setattr(purchaseConfig, mapping[field], value)                
+                setattr(purchaseConfig, mapping[field], value)
         purchaseConfig.save()
         Transaction().commit()
 
+
+with Transaction().start(dbname, 0, context=context):
+    account_configuration()
+    Transaction().commit()
+
+with Transaction().start(dbname, 0, context=context):
+    party_configuration()
+    Transaction().commit()
+
+with Transaction().start(dbname, 0, context=context):
+    sale_configuration()
+    Transaction().commit()
+
+with Transaction().start(dbname, 0, context=context):
+    stock_configuration()
+    Transaction().commit()
+
+with Transaction().start(dbname, 0, context=context):
+    purchase_configuration()
+    Transaction().commit()
 
 
 logger.info('Done')
