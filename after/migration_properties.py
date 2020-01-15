@@ -132,7 +132,8 @@ with Transaction().start(dbname, 0, context=context):
                 value = get_property_value(field, company.id, default=False)
                 if not value:
                     continue
-            setattr(partyConfig, mapping[field], int(value))
+            if not value is None:
+                setattr(partyConfig, mapping[field], int(value))
         partyConfig.save()
         Transaction().commit()
 
