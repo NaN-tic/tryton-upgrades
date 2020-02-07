@@ -15,5 +15,5 @@ fi
 #invoke database.drop $TO_DATABASE
 dropdb $TO_DATABASE
 invoke database.copy $FROM_DATABASE $TO_DATABASE
-export PYTHONPATH=trytond
+export PYTHONPATH=trytond:proteus
 ./upgrades/upgrade $TO_DATABASE $FROM_VERSION $OTHER

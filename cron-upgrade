@@ -14,6 +14,6 @@ fi
 ./server.py stop
 dropdb $TO_DATABASE
 invoke database.copy -o $TO_DATABASE $FROM_DATABASE $TO_DATABASE
-export PYTHONPATH=trytond
+export PYTHONPATH=trytond:proteus
 ./upgrades/upgrade $TO_DATABASE $FROM_VERSION
 ./server.py --no-tail start $TO_DATABASE

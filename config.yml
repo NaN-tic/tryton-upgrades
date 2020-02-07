@@ -393,7 +393,7 @@ before:
   - comment: # Add exceptional parent language (must be run before update
     version: 4.8
     tables: ir_lang
-    query: ALTER TABLE ir_lang ADD  if not exists parent varchar;
+    query: ALTER TABLE ir_lang ADD parent VARCHAR;
 
   - comment: # delete register with type 'jasper' on core modules
     version: 4.8
@@ -679,6 +679,10 @@ after:
   - comment: # Delete unused users
     version: 4.8
     query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger');
+
+  - comment: # upgrade countries/subdivision and locales
+    script: ./upgrades/after/upgrade_country.sh
+    version: 5.2
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
