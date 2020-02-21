@@ -653,6 +653,11 @@ after:
     version: 5.2
     query: update ir_model_data set values = REPLACE(values, '["update_unit_price",true]', '["update_unit_price",false]') WHERE values like '%["update_unit_price",true]%';
 
+  - comment: # 347 replace 'none' to None aeat347_operation_key
+    version: 5.2
+    tables: aeat_347_report
+    query: update account_invoice set aeat347_operation_key = null where aeat347_operation_key = 'none';
+
   - script: ./upgrades/after/sync_model_data.py
     version: 4.8
 
