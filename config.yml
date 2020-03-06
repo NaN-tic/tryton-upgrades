@@ -23,7 +23,6 @@ to_uninstall:
   - aeat_340
   - aeat_303_es
   - aeat_349_es
-  - analytic_account_move
   - asset_guarantee
   - asset_estate
   - audit_log
@@ -32,7 +31,6 @@ to_uninstall:
   - calendar_scheduling
   - calendar_todo
   - country_zip_es
-  - dbcopy
   - guarantee
   - party_vcarddav
   - party_merge
