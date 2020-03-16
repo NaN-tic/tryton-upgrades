@@ -679,9 +679,13 @@ after:
   - script: ./upgrades/after/upgrade_account_invoice_discount_global.py
     version: 4.8
 
-  - comment: # Delete unused users
+  - comment: Delete unused users
     version: 5.0
-    query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger');
+    query: DELETE FROM res_user WHERE login IN ('user_trigger', 'user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger', 'user_cron_process_purchase', 'user_cron_process_sale', 'user_cron_post_clearing_moves', 'user_send_modules', 'user_send_data', 'user_clean_executions');
+
+  - comment: Delete unused users from ir_model_data
+    version: 5.0
+    query: DELETE FROM ir_model_data WHERE model='res.user' AND fs_id IN ('user_trigger', 'user_process_purchase', 'user_process_sale', 'user_post_clearing_moves', 'user_cron_trigger', 'user_send_modules', 'user_send_data', 'user_clean_executions');
 
   - comment: # upgrade countries/subdivision and locales
     script: ./upgrades/after/upgrade_country.sh
