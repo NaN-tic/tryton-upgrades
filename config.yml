@@ -680,7 +680,7 @@ after:
     version: 4.8
 
   - comment: # Delete unused users
-    version: 4.8
+    version: 5.0
     query: DELETE from res_user where login in ('user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger');
 
   - comment: # upgrade countries/subdivision and locales
