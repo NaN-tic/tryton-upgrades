@@ -656,6 +656,16 @@ after:
     tables: aeat_347_report
     query: update account_invoice set aeat347_operation_key = null where aeat347_operation_key = 'none';
 
+  - comment: # https://hg.tryton.org/modules/sale/rev/5809fe404415
+    version: 5.4
+    tables: product_price_list_line
+    query: UPDATE product_price_list_line set formula = REPLACE(formula, 'product.list_price', 'product.list_price_used') where  formula like '%product.list_price%';
+
+  - comment: set company that is null
+    version: 4.4
+    tables: product_cost_price
+    query: UPDATE product_cost_price set company = 1 where company is null;
+
   - script: ./upgrades/after/sync_model_data.py
     version: 4.8
 
