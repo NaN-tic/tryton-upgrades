@@ -32,6 +32,7 @@ to_uninstall:
   - calendar_todo
   - country_zip_es
   - guarantee
+  - party_credit_limit
   - party_vcarddav
   - party_merge
   - product_configuration
