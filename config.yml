@@ -514,7 +514,10 @@ before:
     query: DELETE FROM ir_model_data WHERE module = 'stock_supply' AND model = 'res.user';
         DELETE FROM ir_model_data WHERE module = 'stock_supply_production' AND model = 'res.user';
         DELETE FROM ir_model_data WHERE module = 'res' AND model = 'res.user' AND fs_id IN ('user_trigger', 'user_cron_trigger');
-
+  - comment: # Upgrade 5.6
+    version: 5.6
+    tables: sale_amendment_line
+    query: ALTER TABLE sale_amendment_line DROP CONSTRAINT sale_amendment_line_shipment_party_fkey;
 
 after:
   - comment: Remove include_347 from diferent models
@@ -666,6 +669,12 @@ after:
     version: 4.4
     tables: product_cost_price
     query: UPDATE product_cost_price set company = 1 where company is null;
+
+  - comment: # Upgrade 5.6
+    version: 5.6
+    tables: project_work
+    query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' AND fs_id = 'work_open_status' AND state = 'opened';
+        UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' and fs_id = 'work_done_status' AND state = 'done';
 
   - script: ./upgrades/after/sync_model_data.py
     version: 4.8
