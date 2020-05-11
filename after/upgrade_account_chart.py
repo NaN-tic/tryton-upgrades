@@ -12,9 +12,8 @@ if domain:
 from trytond.config import config as CONFIG
 CONFIG.update_etc(config_file)
 
-
-from trytond.transaction import Transaction
 from trytond.pool import Pool
+from trytond.transaction import Transaction
 import logging
 
 Pool.start()

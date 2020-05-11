@@ -7,8 +7,8 @@ config_file = sys.argv[2]
 from trytond.config import config as CONFIG
 CONFIG.update_etc(config_file)
 
-from trytond.transaction import Transaction
 from trytond.pool import Pool
+from trytond.transaction import Transaction
 import logging
 
 Pool.start()
@@ -36,7 +36,7 @@ def get_tax(xml_id, company):
     data, = data
     template = AccountTaxTemplate(data.db_id)
 
-    with Transaction().set_user(0): 
+    with Transaction().set_user(0):
         tax = AccountTax.search([
             ('template', '=', template.id),
             ('company', '=', company)], limit=1)

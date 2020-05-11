@@ -8,8 +8,8 @@ from trytond.config import config as CONFIG
 CONFIG.update_etc(config_file)
 
 from trytond import __version__
-from trytond.transaction import Transaction
 from trytond.pool import Pool
+from trytond.transaction import Transaction
 import trytond.tools as tools
 import logging
 

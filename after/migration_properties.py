@@ -6,8 +6,8 @@ config_file = sys.argv[2]
 from trytond.config import config as CONFIG
 CONFIG.update_etc(config_file)
 
-from trytond.transaction import Transaction
 from trytond.pool import Pool
+from trytond.transaction import Transaction
 from datetime import timedelta
 import logging
 

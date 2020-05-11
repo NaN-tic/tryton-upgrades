@@ -54,10 +54,10 @@ to_install:
   - account_product_accounting
   - account_move_draft
   - account_invoice_line_description
-  - party_identifier
   - account_invoice_company_currency
   - electronic_mail
   - html_report
+  - party_identifier
 
 before:
   # - tables: ir_model_data
@@ -463,6 +463,17 @@ before:
     query: DELETE from ir_cron where function in ('generate_requests', 'generate_internal_shipment');
         DELETE from ir_model_data where module = 'stock_supply' and model = 'ir.cron';
 
+  - comment: # Delete unused crons
+    version: 5.6
+    query: DELETE from ir_cron where function in ('cron_post_clearing_moves');
+        DELETE from ir_model_data where fs_id = 'cron_post_clearing_moves' and model = 'ir.cron';
+        DELETE FROM res_user WHERE login IN ('user_cron_post_clearing_moves');
+        DELETE FROM ir_model_data WHERE model='res.user' AND fs_id IN ('user_post_clearing_moves');
+        DELETE from ir_cron where function in ('trigger_time');
+        DELETE from ir_model_data where fs_id = 'cron_trigger_time' and model = 'ir.cron';
+        DELETE FROM res_user WHERE login IN ('user_cron_trigger');
+        DELETE FROM ir_model_data WHERE model='res.user' AND fs_id IN ('user_trigger');
+
   - comment: # Remove error translations
     version: 5.1
     query: DELETE FROM "ir_translation" WHERE "type" = 'error';
@@ -676,8 +687,8 @@ after:
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' AND fs_id = 'work_open_status' AND state = 'opened';
         UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' and fs_id = 'work_done_status' AND state = 'done';
 
-  - script: ./upgrades/after/sync_model_data.py
-    version: 4.8
+  - comment: all versions sync model data
+    script: ./upgrades/after/sync_model_data.py
 
   - script: ./upgrades/after/upgrade_account_chart.py
     version: 4.8
