@@ -687,6 +687,10 @@ after:
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' AND fs_id = 'work_open_status' AND state = 'opened';
         UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' and fs_id = 'work_done_status' AND state = 'done';
 
+  - comment: replace ir.cron method
+    version: 5.4
+    query: UPDATE update ir_cron set method = 'babi.report|calculate_babi_report' where method = 'calculate_babi_report';
+
   - comment: all versions sync model data
     script: ./upgrades/after/sync_model_data.py
 
