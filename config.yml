@@ -689,7 +689,7 @@ after:
 
   - comment: replace ir.cron method
     version: 5.4
-    query: UPDATE update ir_cron set method = 'babi.report|calculate_babi_report' where method = 'calculate_babi_report';
+    query: UPDATE ir_cron set method = 'babi.report|calculate_babi_report' where method = 'calculate_babi_report';
 
   - comment: all versions sync model data
     script: ./upgrades/after/sync_model_data.py
