@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import sys
 
 dbname = sys.argv[1]
@@ -24,11 +25,19 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+to_omit = []
+if 'sync_model_data_omit' in os.environ:
+    to_omit = str(os.environ['sync_model_data_omit']).split(',')
+
+
 with Transaction().start(dbname, 0, context=context):
     Data = pool.get('ir.model.data')
 
-    #datas = Data.search([('out_of_sync', '=', True)])
-    datas = Data.search([])
+    domain = []
+    #domain += [('out_of_sync', '=', True)]
+    if to_omit:
+        domain += [('id', 'not in', to_omit)]
+    datas = Data.search(domain)
     print('LEN: ', len(datas))
     Data.sync(datas)
 
