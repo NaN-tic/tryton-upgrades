@@ -23,6 +23,7 @@ to_uninstall:
   - aeat_340
   - aeat_303_es
   - aeat_349_es
+  - analytic_account_asset
   - asset_guarantee
   - asset_estate
   - audit_log
