@@ -51,15 +51,6 @@ to_uninstall:
   - stock_reservation
   - webdav
 
-to_install:
-  - account_product_accounting
-  - account_move_draft
-  - account_invoice_line_description
-  - account_invoice_company_currency
-  - electronic_mail
-  - html_report
-  - party_identifier
-
 before:
   # - tables: ir_model_data
   #   version: 3.2
