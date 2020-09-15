@@ -41,7 +41,7 @@ with Transaction().start(dbname, 1, context=context):
 
     party = Party.search([('name', '=', 'Generic for Party required Accounts')])
     if not party:
-        party = Party(name='Generic for Party required Accounts')
+        party = Party(name='Generic for Party required Accounts', code='GPRA')
         party.save()
     else:
         party, = party
