@@ -374,8 +374,10 @@ if os.path.exists(cmd.override):
     logger.info
     config['to_install'] += override.get('to_install', [])
     config['to_uninstall'] += override.get('to_uninstall', [])
-    config['before'] += override.get('before', [])
-    config['after'] += override.get('after', [])
+    config['before'] = (override.get('before_before', []) +
+        config.get('before', []) + override.get('before', []))
+    config['after'] = (override.get('before_after', []) +
+        config.get('after', []) + override.get('after', []))
     config['ignore'] += override.get('ignore', [])
     config['vars'].update(override.get('vars', {}))
 else:
