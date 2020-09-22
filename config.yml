@@ -91,12 +91,12 @@ before:
   - comment: #Adapat fields from stock_lot_expiry to stock_lot_sled
     fields: stock_lot.life_date
     version: 4.8
-    query: ALTER TABLE stock_lot rename column life_date to shelf_life_expiration_date;
+    query: ALTER TABLE stock_lot RENAME COLUMN life_date TO shelf_life_expiration_date;
 
   - comment: #Adapat fields from stock_lot_expiry to stock_lot_sled
     fields: stock_lot.expiry_date
     version: 4.8
-    query: ALTER TABLE stock_lot rename column expiry_date to expiration_date;
+    query: ALTER TABLE stock_lot RENAME COLUMN expiry_date TO expiration_date;
 
 
   - comment: # Tax migration from new tax rules. on 4.7
@@ -699,7 +699,7 @@ after:
   - comment: set company that is null
     version: 4.4
     tables: product_cost_price
-    query: UPDATE product_cost_price set company = 1 where company is null;
+    query: UPDATE product_cost_price SET company = 1 WHERE company IS NULL;
 
   - comment: # Upgrade 5.6
     version: 5.6
