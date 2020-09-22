@@ -45,7 +45,6 @@ to_uninstall:
   - product_price_list_category
   - sale_invoices_paid
   - sale_shipments_done
-  - stock_delivery_note_valued_jreport
   - stock_picking_box
   - stock_lot_expiry
   - stock_reservation
