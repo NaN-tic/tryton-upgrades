@@ -66,10 +66,12 @@ before:
 
   - comment: Remove name from account journal period
     version: 4.8
+    tables: account_journal_period
     query: ALTER TABLE account_journal_period DROP COLUMN IF EXISTS name;
 
   - comment: drop constraint, new ones applied on module
     version: 5.1
+    tables: account_account
     query: ALTER TABLE account_account DROP CONSTRAINT IF EXISTS account_account_code_uniq;
 
   - comment: # copy to migrate default values, must be dropped
@@ -310,14 +312,17 @@ before:
 
   - comment: # delete account_tax_rule ir properties
     version: 4.4
-    query: DELETE FROM ir_property where value like 'account_tax_rule,%' and SUBSTRING(value, POSITION(',' IN value) + 1)::integer not in (select id from account_tax_rule);
+    tables: account_tax_rule
+    query: DELETE FROM ir_property WHERE value LIKE 'account_tax_rule,%' AND SUBSTRING(value, POSITION(',' IN value) + 1)::integer not in (select id from account_tax_rule);
 
   - comment: # delete properties of account_journal without foreign key
     version: 4.7
+    tables: account_journal
     query: delete from ir_property where id in (select id from ir_property  where res like 'account.journal%' and value like 'ir.sequence%' and split_part(res, ',', 2)::int not in (select id from account_journal));
 
   - comment: # delete properties of account_journal without foreign key
     version: 4.7
+    tables: account_journal
     query: delete from ir_property where id in (select id from ir_property  where res like 'account.journal%' and value like 'account.account%' and split_part(res, ',', 2)::int not in (select id from account_journal));
 
   - comment: # delete properties of stock_sequence without foreign key
@@ -326,6 +331,7 @@ before:
 
   - comment: # delete properties of party and account without foreign key
     version: 4.7
+    tables: account_account
     query: delete from ir_property where id in (select id from ir_property  where res like 'party.party%' and value like 'account.account%' and split_part(value, ',', 2)::int not in (select id from account_account));
 
   - comment: # delete default properties
@@ -348,6 +354,7 @@ before:
   # account_es and aeat
   - comment: # add new column in code_uniq constrain when upgrade
     version: 4.6
+    tables: account_account_template
     query: ALTER TABLE account_account_template DROP CONSTRAINT if exists "account_account_template_code_uniq";
 
   # - comment: # Rename model data aeat_349
@@ -491,6 +498,7 @@ before:
     query: ALTER TABLE account_invoice_payment_term_line ALTER COLUMN weekday TYPE INTEGER USING weekday::INT
   - comment: # Set Second Currency of account_Account null if it's equal of company currency
     version: 4.8
+    tables: account_account
     query: update account_account set second_currency = null where second_currency=(select currency from company_company where id=company)
   - comment: # remove style option in ir.action.window
     version: 4.8
@@ -531,9 +539,18 @@ before:
 
 
 after:
-  - comment: Remove include_347 from diferent models
+  - comment: Remove include_347 from party
     version: 5.1
-    query: ALTER TABLE party_party DROP COLUMN IF EXISTS include_347; ALTER TABLE account_tax_rule DROP COLUMN IF EXISTS include_347; ALTER TABLE account_tax_rule_template DROP COLUMN IF EXISTS include_347;
+    tables: party_party
+    query: ALTER TABLE party_party DROP COLUMN IF EXISTS include_347;
+  - comment: Remove include_347 from account_tax_rule
+    version: 5.1
+    tables: account_tax_rule
+    query: ALTER TABLE account_tax_rule DROP COLUMN IF EXISTS include_347;
+  - comment: Remove include_347 from account_tax_rule_template
+    version: 5.1
+    tables: account_tax_rule_template
+    query: ALTER TABLE account_tax_rule_template DROP COLUMN IF EXISTS include_347;
   - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
   - comment: -> Change sign on account_tax_line
     version: 3.8 # TODO: check i 3.8 needs.
@@ -643,6 +660,7 @@ after:
 
   - comment: # Set end_date inactive account taxes and accounts
     version: 5.0
+    tables: account_account
     query: update account_account set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
         update account_account set end_date = current_date where active = False and end_date is null;
         update account_tax set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
@@ -650,6 +668,7 @@ after:
 
   - comment: # Set end_date inactive account taxes and accounts
     version: 5.0
+    tables: account_account
     query: update account_account set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
         update account_account set end_date = current_date where active = False and end_date is null;
         update account_tax set end_date = current_date, template_override = True where active = False and end_date is null and template is not null;
@@ -657,6 +676,7 @@ after:
 
   - comment: #disable old taxes not contempled.
     version: 5.0
+    tables: account_tax
     query: update account_tax set active=false, end_date=now()::date where name like '%IRPF%+%IVA%' and active = True
 
   - comment: We need this query before sync_model_data.py otherwise it fails
@@ -695,6 +715,7 @@ after:
     script: ./upgrades/after/sync_model_data.py
 
   - script: ./upgrades/after/upgrade_account_chart.py
+    tables: account_account
     version: 4.8
 
   - comment: # upgrade configuration models from ir_property
@@ -703,6 +724,7 @@ after:
 
   - comment: # update taxes
     version: 4.4
+    tables: mapping_taxes
     script: ./upgrades/after/update_taxes.py
 
   - script: ./upgrades/after/convert_domain_rules.py
@@ -712,6 +734,7 @@ after:
 #    tables: aeat_sii_report_lines
 
   - script: ./upgrades/after/upgrade_account_invoice_discount_global.py
+    tables: account_invoice
     version: 4.8
 
   - comment: Delete unused users
