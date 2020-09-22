@@ -101,7 +101,7 @@ before:
 
   - comment: # Tax migration from new tax rules. on 4.7
     tables: aeat_347_record
-    version: 4.8
+    version: 5.2
     query:  create table if not exists mapping_taxes as select
         a.*,
         t.template as parent_template,
