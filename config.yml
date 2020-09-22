@@ -537,6 +537,9 @@ before:
     version: 5.4
     query: DELETE FROM ir_model_data WHERE model='res.user' AND fs_id IN ('user_send_modules', 'user_send_data');
 
+  - comment: set type to null from ir.ui.view that is an inherit
+    version: 5.4
+    query: update ir_ui_view set type = null from (select db_id from ir_model_data where module = 'account_bank_statement_payment' and fs_id = 'move_line_bank_statement_lines') as sub where id = sub.db_id;
 
 after:
   - comment: Remove include_347 from party
