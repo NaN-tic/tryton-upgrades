@@ -560,9 +560,13 @@ after:
     query:  update account_tax_line set amount=amount*-1 where type = 'tax' and tax in (select id from account_tax where name ilike '%(2)%');
   - comment: # translations fuzzy to false
     query: UPDATE ir_translation set fuzzy = false where fuzzy = true and res_id = -1;
-  - tables: aeat_303_mapping-account_tax_code
+  - comment: -> 4.8
+    version: 4.8
+    tables: aeat_303_mapping-account_tax_code
     query: delete from "aeat_303_mapping-account_tax_code"
-  - tables: aeat_303_mapping
+  - commnet: -> 4.8
+    version: 4.8
+    tables: aeat_303_mapping
     query: delete from aeat_303_mapping ;
   - comment: -> 4.7
     version: 4.7
