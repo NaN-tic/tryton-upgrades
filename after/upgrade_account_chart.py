@@ -97,6 +97,14 @@ with Transaction().start(dbname, 1, context=context):
         user.company = company.id
         user.save()
         with Transaction().set_context(company=company.id):
+            config = Configuration(1)
+
+            if not config.default_account_code_digits:
+                config.default_account_code_digits = digits
+                config.force_digits = False
+                config.save()
+
+            print("digits:", digits, config.default_account_code_digits)
 
             template = AccountTemplate(ModelData.get_id('account_es', 'pgc_0'))
             account = Account.search([('template', '=', template),
@@ -108,14 +116,6 @@ with Transaction().start(dbname, 1, context=context):
 
             account = account[0]
 
-            config = Configuration(1)
-
-            if not config.default_account_code_digits:
-                config.default_account_code_digits = digits
-                config.force_digits = False
-                config.save()
-
-            print("digits:", digits, config.default_account_code_digits)
             session_id, _, _ = UpdateChart.create()
             update_chart = UpdateChart(session_id)
             update_chart.start.account = account
