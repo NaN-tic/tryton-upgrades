@@ -89,7 +89,6 @@ with Transaction().start(dbname, 1, context=context) as transaction:
                 tax_id, name, parent, i347, fs_id, template_id, parent_template, xml_id = x
                 # print(name, xml_id, parent_template, template_id, fs_id)
 
-
                 if '_' == xml_id[-1]:
                     xml_id = xml_id[:-1]
 
@@ -136,6 +135,9 @@ with Transaction().start(dbname, 1, context=context) as transaction:
             tables2 = [
                 ('account_invoice_line_account_tax', 'tax', 'line' ),
                 ('product_category_customer_taxes_rel', 'tax', 'category'),
+                ('product_category_supplier_taxes_rel', 'tax', 'category'),
+                ('product_customer_taxes_rel', 'tax', 'product'),
+                ('product_supplier_taxes_rel', 'tax', 'product'),
             ]
 
             sales = Module.search([
@@ -166,8 +168,10 @@ with Transaction().start(dbname, 1, context=context) as transaction:
                 ('state', '=', 'activated')], limit=1)
             if account_template_product:
                 tables3 = [
-                    ('product_customer_taxes_template_rel', 'tax', 'product'),
-                    ('product_category_customer_taxes_template_rel', 'tax', 'product')
+                    ('product_category_customer_taxes_rel', 'tax', 'category'),
+                    ('product_category_supplier_taxes_rel', 'tax', 'category'),
+                    ('product_customer_taxes_rel', 'tax', 'product'),
+                    ('product_supplier_taxes_rel', 'tax', 'product'),
                 ]
 
                 for template, taxes in template_map.items():
