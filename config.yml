@@ -19,7 +19,6 @@ to_uninstall:
   - account_bank_statement_csb43
   - account_statement_of_account
   - asset_attribute
-  - account_payment_bank
   - account_payment_type_move
   - aeat_340
   - aeat_303_es
