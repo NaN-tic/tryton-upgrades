@@ -37,6 +37,7 @@ to_uninstall:
   - party_vcarddav
   - party_merge
   - product_configuration
+  - project_state_by_buttons
   - project_auto_timesheet
   - project_asterisk
   - project_current_effort
