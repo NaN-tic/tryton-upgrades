@@ -46,7 +46,6 @@ to_uninstall:
   - product_price_list_category
   - sale_invoices_paid
   - sale_shipments_done
-  - stock_external_party
   - stock_inventory_expected_quantity
   - stock_picking_box
   - stock_lot_expiry
