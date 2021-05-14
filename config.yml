@@ -549,6 +549,34 @@ before:
     version: 5.4
     query: update ir_ui_view set type = null from (select db_id from ir_model_data where module = 'account_bank_statement_payment' and fs_id = 'move_line_bank_statement_lines') as sub where id = sub.db_id;
 
+  # From 5.4 to 5.6
+  # https://discuss.tryton.org/t/migration-from-5-4-to-5-6/2303
+  #
+  #
+  # From 5.6 to 5.8
+  # https://discuss.tryton.org/t/migration-from-5-6-to-5-8/3341
+  #
+  # From 5.8 to 6.0
+  # https://discuss.tryton.org/t/migration-from-5-8-to-6-0/3603
+
+  - comment: before update, add access on field
+    version: 5.8
+    query: ALTER TABLE ir_model_field ADD COLUMN "access" BOOLEAN
+
+  - comment: Delete unused users
+    version: 5.8
+    query: DELETE FROM res_user WHERE login IN ('user_trigger', 'user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger', 'user_cron_process_purchase', 'user_cron_process_sale', 'user_cron_post_clearing_moves', 'user_send_modules', 'user_send_data', 'user_clean_executions', 'user_cron_deactivate_lots_without_stock');
+
+  - comment: Delete unused users
+    version: 5.8
+    query: DELETE FROM ir_model_data WHERE fs_id IN ('user_clean_executions', 'user_deactivate_lots_without_stock');
+
+  - comment: Before update, the foreign key of shipment_party of sale amendment must be recreated
+    version: 5.8
+    tables: sale_amendment_line
+    query: ALTER TABLE sale_amendment_line DROP CONSTRAINT sale_amendment_line_shipment_party_fkey;
+
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
@@ -567,6 +595,7 @@ after:
     version: 3.8 # TODO: check i 3.8 needs.
     query:  update account_tax_line set amount=amount*-1 where type = 'tax' and tax in (select id from account_tax where name ilike '%(2)%');
   - comment: # translations fuzzy to false
+    version: 5.2
     query: UPDATE ir_translation set fuzzy = false where fuzzy = true and res_id = -1;
   - comment: -> 4.8
     version: 4.8
@@ -588,29 +617,39 @@ after:
     version: 4.0
     query: UPDATE account_move_reconciliation SET date=create_date::DATE WHERE date IS NULL;
   - comment: # Change login's length
+    version: 5.2
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE character varying(512);
   - comment: # Mark all categories as accounting type
     version: 4.0
     tables: product_category
     query: UPDATE product_category SET accounting = True;
   - comment: # Set reconciliation date
+    version: 5.2
     tables: account_move_reconciliation
     query: UPDATE account_move_reconciliation SET date=create_date WHERE date IS NULL;
   - tables: account_move_reconciliation
+    version: 5.2
     query: ALTER TABLE account_move_reconciliation ALTER COLUMN date SET NOT NULL;
   - tables: contract
+    version: 5.2
     query: UPDATE contract SET first_invoice_date=start_period_date WHERE first_invoice_date IS NULL;
   - tables: asset
+    version: 5.2
     query: ALTER TABLE asset ALTER COLUMN company SET NOT NULL;
   - tables: timesheet_line
+    version: 5.2
     query: ALTER TABLE timesheet_line ALTER COLUMN duration SET NOT NULL;
   - tables: stock_shipment_in_return
+    version: 5.2
     query: ALTER TABLE stock_shipment_in_return ALTER COLUMN supplier SET NOT NULL;
   - tables: contract
+    version: 5.2
     query: ALTER TABLE contract ALTER COLUMN first_invoice_date SET NOT NULL;
   - tables: asset
+    version: 5.2
     query: UPDATE asset SET company = 1 WHERE company IS NULL;
   - comment: Drop category column
+    version: 5.2
     fields: product_template.category
     query: ALTER TABLE product_template DROP COLUMN category;
   - tables: country_zip
@@ -729,10 +768,7 @@ after:
   - comment: Add DeactivableMixin on carrier
     version: 5.6
     tables: carrier
-    query: update carrier set active = True;
-
-  - comment: all versions sync model data
-    script: ./upgrades/after/sync_model_data.py
+    query: UPDATE carrier SET active = True;
 
   - script: ./upgrades/after/upgrade_account_chart.py
     tables: account_account
@@ -757,10 +793,6 @@ after:
     tables: account_invoice
     version: 4.8
 
-  - comment: Delete unused users
-    version: 5.0
-    query: DELETE FROM res_user WHERE login IN ('user_trigger', 'user_cron_purchase_request', 'user_cron_internal_shipment', 'user_cron_production_request', 'user_cron_trigger', 'user_cron_process_purchase', 'user_cron_process_sale', 'user_cron_post_clearing_moves', 'user_send_modules', 'user_send_data', 'user_clean_executions');
-
   - comment: Delete unused users from ir_model_data
     version: 5.0
     query: DELETE FROM ir_model_data WHERE model='res.user' AND fs_id IN ('user_trigger', 'user_process_purchase', 'user_process_sale', 'user_post_clearing_moves', 'user_cron_trigger', 'user_send_modules', 'user_send_data', 'user_clean_executions');
@@ -768,6 +800,38 @@ after:
   - comment: # upgrade countries/subdivision and locales
     script: ./upgrades/after/upgrade_country.sh
     version: 5.2
+
+  # From 5.4 to 5.6
+  # https://discuss.tryton.org/t/migration-from-5-4-to-5-6/2303
+
+  - comment: Update project status based on previous state
+    version: 5.4
+    query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' AND fs_id = 'work_open_status' AND state = 'opened';
+
+  - comment: Update project status based on previous state
+    version: 5.4
+    query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' and fs_id = 'work_done_status' AND state = 'done';
+  #
+  #
+  # From 5.6 to 5.8
+  # https://discuss.tryton.org/t/migration-from-5-6-to-5-8/3341
+  #
+  # From 5.8 to 6.0
+  # https://discuss.tryton.org/t/migration-from-5-8-to-6-0/3603
+
+  - comment: fix currency, invoice_type and party on invoice line
+    version: 5.8
+    tables: account_invoice_line
+    query: UPDATE account_invoice_line SET currency = (SELECT currency FROM account_invoice WHERE id = account_invoice_line.invoice);
+        UPDATE account_invoice_line SET invoice_type = (SELECT type FROM account_invoice WHERE id = account_invoice_line.invoice) WHERE invoice_type IS NOT NULL;
+        UPDATE account_invoice_line SET party = (SELECT party FROM account_invoice WHERE id = account_invoice_line.invoice) WHERE party IS NOT NULL;
+  - comment: after update, remove code column
+    version: 5.8
+    query: ALTER TABLE ir_sequence_type DROP COLUMN code
+
+  - comment: all versions sync model data
+    script: ./upgrades/after/sync_model_data.py
+
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
