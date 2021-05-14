@@ -37,8 +37,11 @@ class Step(Enum):
 t = Terminal()
 
 def get_url():
-    CONFIG.update_etc(config_file)
-    url = parse_uri(CONFIG.get('database', 'uri'))
+    if config_file:
+        CONFIG.update_etc(config_file)
+        url = parse_uri(CONFIG.get('database', 'uri'))
+    else:
+        url = parse_uri(os.environ.get('TRYTOND_DATABASE__URI', ''))
     return url
 
 def run(*args):
@@ -92,10 +95,11 @@ def execute(query, *args, **kwargs):
     cursor.execute(query, args)
 
 def run_trytond(to_install=None):
-    to_run = ['trytond/bin/trytond-admin', '-v', '-c', config_file]
+    to_run = ['trytond/bin/trytond-admin', '-v']
+    if config_file:
+        to_run += ['-c', config_file]
     if to_install:
-        to_run += ['-u']
-        to_run += to_install
+        to_run += ['-u', to_install]
     to_run.append('--all')
     to_run.append('-d')
     to_run.append(database_name)
@@ -259,7 +263,8 @@ class Upgrade:
                     # is not locked by our transaction
                     logger.info(t.green('Executing: %s' % script))
                     self.connection.commit()
-                    res = run(script, self.database_name, self.config_file)
+                    res = run(script, self.database_name, self.config_file or
+                        '')
                     self.cursor = self.connection.cursor()
 
                     if res:
@@ -350,10 +355,10 @@ if not cmd.config:
         logger.info('Checking %s...' % config_file)
         if os.path.exists(config_file):
             break
-    if not config_file:
-        logger.info('Not found file %s' % config_file)
-        sys.exit(1)
-    logger.info("Configuration file: %s" % config_file)
+    if config_file:
+        logger.info("Configuration file: %s" % config_file)
+    else:
+        logger.info("No configuration file found.")
 else:
     config_file = cmd.config
     if not os.path.isfile(config_file):
