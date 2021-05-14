@@ -56,15 +56,17 @@ before:
   # - tables: ir_model_data
   #   version: 3.2
   #   query: ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;
-  - UPDATE ir_model_data SET module = 'aeat_303' WHERE module = 'aeat_303_es';
-  - UPDATE ir_model_data SET module = 'aeat_349' WHERE module = 'aeat_349_es';
-  - UPDATE ir_translation SET module = 'aeat_303' WHERE module = 'aeat_303_es';
-  - UPDATE ir_translation SET module = 'aeat_349' WHERE module = 'aeat_349_es';
-  - DELETE from ir_ui_view where module = '';
-  - DELETE from ir_ui_view where data = '' and module = 'account_payment_type';
-  - UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL AND module <> 'farm';
-  - DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
-  - DELETE FROM ir_ui_view where module = '%sale%milestone%'
+  - version: 5.2
+    query:
+        UPDATE ir_model_data SET module = 'aeat_303' WHERE module = 'aeat_303_es';
+        UPDATE ir_model_data SET module = 'aeat_349' WHERE module = 'aeat_349_es';
+        UPDATE ir_translation SET module = 'aeat_303' WHERE module = 'aeat_303_es';
+        UPDATE ir_translation SET module = 'aeat_349' WHERE module = 'aeat_349_es';
+        DELETE from ir_ui_view where module = '';
+        DELETE from ir_ui_view where data = '' and module = 'account_payment_type';
+        UPDATE ir_ui_view SET type = NULL WHERE inherit IS NOT NULL AND type IS NOT NULL AND module <> 'farm';
+        DELETE FROM ir_model_data WHERE model='stock.location' AND fs_id LIKE '%transit%'
+        DELETE FROM ir_ui_view where module = '%sale%milestone%'
 
   - comment: Remove name from account journal period
     version: 4.8
@@ -464,12 +466,16 @@ before:
         DELETE from ir_model_data where module = 'stock_supply' and model = 'ir.cron';
 
   - comment: # Delete unused crons
-    version: 5.6
+    version: 5.4
     query: DELETE from ir_cron where function in ('cron_post_clearing_moves');
+        DELETE from ir_cron where function in ('trigger_time');
+
+  - comment: # Delete unused crons
+    version: 5.6
+    query:
         DELETE from ir_model_data where fs_id = 'cron_post_clearing_moves' and model = 'ir.cron';
         DELETE FROM res_user WHERE login IN ('user_cron_post_clearing_moves');
         DELETE FROM ir_model_data WHERE model='res.user' AND fs_id IN ('user_post_clearing_moves');
-        DELETE from ir_cron where function in ('trigger_time');
         DELETE from ir_model_data where fs_id = 'cron_trigger_time' and model = 'ir.cron';
         DELETE FROM res_user WHERE login IN ('user_cron_trigger');
         DELETE FROM ir_model_data WHERE model='res.user' AND fs_id IN ('user_trigger');
