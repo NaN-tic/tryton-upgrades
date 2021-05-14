@@ -523,6 +523,7 @@ before:
     fields: production_lead_time.lead_time
     query: ALTER TABLE production_lead_time DROP COLUMN lead_time;
   - script: ./upgrades/before/remove_deprecated_taxes.py
+    version: 5.2
   - comment: replace account_payment_sepa_message from TEXT to BYTEA
     version: 5.4
     tables: account_payment_sepa_message
