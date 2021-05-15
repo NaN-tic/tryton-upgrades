@@ -44,6 +44,7 @@ to_uninstall:
   - project_unittest
   - project_unittest
   - product_price_list_category
+  - production_origin # Remove in upgrade to 6.0
   - sale_invoices_paid
   - sale_shipments_done
   - stock_inventory_expected_quantity
