@@ -756,12 +756,6 @@ after:
     tables: product_cost_price
     query: UPDATE product_cost_price SET company = 1 WHERE company IS NULL;
 
-  - comment: # Upgrade 5.6
-    version: 5.6
-    tables: project_work
-    query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' AND fs_id = 'work_open_status' AND state = 'opened';
-        UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' and fs_id = 'work_done_status' AND state = 'done';
-
   - comment: replace ir.cron method
     version: 5.4
     query: UPDATE ir_cron set method = 'babi.report|calculate_babi_report' where method = 'calculate_babi_report';
@@ -807,10 +801,12 @@ after:
 
   - comment: Update project status based on previous state
     version: 5.4
+    tables: project_work
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' AND fs_id = 'work_open_status' AND state = 'opened';
 
   - comment: Update project status based on previous state
     version: 5.4
+    tables: project_work
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' and fs_id = 'work_done_status' AND state = 'done';
   #
   #
