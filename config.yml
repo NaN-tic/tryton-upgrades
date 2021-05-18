@@ -762,11 +762,6 @@ after:
     version: 5.4
     query: UPDATE ir_cron set method = 'babi.report|calculate_babi_report' where method = 'calculate_babi_report';
 
-  - comment: Add DeactivableMixin on carrier
-    version: 5.6
-    tables: carrier
-    query: UPDATE carrier SET active = True;
-
   - script: ./upgrades/after/upgrade_account_chart.py
     tables: account_account
     version: 4.8
