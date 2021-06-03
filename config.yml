@@ -52,6 +52,10 @@ to_uninstall:
   - stock_lot_expiry
   - stock_reservation
   - webdav
+  - stock_quality_control_trigger_shipment_in
+  - quality_control_trigger
+  - production_quality_control_trigger_lot
+  - stock_quality_control_trigger_lot
 
 before:
   # - tables: ir_model_data
