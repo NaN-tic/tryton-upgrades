@@ -101,6 +101,7 @@ def run_trytond(to_install=None):
     if to_install:
         to_run += ['-u', to_install]
     to_run.append('--all')
+    to_run.append('--activate-dependencies')
     to_run.append('-d')
     to_run.append(database_name)
     returncode = run(*to_run)
