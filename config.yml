@@ -582,6 +582,13 @@ before:
     tables: sale_amendment_line
     query: ALTER TABLE sale_amendment_line DROP CONSTRAINT sale_amendment_line_shipment_party_fkey;
 
+  - comment: Remove user_send_summary user (brain)
+    version: 5.8
+    query: DELETE FROM res_user WHERE login = 'user_send_summary';DELETE from ir_model_data where fs_id = 'user_send_summary' and module = 'brain' and model = 'res.user';
+
+  - comment: Delete user_cron_imap user
+    version: 5.8
+    query: DELETE from res_user where login = 'user_cron_imap';DELETE from ir_model_data where fs_id = 'user_imap' and model = 'res.user';
 
 after:
   - comment: Remove include_347 from party
