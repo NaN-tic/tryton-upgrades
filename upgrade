@@ -378,14 +378,15 @@ if os.path.exists(cmd.override):
     logger.info('Overriding configuration using "%s"' % cmd.override)
     override = yaml.load(open(cmd.override, 'r').read())
     logger.info
-    config['to_install'] += override.get('to_install', [])
-    config['to_uninstall'] += override.get('to_uninstall', [])
-    config['before'] = (override.get('before_before', []) +
-        config.get('before', []) + override.get('before', []))
-    config['after'] = (override.get('before_after', []) +
-        config.get('after', []) + override.get('after', []))
-    config['ignore'] += override.get('ignore', [])
-    config['vars'].update(override.get('vars', {}))
+    if override:
+        config['to_install'] += override.get('to_install', [])
+        config['to_uninstall'] += override.get('to_uninstall', [])
+        config['before'] = (override.get('before_before', []) +
+            config.get('before', []) + override.get('before', []))
+        config['after'] = (override.get('before_after', []) +
+            config.get('after', []) + override.get('after', []))
+        config['ignore'] += override.get('ignore', [])
+        config['vars'].update(override.get('vars', {}))
 else:
     logger.info('Overriding file "%s" not found.' % cmd.override)
 
