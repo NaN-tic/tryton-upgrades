@@ -99,7 +99,7 @@ def run_trytond(to_install=None):
     if config_file:
         to_run += ['-c', config_file]
     if to_install:
-        to_run += ['-u', to_install]
+        to_run += ['-u'] + to_install
     to_run.append('--all')
     to_run.append('--activate-dependencies')
     to_run.append('-d')
