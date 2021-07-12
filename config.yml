@@ -591,6 +591,11 @@ before:
     version: 5.8
     query: DELETE from res_user where login = 'user_cron_imap';DELETE from ir_model_data where fs_id = 'user_imap' and model = 'res.user';
 
+  - comment: Delete user_clean_execution_group_babi_admin group user
+    version: 5.8
+    query: DELETE from "res_user-res_group" where id in (select db_id from ir_model_data where module = 'babi' and fs_id = 'user_clean_execution_group_babi_admin' and model = 'res.user-res.group');
+        DELETE from ir_model_data where module = 'babi' and fs_id = 'user_clean_execution_group_babi_admin' and model = 'res.user-res.group';
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
