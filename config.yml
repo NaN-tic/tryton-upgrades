@@ -842,6 +842,9 @@ after:
   - comment: all versions sync model data
     script: ./upgrades/after/sync_model_data.py
 
+  - comment: replace forbidden char
+    version: 5.8
+    script: ./upgrades/after/replace_forbidden_char.py
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
