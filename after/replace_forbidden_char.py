@@ -43,7 +43,6 @@ with Transaction().start(dbname, 0, context=context):
 
     cursor = Transaction().connection.cursor()
 
-
     query = 'SELECT * FROM pg_catalog.pg_tables'
     cursor.execute(query)
     tables = [name for _, name, _, _, _, _, _, _ in cursor.fetchall()]
@@ -56,7 +55,7 @@ with Transaction().start(dbname, 0, context=context):
         model = Model(model_id)
         ModelRecord = pool.get(model.model)
 
-        if not hasattr(ModelRecord, '_table') or hasattr(ModelRecord, 'table_query'):
+        if not hasattr(ModelRecord, '_table') or callable(getattr(ModelRecord, 'table_query')):
             continue
 
         table = ModelRecord._table
@@ -66,15 +65,23 @@ with Transaction().start(dbname, 0, context=context):
         model_h = ModelRecord.__table__()
         field_names = model_fields.split(',')
 
-        to_write = []
+        to_check = []
         for _field, _ttype in ModelRecord._fields.items():
             if _field in field_names and not isinstance(_ttype, fields.Function):
-                to_write.append(_field)
+                to_check.append(_field)
 
-        if to_write:
-            columns = ', '.join([column+" = replace( replace( replace("+column+", E'\\n', '' ), E'\\t', '' ), E'\\r', '')" for column in to_write])
-            query = "UPDATE %(table)s set %(columns)s" % {'table': table, 'columns': columns}
-            # print(query)
+        if to_check:
+            columns = 'or '.join([column+" ilike E'%\\"+char+"%'" for char in ['n', 't', 'r'] for column in to_check])
+            query = "select id from %(table)s where %(columns)s" % {'table': table, 'columns': columns}
+
+            cursor.execute(query)
+            ids = ', '.join([str(id[0]) for id in cursor.fetchall()])
+
+            if not ids:
+                continue
+
+            columns = ', '.join([column+" = replace( replace( replace("+column+", E'\\n', '' ), E'\\t', '' ), E'\\r', '')" for column in to_check])
+            query = "UPDATE %(table)s set %(columns)s WHERE id in (%(ids)s)" % {'table': table, 'columns': columns, 'ids': ids}
             cursor.execute(query)
 
     Transaction().commit()
