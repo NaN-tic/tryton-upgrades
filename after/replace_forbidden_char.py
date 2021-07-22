@@ -71,7 +71,7 @@ with Transaction().start(dbname, 0, context=context):
                 to_check.append(_field)
 
         if to_check:
-            columns = 'or '.join([column+" ilike E'%\\"+char+"%'" for char in ['n', 't', 'r'] for column in to_check])
+            columns = ' or '.join(["\""+column+"\" ilike E'%\\"+char+"%'" for char in ['n', 't', 'r'] for column in to_check])
             query = "select id from %(table)s where %(columns)s" % {'table': table, 'columns': columns}
 
             cursor.execute(query)
@@ -79,8 +79,7 @@ with Transaction().start(dbname, 0, context=context):
 
             if not ids:
                 continue
-
-            columns = ', '.join([column+" = replace( replace( replace("+column+", E'\\n', '' ), E'\\t', '' ), E'\\r', '')" for column in to_check])
+            columns = ', '.join(["\""+column+"\" = replace( replace( replace(\""+column+"\", E'\\n', '' ), E'\\t', '' ), E'\\r', '')" for column in to_check])
             query = "UPDATE %(table)s set %(columns)s WHERE id in (%(ids)s)" % {'table': table, 'columns': columns, 'ids': ids}
             cursor.execute(query)
 
