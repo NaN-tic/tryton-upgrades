@@ -206,9 +206,6 @@ before:
       UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["deferral",true],', '') where fs_values ilike '%["deferral",true],%' and module = 'account_es';
       UPDATE ir_model_data set fs_values = REPLACE(fs_values, '["deferral",false],', '') where fs_values ilike '%["deferral",false],%' and module = 'account_es';
 
-  - comment:
-    vestion: 4.0
-    query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE VARCHAR(512);
   - tables: stock_location
     version: 4.0
     query: INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
@@ -637,6 +634,7 @@ after:
     query: UPDATE account_move_reconciliation SET date=create_date::DATE WHERE date IS NULL;
   - comment: # Change login's length
     version: 5.2
+    tables: res_user_login_attempt
     query: ALTER TABLE res_user_login_attempt ALTER COLUMN login TYPE character varying(512);
   - comment: # Mark all categories as accounting type
     version: 4.0
