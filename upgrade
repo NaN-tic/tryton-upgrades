@@ -369,7 +369,8 @@ else:
 
 url = get_url()
 
-config = yaml.load(open('upgrades/config.yml', 'r').read())
+config = yaml.load(open('upgrades/config.yml', 'r').read(),
+    Loader=yaml.FullLoader)
 config.setdefault('to_uninstall', [])
 config.setdefault('to_install', [])
 config.setdefault('ignore', [])
