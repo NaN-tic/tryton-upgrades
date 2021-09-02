@@ -834,6 +834,9 @@ after:
     query: UPDATE account_invoice_line SET currency = (SELECT currency FROM account_invoice WHERE id = account_invoice_line.invoice) WHERE invoice IS NOT NULL;
         UPDATE account_invoice_line SET invoice_type = (SELECT type FROM account_invoice WHERE id = account_invoice_line.invoice) WHERE invoice_type IS NOT NULL;
         UPDATE account_invoice_line SET party = (SELECT party FROM account_invoice WHERE id = account_invoice_line.invoice) WHERE party IS NOT NULL;
+        UPDATE account_invoice_line SET invoice_type = 'in' WHERE invoice_type IS NULL and invoice is NULL and origin like 'purchase%';
+        UPDATE account_invoice_line SET invoice_type = 'out' WHERE invoice_type IS NULL and invoice is NULL and origin like 'sale%';
+
   - comment: after update, remove code column
     version: 5.8
     query: ALTER TABLE ir_sequence_type DROP COLUMN code
