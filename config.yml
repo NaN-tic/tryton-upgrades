@@ -58,6 +58,7 @@ to_uninstall:
   - quality_control_trigger
   - production_quality_control_trigger_lot
   - stock_quality_control_trigger_lot
+  - commission_party
 
 before:
   # - tables: ir_model_data
@@ -844,6 +845,10 @@ after:
   - comment: all versions sync model data
     script: ./upgrades/after/sync_model_data.py
 
+  - comment: Migrate data from commission_party agent to new agent in commission module
+    version: 6.0
+    tables: party_party_commission_agent commission_agent_selection
+    query: INSERT INTO commission_agent_selection (agent,party) SELECT agent, party FROM party_party_commission_agent WHERE agent IS NOT NULL;
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
