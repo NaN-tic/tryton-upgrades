@@ -377,7 +377,7 @@ config.setdefault('ignore', [])
 config.setdefault('vars', {})
 if os.path.exists(cmd.override):
     logger.info('Overriding configuration using "%s"' % cmd.override)
-    override = yaml.load(open(cmd.override, 'r').read())
+    override = yaml.load(open(cmd.override, 'r').read(), Loader=yaml.FullLoader)
     logger.info
     if override:
         config['to_install'] += override.get('to_install', [])
