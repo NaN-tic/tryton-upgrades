@@ -59,6 +59,7 @@ to_uninstall:
   - production_quality_control_trigger_lot
   - stock_quality_control_trigger_lot
   - commission_party
+  - production_cost_distribution
 
 before:
   # - tables: ir_model_data
