@@ -43,44 +43,23 @@ with Transaction().start(dbname, 0, context=context):
 
     cursor = Transaction().connection.cursor()
 
-    query = 'SELECT * FROM pg_catalog.pg_tables'
-    cursor.execute(query)
-    tables = [name for _, name, _, _, _, _, _, _ in cursor.fetchall()]
-
-    sql_where = (model_field_h.ttype == 'char')
-    query = model_field_h.select(model_field_h.model, StringAgg(model_field_h.name, ','), group_by=model_field_h.model, where=sql_where)
-    cursor.execute(*query)
-
-    for model_id, model_fields in cursor.fetchall():
-        model = Model(model_id)
-        ModelRecord = pool.get(model.model)
-
-        if not hasattr(ModelRecord, '_table') or callable(getattr(ModelRecord, 'table_query')):
+    for field in ModelField.search([
+            ('ttype', '=', 'char'),
+            ['OR', [
+            ('model.model', 'not like', 'babi_%'),
+            ('model.model', 'not like', 'ir_%'),
+            ]],
+            ]):
+        Model = pool.get(field.model.model)
+        try:
+            table = Model.__table__()
+        except AttributeError:
             continue
 
-        table = ModelRecord._table
-        if table.startswith(('babi_', 'ir')) or table not in tables:
-            continue
-
-        model_h = ModelRecord.__table__()
-        field_names = model_fields.split(',')
-
-        to_check = []
-        for _field, _ttype in ModelRecord._fields.items():
-            if _field in field_names and not isinstance(_ttype, fields.Function):
-                to_check.append(_field)
-
-        if to_check:
-            columns = ' or '.join(["\""+column+"\" ilike E'%\\"+char+"%'" for char in ['n', 't', 'r'] for column in to_check])
-            query = "select id from %(table)s where %(columns)s" % {'table': table, 'columns': columns}
-
-            cursor.execute(query)
-            ids = ', '.join([str(id[0]) for id in cursor.fetchall()])
-
-            if not ids:
-                continue
-            columns = ', '.join(["\""+column+"\" = replace( replace( replace(\""+column+"\", E'\\n', '' ), E'\\t', '' ), E'\\r', '')" for column in to_check])
-            query = "UPDATE %(table)s set %(columns)s WHERE id in (%(ids)s)" % {'table': table, 'columns': columns, 'ids': ids}
+        column = field.name
+        if Model.__table_handler__().column_exist(column):
+            replace = "replace( replace( replace(\""+column+"\", E'\\n', '' ), E'\\t', '' ), E'\\r', '')"
+            query = "UPDATE %(table)s set \"%(column)s\" = %(replace)s" % {'table': table, 'column': column, 'replace': replace}
             cursor.execute(query)
 
     Transaction().commit()
