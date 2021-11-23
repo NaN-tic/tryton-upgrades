@@ -45,10 +45,8 @@ with Transaction().start(dbname, 0, context=context):
 
     for field in ModelField.search([
             ('ttype', '=', 'char'),
-            ['OR', [
             ('model.model', 'not like', 'babi_%'),
             ('model.model', 'not like', 'ir_%'),
-            ]],
             ]):
         Model = pool.get(field.model.model)
         try:
