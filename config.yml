@@ -851,5 +851,9 @@ after:
     tables: party_party_commission_agent commission_agent_selection
     query: INSERT INTO commission_agent_selection (agent,party) SELECT agent, party FROM party_party_commission_agent WHERE agent IS NOT NULL;
 
+  - comment: replace forbidden char
+    version: 5.8
+    script: ./upgrades/after/replace_forbidden_char.py
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
