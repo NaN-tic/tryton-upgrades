@@ -47,13 +47,13 @@ def get_url():
 def run(*args):
     logger.info('RUNNING: %s' % ' '.join(args))
     process = subprocess.Popen(args, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, bufsize=1, shell=False)
+        stderr=subprocess.PIPE, bufsize=1, text=True, shell=False)
 
     out, err = process.communicate()
 
     summary = set()
     in_traceback = False
-    for line in chain(out.decode("utf-8").split('\n'), err.decode("utf-8").split('\n')):
+    for line in chain(out.split('\n'), err.split('\n')):
         line = line.strip()
         if 'ERROR' in line:
             s = line[line.index('ERROR'):]
@@ -369,14 +369,15 @@ else:
 
 url = get_url()
 
-config = yaml.load(open('upgrades/config.yml', 'r').read())
+config = yaml.load(open('upgrades/config.yml', 'r').read(),
+    Loader=yaml.FullLoader)
 config.setdefault('to_uninstall', [])
 config.setdefault('to_install', [])
 config.setdefault('ignore', [])
 config.setdefault('vars', {})
 if os.path.exists(cmd.override):
     logger.info('Overriding configuration using "%s"' % cmd.override)
-    override = yaml.load(open(cmd.override, 'r').read())
+    override = yaml.load(open(cmd.override, 'r').read(), Loader=yaml.FullLoader)
     logger.info
     if override:
         config['to_install'] += override.get('to_install', [])
