@@ -855,5 +855,9 @@ after:
     version: 5.8
     script: ./upgrades/after/replace_forbidden_char.py
 
+  - comment: Migrate sequence_type from product_sequence
+    version: 6.0
+    query: update ir_sequence set sequence_type = (select id from ir_sequence_type where name = 'Product') where sequence_type in (select id from ir_sequence_type where name = 'Product Category');
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
