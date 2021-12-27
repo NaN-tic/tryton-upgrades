@@ -596,10 +596,14 @@ before:
     query: DELETE from "res_user-res_group" where id in (select db_id from ir_model_data where module = 'babi' and fs_id = 'user_clean_execution_group_babi_admin' and model = 'res.user-res.group');
         DELETE from ir_model_data where module = 'babi' and fs_id = 'user_clean_execution_group_babi_admin' and model = 'res.user-res.group';
 
-  - comment: Delete sale_discount reports
+  - comment: Delete sale_discount, purchase_discount and account_invoice_discount reports
     version: 5.8
     query: DELETE from ir_action_report where id in (select db_id from ir_model_data where module = 'sale_discount' and fs_id = 'report_sale') and module = 'sale_discount';
         DELETE from ir_model_data where module = 'sale_discount' and fs_id = 'report_sale';
+        DELETE from ir_action_report where id in (select db_id from ir_model_data where module = 'purchase_discount' and fs_id = 'report_purchase') and module = 'purchase_discount';
+        DELETE from ir_model_data where module = 'purchase_discount' and fs_id = 'report_purchase';
+        DELETE from ir_action_report where id in (select db_id from ir_model_data where module = 'account_invoice_discount' and fs_id = 'report_invoice') and module = 'account_invoice_discount';
+        DELETE from ir_model_data where module = 'account_invoice_discount' and fs_id = 'report_invoice';
 
 after:
   - comment: Remove include_347 from party
