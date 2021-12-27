@@ -568,7 +568,7 @@ before:
 
   - comment: before update, add access on field
     version: 5.8
-    query: ALTER TABLE ir_model_field ADD COLUMN "access" BOOLEAN
+    query: ALTER TABLE ir_model_field ADD COLUMN IF NOT EXISTS "access" BOOLEAN;
 
   - comment: Delete unused users
     version: 5.8
