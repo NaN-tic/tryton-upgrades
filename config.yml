@@ -860,6 +860,10 @@ after:
     tables: party_party_commission_agent commission_agent_selection
     query: INSERT INTO commission_agent_selection (agent,party) SELECT agent, party FROM party_party_commission_agent WHERE agent IS NOT NULL;
 
+  - comment: Merge sepa identifier into eu_at_02
+    version: 5.6
+    query: UPDATE party_configuration SET identifier_types = REPLACE(identifier_types, 'sepa', 'eu_at_02');
+
   - comment: replace forbidden char
     version: 5.8
     script: ./upgrades/after/replace_forbidden_char.py
