@@ -868,5 +868,17 @@ after:
     version: 5.8
     script: ./upgrades/after/replace_forbidden_char.py
 
+  - comment: Use the new field code in template instead of product code in templates with unique_variant
+    version: 6.0
+    fields: product_template.unique_variant
+    tables: product_template product_product
+    query: UPDATE product_template SET code = (SELECT code FROM product_product WHERE template = product_template.id) WHERE unique_variant = True;
+
+  - comment: Delete code from products with unique_variant
+    version: 6.0
+    fields: product_template.unique_variant
+    tables: product_product product_template
+    query: UPDATE product_product SET suffix_code = null WHERE template IN (SELECT id FROM product_template WHERE unique_variant = True);
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
