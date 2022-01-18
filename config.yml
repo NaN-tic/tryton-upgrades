@@ -880,5 +880,10 @@ after:
     tables: product_product product_template
     query: UPDATE product_product SET suffix_code = null WHERE template IN (SELECT id FROM product_template WHERE unique_variant = True);
 
+  - comment: Add lost and found location to warehouse location configuration
+    version: 6.0
+    tables: stock_location
+    query: UPDATE stock_location SET lost_found_location = db_id FROM ir_model_data WHERE module = 'stock' and fs_id = 'location_lost_found' AND type = 'warehouse';
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
