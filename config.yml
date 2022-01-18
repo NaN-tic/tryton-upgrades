@@ -823,12 +823,12 @@ after:
   # https://discuss.tryton.org/t/migration-from-5-4-to-5-6/2303
 
   - comment: Update project status based on previous state
-    version: 5.4
+    version: 5.6
     tables: project_work
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' AND fs_id = 'work_open_status' AND state = 'opened';
 
   - comment: Update project status based on previous state
-    version: 5.4
+    version: 5.6
     tables: project_work
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' and fs_id = 'work_done_status' AND state = 'done';
   #
