@@ -55,7 +55,11 @@ with Transaction().start(dbname, 0, context=context):
             continue
 
         column = field.name
-        if Model.__table_handler__().column_exist(column):
+        try:
+            is_column = Model.__table_handler__().column_exist(column)
+        except TypeError:
+            continue
+        if is_column:
             replace = "replace( replace( replace(\""+column+"\", E'\\n', '' ), E'\\t', '' ), E'\\r', '')"
             query = "UPDATE %(table)s set \"%(column)s\" = %(replace)s" % {'table': table, 'column': column, 'replace': replace}
             cursor.execute(query)

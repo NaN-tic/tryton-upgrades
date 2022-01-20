@@ -568,7 +568,7 @@ before:
 
   - comment: before update, add access on field
     version: 5.8
-    query: ALTER TABLE ir_model_field ADD COLUMN "access" BOOLEAN
+    query: ALTER TABLE ir_model_field ADD COLUMN IF NOT EXISTS "access" BOOLEAN;
 
   - comment: Delete unused users
     version: 5.8
@@ -595,6 +595,15 @@ before:
     version: 5.8
     query: DELETE from "res_user-res_group" where id in (select db_id from ir_model_data where module = 'babi' and fs_id = 'user_clean_execution_group_babi_admin' and model = 'res.user-res.group');
         DELETE from ir_model_data where module = 'babi' and fs_id = 'user_clean_execution_group_babi_admin' and model = 'res.user-res.group';
+
+  - comment: Delete sale_discount, purchase_discount and account_invoice_discount reports
+    version: 5.8
+    query: DELETE from ir_action_report where id in (select db_id from ir_model_data where module = 'sale_discount' and fs_id = 'report_sale') and module = 'sale_discount';
+        DELETE from ir_model_data where module = 'sale_discount' and fs_id = 'report_sale';
+        DELETE from ir_action_report where id in (select db_id from ir_model_data where module = 'purchase_discount' and fs_id = 'report_purchase') and module = 'purchase_discount';
+        DELETE from ir_model_data where module = 'purchase_discount' and fs_id = 'report_purchase';
+        DELETE from ir_action_report where id in (select db_id from ir_model_data where module = 'account_invoice_discount' and fs_id = 'report_invoice') and module = 'account_invoice_discount';
+        DELETE from ir_model_data where module = 'account_invoice_discount' and fs_id = 'report_invoice';
 
 after:
   - comment: Remove include_347 from party
@@ -814,12 +823,12 @@ after:
   # https://discuss.tryton.org/t/migration-from-5-4-to-5-6/2303
 
   - comment: Update project status based on previous state
-    version: 5.4
+    version: 5.6
     tables: project_work
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' AND fs_id = 'work_open_status' AND state = 'opened';
 
   - comment: Update project status based on previous state
-    version: 5.4
+    version: 5.6
     tables: project_work
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' and fs_id = 'work_done_status' AND state = 'done';
   #
@@ -851,6 +860,10 @@ after:
     tables: party_party_commission_agent commission_agent_selection
     query: INSERT INTO commission_agent_selection (agent,party) SELECT agent, party FROM party_party_commission_agent WHERE agent IS NOT NULL;
 
+  - comment: Merge sepa identifier into eu_at_02
+    version: 5.6
+    query: UPDATE party_configuration SET identifier_types = REPLACE(identifier_types, 'sepa', 'eu_at_02');
+
   - comment: replace forbidden char
     version: 5.8
     script: ./upgrades/after/replace_forbidden_char.py
@@ -858,6 +871,23 @@ after:
   - comment: Migrate sequence_type from product_sequence
     version: 6.0
     query: update ir_sequence set sequence_type = (select id from ir_sequence_type where name = 'Product') where sequence_type in (select id from ir_sequence_type where name = 'Product Category');
+
+  - comment: Use the new field code in template instead of product code in templates with unique_variant
+    version: 6.0
+    fields: product_template.unique_variant
+    tables: product_template product_product
+    query: UPDATE product_template SET code = (SELECT code FROM product_product WHERE template = product_template.id AND product_template.unique_variant = True AND product_product.active = True) WHERE unique_variant = True;
+
+  - comment: Delete code from products with unique_variant
+    version: 6.0
+    fields: product_template.unique_variant
+    tables: product_product product_template
+    query: UPDATE product_product SET suffix_code = null WHERE template IN (SELECT id FROM product_template WHERE unique_variant = True);
+
+  - comment: Add lost and found location to warehouse location configuration
+    version: 6.0
+    tables: stock_location
+    query: UPDATE stock_location SET lost_found_location = db_id FROM ir_model_data WHERE module = 'stock' and fs_id = 'location_lost_found' AND type = 'warehouse';
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
