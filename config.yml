@@ -868,6 +868,10 @@ after:
     version: 5.8
     script: ./upgrades/after/replace_forbidden_char.py
 
+  - comment: Migrate sequence_type from product_sequence
+    version: 6.0
+    query: update ir_sequence set sequence_type = (select id from ir_sequence_type where name = 'Product') where sequence_type in (select id from ir_sequence_type where name = 'Product Category');
+
   - comment: Use the new field code in template instead of product code in templates with unique_variant
     version: 6.0
     fields: product_template.unique_variant
