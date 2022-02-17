@@ -65,6 +65,8 @@ before:
   # - tables: ir_model_data
   #   version: 3.2
   #   query: ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;
+  - comment: Remove all existing sessions to force new logins
+    query: DELETE FROM ir_session;
   - version: 5.2
     query:
         UPDATE ir_model_data SET module = 'aeat_303' WHERE module = 'aeat_303_es';
