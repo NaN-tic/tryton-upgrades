@@ -891,5 +891,10 @@ after:
     tables: stock_location
     query: UPDATE stock_location SET lost_found_location = db_id FROM ir_model_data WHERE module = 'stock' and fs_id = 'location_lost_found' AND type = 'warehouse';
 
+  - comment: stock_location_product set template is not null
+    version: 6.0
+    tables: stock_product_location
+    query: update stock_product_location set template = sub.template from (select template, id as pid from product_product where id in (select product from stock_product_location)) as sub where product = sub.pid;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
