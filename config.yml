@@ -475,6 +475,7 @@ before:
 
   - comment: # Delete unused crons
     version: 5.4
+    fields: ir_cron.function
     query: DELETE from ir_cron where function in ('cron_post_clearing_moves');
         DELETE from ir_cron where function in ('trigger_time');
 
@@ -606,6 +607,11 @@ before:
         DELETE from ir_model_data where module = 'purchase_discount' and fs_id = 'report_purchase';
         DELETE from ir_action_report where id in (select db_id from ir_model_data where module = 'account_invoice_discount' and fs_id = 'report_invoice') and module = 'account_invoice_discount';
         DELETE from ir_model_data where module = 'account_invoice_discount' and fs_id = 'report_invoice';
+
+  - comment: Replace sale_customer_product to sale_product_customer
+    version: 5.4
+    tables: sale_product_customer
+    query: ALTER TABLE sale_product_customer rename column product to template;
 
 after:
   - comment: Remove include_347 from party
