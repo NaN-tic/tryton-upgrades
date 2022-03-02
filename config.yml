@@ -613,6 +613,10 @@ before:
     tables: sale_product_customer
     query: ALTER TABLE sale_product_customer rename column product to template;
 
+  - comment: ir.cron set hour 0 where is 24
+    version: 5.4
+    query: UPDATE ir_cron set hour = 0 where hour = 24;
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
