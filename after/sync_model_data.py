@@ -39,9 +39,7 @@ with Transaction().start(dbname, 0, context=context):
         domain += [('id', 'not in', to_omit)]
     datas = Data.search(domain)
     print('LEN: ', len(datas))
-    for data in datas:
-        print(data)
-        Data.sync([data])
+    Data.sync(datas)
 
     Transaction().commit()
 
