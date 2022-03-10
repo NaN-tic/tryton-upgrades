@@ -617,6 +617,18 @@ before:
     version: 5.4
     query: UPDATE ir_cron set hour = 0 where hour = 24;
 
+  - comment: rename contact to invoice_contact
+    version: 5.6
+    fields: account_invoice.contact
+    tables: account_invoice
+    query: ALTER table account_invoice rename contact to invoice_contact;
+
+  - comment: rename contact to invoice_contact
+    version: 5.6
+    fields: sale_sale.contact
+    tables: sale_sale
+    query: ALTER table sale_sale rename contact to invoice_contact;
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
