@@ -626,6 +626,10 @@ before:
     tables: sale_sale
     query: ALTER table sale_sale rename contact to invoice_contact;
 
+  - comment: replace sequence_type_lot from stock_lot_sequence to sequence_type_stock_lot from stock_lot module
+    version: 6.4
+    query: update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'stock_lot' and fs_id = 'sequence_type_stock_lot') where sequence_type = (select db_id from ir_model_data where module = 'stock_lot_sequence' and fs_id = 'sequence_type_lot');
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
@@ -914,6 +918,10 @@ after:
     version: 6.0
     tables: stock_product_location
     query: update stock_product_location set template = sub.template from (select template, id as pid from product_product where id in (select product from stock_product_location)) as sub where product = sub.pid;
+
+  - comment: replace sequence_type_lot from stock_lot_sequence to sequence_type_stock_lot from stock_lot module
+    version: 5.4
+    query: update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'stock_lot' and fs_id = 'sequence_type_stock_lot') where sequence_type = (select db_id from ir_model_data where module = 'stock_lot_sequence' and fs_id = 'sequence_type_lot');
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
