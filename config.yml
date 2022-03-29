@@ -901,7 +901,7 @@ after:
     version: 6.0
     fields: product_template.unique_variant
     tables: product_template product_product
-    query: UPDATE product_template SET code = (SELECT code FROM product_product WHERE template = product_template.id AND product_template.unique_variant = True AND product_product.active = True) WHERE unique_variant = True;
+    query:  update product_template set code = sub.code from (SELECT pp.id as pp_id, pp.template as pt_id, pp.code as code FROM product_product as pp left join product_template as pt on pt.id = pp.template WHERE pp.template = pt.id AND pt.unique_variant = True AND pp.active = True) as sub where id = pt_id;
 
   - comment: Delete code from products with unique_variant
     version: 6.0
