@@ -631,6 +631,12 @@ before:
     query: update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'stock_lot' and fs_id = 'sequence_type_stock_lot') where sequence_type = (select db_id from ir_model_data where module = 'stock_lot_sequence' and fs_id = 'sequence_type_lot');
         update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'farm' and fs_id = 'sequence_type_lot') where sequence_type = (select db_id from ir_model_data where module = 'farm' and fs_id = 'sequence_type_lot');
 
+  - comment: remove domain act_window employee_leave module
+    version: 6.0
+    query: update ir_model_data set fs_values = '[["name","Employee Leave Summary"],["res_model","employee.leave.summary"]]' where fs_id = 'act_employee_leave_summary';
+        update ir_model_data set fs_values = '[["name","Employee Entitlement"],["res_model","employee.leave.entitlement"]]' where fs_id = 'act_employee_leave_entitlement';
+        update ir_action_act_window set domain = null where id = (select db_id from ir_model_data where fs_id = 'act_employee_leave_entitlement');
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
