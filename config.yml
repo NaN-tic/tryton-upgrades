@@ -60,6 +60,8 @@ to_uninstall:
   - stock_quality_control_trigger_lot
   - commission_party
   - production_cost_distribution
+  - asterisk
+  - party_asterisk
 
 before:
   # - tables: ir_model_data
