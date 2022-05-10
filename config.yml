@@ -62,6 +62,7 @@ to_uninstall:
   - production_cost_distribution
   - asterisk
   - party_asterisk
+  - shine
 
 before:
   # - tables: ir_model_data
