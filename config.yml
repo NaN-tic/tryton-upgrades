@@ -64,6 +64,9 @@ to_uninstall:
   - party_asterisk
   - shine
 
+# TODO: Add to uninstall to upgrades to v6.4
+#  - account_invoice_prevent_duplicates
+
 before:
   # - tables: ir_model_data
   #   version: 3.2
