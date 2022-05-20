@@ -652,6 +652,10 @@ before:
         update ir_action_act_window set domain = null where id = (select db_id from ir_model_data where fs_id = 'act_employee_leave_entitlement');
         update ir_action_act_window set domain = null where id = (select db_id from ir_model_data where fs_id = 'act_employee_leave_summary');
 
+  - comment: upgrade incoterm 2020
+    version: 6.0
+    query: delete from ir_model_data where module = 'incoterm' and fs_id = 'incoterm_2010';
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
