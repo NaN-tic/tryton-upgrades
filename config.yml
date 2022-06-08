@@ -63,6 +63,7 @@ to_uninstall:
   - asterisk
   - party_asterisk
   - shine
+  - csv_import
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
