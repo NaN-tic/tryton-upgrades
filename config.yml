@@ -6,6 +6,7 @@ to_uninstall:
   - account_invoice_data
   - account_invoice_consecutive
   - account_invoice_post_in_tree
+  - account_invoice_prevent_duplicates
   - account_move_party_required
   - account_payment_bank
   - account_payment_es_csb_19
@@ -950,6 +951,16 @@ after:
     version: 5.4
     query: update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'stock_lot' and fs_id = 'sequence_type_stock_lot') where sequence_type = (select db_id from ir_model_data where module = 'stock_lot_sequence' and fs_id = 'sequence_type_lot');
         update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'farm' and fs_id = 'sequence_type_lot') where sequence_type = (select db_id from ir_model_data where module = 'farm' and fs_id = 'sequence_type_lot');
+
+  - comment: text to JSONB
+    version: 6.4
+    query: ALTER TABLE ir_queue ALTER data TYPE JSONB USING data::JSONB;
+
+  - comment: text to JSONB
+    version: 6.4
+    tables: asset
+    query: ALTER TABLE asset ALTER attributes TYPE JSONB USING attributes::JSONB;
+
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
