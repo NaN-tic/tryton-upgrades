@@ -496,6 +496,8 @@ before:
         DELETE from ir_model_data where fs_id = 'cron_trigger_time' and model = 'ir.cron';
         DELETE FROM res_user WHERE login IN ('user_cron_trigger');
         DELETE FROM ir_model_data WHERE model='res.user' AND fs_id IN ('user_trigger');
+        DELETE FROM res_user WHERE login IN ('user_cron_internal_esale');
+        DELETE FROM ir_model_data WHERE model='res.user' AND fs_id IN ('user_cron_internal_esale');
 
   - comment: # Delete unused crons esale
     version: 5.4
