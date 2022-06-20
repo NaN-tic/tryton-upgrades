@@ -666,10 +666,6 @@ before:
         UPDATE account_invoice_line SET invoice_type = (SELECT type FROM account_invoice WHERE id = account_invoice_line.invoice) WHERE invoice_type IS NOT NULL AND invoice IS NOT NULL;
         UPDATE account_invoice_line SET party = (SELECT party FROM account_invoice WHERE id = account_invoice_line.invoice) WHERE party IS NOT NULL AND invoice IS NOT NULL;
 
-  - comment: before update, add access on field
-    version: 6.0
-    query: ALTER TABLE ir_model_field ADD COLUMN "access" BOOLEAN;
-
 after:
   - comment: Remove include_347 from party
     version: 5.1
