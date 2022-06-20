@@ -969,10 +969,6 @@ after:
     tables: asset
     query: ALTER TABLE asset ALTER attributes TYPE JSONB USING attributes::JSONB;
 
-  - comment: after update, remove code column
-    version: 6.0
-    query: ALTER table ir_sequence_type DROP COLUMN code;
-
   - comment: Migration from 6.2 to 6.4
     version: 6.4
     tables: account_payment
