@@ -911,7 +911,7 @@ after:
 
   - comment: after update, remove code column
     version: 5.8
-    query: ALTER TABLE ir_sequence_type DROP COLUMN code
+    query: ALTER TABLE ir_sequence_type DROP COLUMN IF EXISTS code;
 
   - comment: all versions sync model data
     script: ./upgrades/after/sync_model_data.py
