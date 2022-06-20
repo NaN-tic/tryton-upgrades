@@ -973,5 +973,10 @@ after:
     version: 6.0
     query: ALTER table ir_sequence_type DROP COLUMN code;
 
+  - comment: Migration from 6.2 to 6.4
+    version: 6.4
+    tables: account_payment
+    script: ./upgrades/after/account_payment_update_reconciled.py
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
