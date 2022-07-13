@@ -66,6 +66,7 @@ to_uninstall:
   - stock_supply_production_warehouse
   - stock_quality_control_trigger_lot
   - webdav
+  - stock_lot_quantity
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
