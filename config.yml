@@ -969,7 +969,7 @@ after:
 
   - comment: text to JSONB
     version: 6.4
-    tables: asset
+    fields: asset.attributes
     query: ALTER TABLE asset ALTER attributes TYPE JSONB USING attributes::JSONB;
 
   - comment: Migration from 6.2 to 6.4
