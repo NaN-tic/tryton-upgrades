@@ -36,24 +36,26 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     # trytond.exceptions.UserError: Payment "1648" can not be modified because its mandate "RUM0000006" is canceled. -
     # trytond.model.modelstorage.DomainValidationError: The value for field "Bank Account" in "Payment" is not valid according to its domain. -
 
-    payment_sepa_es = Module.search([
-        ('name', '=', 'account_payment_sepa_es'),
-        ('state', '=', 'activated'),
-        ], limit=1)
+    # required account_payment_clearing activated
+    if hasattr(Payment, 'update_reconciled'):
+        payment_sepa_es = Module.search([
+            ('name', '=', 'account_payment_sepa_es'),
+            ('state', '=', 'activated'),
+            ], limit=1)
 
-    if payment_sepa_es:
-        domain = ['OR',
-            ('sepa_mandate', '=', None),
-            ('sepa_mandate.state', '!=', 'cancelled'),
-            ]
-    else:
-        domain = []
+        if payment_sepa_es:
+            domain = ['OR',
+                ('sepa_mandate', '=', None),
+                ('sepa_mandate.state', '!=', 'cancelled'),
+                ]
+        else:
+            domain = []
 
-    payments = Payment.search(domain)
+        payments = Payment.search(domain)
 
-    for payment in payments:
-        try:
-            Payment.update_reconciled([payment])
-        except DomainValidationError:
-            pass
-    transaction.commit()
+        for payment in payments:
+            try:
+                Payment.update_reconciled([payment])
+            except DomainValidationError:
+                pass
+        transaction.commit()
