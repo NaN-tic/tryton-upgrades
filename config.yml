@@ -650,6 +650,7 @@ before:
 
   - comment: replace sequence_type_lot from stock_lot_sequence to sequence_type_stock_lot from stock_lot module
     version: 6.4
+    fields: ir_sequence.sequence_type
     query: update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'stock_lot' and fs_id = 'sequence_type_stock_lot') where sequence_type = (select db_id from ir_model_data where module = 'stock_lot_sequence' and fs_id = 'sequence_type_lot');
         update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'farm' and fs_id = 'sequence_type_lot') where sequence_type = (select db_id from ir_model_data where module = 'farm' and fs_id = 'sequence_type_lot');
 
@@ -895,11 +896,13 @@ after:
   - comment: Update project status based on previous state
     version: 5.6
     tables: project_work
+    fields: project_work.state
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' AND fs_id = 'work_open_status' AND state = 'opened';
 
   - comment: Update project status based on previous state
     version: 5.6
     tables: project_work
+    fields: project_work.state
     query: UPDATE project_work SET status = db_id FROM ir_model_data WHERE module = 'project' and fs_id = 'work_done_status' AND state = 'done';
   #
   #
