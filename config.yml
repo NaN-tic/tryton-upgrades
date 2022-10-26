@@ -29,6 +29,7 @@ to_uninstall:
   - asset_estate
   - asterisk
   - audit_log
+  - dbcopy
   - calendar
   - calendar_classification
   - calendar_scheduling
