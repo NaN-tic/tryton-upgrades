@@ -988,5 +988,9 @@ after:
     tables: account_payment
     script: ./upgrades/after/account_payment_update_reconciled.py
 
+  - comment: Deprecated currency_digits fields
+    version: 6.4
+    query: delete from ir_export_line where name = 'currency_digits';
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
