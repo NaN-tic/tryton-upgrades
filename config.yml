@@ -48,6 +48,7 @@ to_uninstall:
   - product_code_unique
   - production_cost_distribution
   - production_quality_control_trigger_lot
+  - production_package
   - project_state_by_buttons
   - project_auto_timesheet
   - project_asterisk
