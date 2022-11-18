@@ -57,7 +57,9 @@ to_uninstall:
   - project_unittest
   - product_price_list_category
   - production_origin # Remove in upgrade to 6.0
+  - purchase_incoterm
   - sale_fedicom
+  - sale_incoterm
   - sale_invoices_paid
   - sale_shipments_done
   - shine
@@ -683,6 +685,30 @@ before:
     version: 6.4
     query: delete from ir_translation where name = 'account.configuration,default_product_account_expense' and lang in ('ca', 'es');
         delete from ir_translation where name = 'account.configuration,default_product_account_revenue' and lang in ('ca', 'es');
+
+  - comment: Migration incoterm nantic to core
+    version: 6.4
+    tables: incoterm
+    query: alter table incoterm rename to incoterm_incoterm;alter table incoterm_id_seq rename to incoterm_incoterm_id_seq;
+         alter table incoterm_incoterm drop column active;
+         update ir_model_data set model = 'incoterm.incoterm' where module = 'incoterm' and model = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_exw_2010' where fs_id = 'incoterm_exw' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_fca_2010' where fs_id = 'incoterm_fca' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_cpt_2010' where fs_id = 'incoterm_cpt' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_cip_2010' where fs_id = 'incoterm_cip' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_dap_2010' where fs_id = 'incoterm_dap' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_dpu_2020' where fs_id = 'incoterm_dpu' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_ddp_2010' where fs_id = 'incoterm_ddp' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_fas_2010' where fs_id = 'incoterm_fas' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_fob_2010' where fs_id = 'incoterm_fob' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_cfr_2010' where fs_id = 'incoterm_cfr' and module = 'incoterm';
+         update ir_model_data set fs_id = 'incoterm_cif_2010' where fs_id = 'incoterm_cif' and module = 'incoterm';
+         delete from ir_action_act_window where id in (select db_id from ir_model_data where module = 'incoterm' and model = 'ir.action.act_window');
+         delete from ir_action_act_window_view where id in (select db_id from ir_model_data where module = 'incoterm' and model = 'ir.action.act_window.view');
+         delete from ir_ui_menu where id in (select db_id from ir_model_data where module = 'incoterm' and model = 'ir.ui.menu');
+         delete from ir_ui_view where id in (select db_id from ir_model_data where module = 'incoterm' and model = 'ir.ui.view');
+         delete from ir_model_data where module = 'incoterm' and model in ('act_incoterm_form', 'ir.action.act_window', 'ir.action.act_window.view', 'ir.ui.menu', 'ir.ui.view');
+         delete from ir_translation where module in ('incoterm', 'sale_incoterm', 'purchase_incoterm');
 
 after:
   - comment: Remove include_347 from party
