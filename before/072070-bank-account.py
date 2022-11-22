@@ -44,6 +44,10 @@ with Transaction().start(dbname, 1, context=context):
     cursor = Transaction().connection.cursor()
 
     # 1. move data to new
+    query = 'alter table  "party_party-bank_account-company" ADD COLUMN IF NOT EXISTS payable_bank_account int';
+    query = 'alter table  "party_party-bank_account-company" ADD COLUMN IF NOT EXISTS receivable_bank_account int';
+    cursor.execute(query)
+
     query = 'select account, owner, company, payable_bank_account, receivable_bank_account from "bank_account-party_party"'
     cursor.execute(query)
     bank_rows = {}

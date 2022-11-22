@@ -694,11 +694,6 @@ before:
          ALTER TABLE "party_party-bank_account-company" RENAME COLUMN payable_bank_account TO payable_company_bank_account;
     script: ./upgrades/before/072070-bank-account.py
 
-  - comment: company_bank with MultiValue - 072070
-    version: 6.4
-    tables: bank_account
-    script: ./upgrades/before/issue11198-bank-number.py
-
   - comment: Migration incoterm nantic to core
     version: 6.4
     tables: incoterm
