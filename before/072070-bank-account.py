@@ -43,9 +43,16 @@ with Transaction().start(dbname, 1, context=context):
 
     cursor = Transaction().connection.cursor()
 
+    # 1. drop _sql_constraints
+    # 2. bank_account-party_party data to party_party-bank_account-company table
+    query = "ALTER TABLE bank_account_number DROP CONSTRAINT IF EXISTS bank_account_number_number_iban_exclude"
+    cursor.execute(query)
+    query = "ALTER TABLE bank_account_number DROP CONSTRAINT IF EXISTS bank_account_number_account_iban_exclude"
+    cursor.execute(query)
+
     # 1. move data to new
-    query = 'alter table  "party_party-bank_account-company" ADD COLUMN IF NOT EXISTS payable_bank_account int';
-    query = 'alter table  "party_party-bank_account-company" ADD COLUMN IF NOT EXISTS receivable_bank_account int';
+    query = 'alter table "party_party-bank_account-company" ADD COLUMN IF NOT EXISTS payable_bank_account int';
+    query = 'alter table "party_party-bank_account-company" ADD COLUMN IF NOT EXISTS receivable_bank_account int';
     cursor.execute(query)
 
     query = 'select account, owner, company, payable_bank_account, receivable_bank_account from "bank_account-party_party"'
