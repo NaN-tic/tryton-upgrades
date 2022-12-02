@@ -42,6 +42,32 @@ with Transaction().start(dbname, 1, context=context):
     BankNumber = pool.get('bank.account.number')
 
     cursor = Transaction().connection.cursor()
+
+    # 1. drop _sql_constraints
+    # 2. rename account2 to account in case before upgrade rename columns
+    # 3. rename number_compact2 to number_compact in case before upgrade rename columns
+    # 4. remove duplicated iban codes
+    query = "ALTER TABLE bank_account_number DROP CONSTRAINT IF EXISTS bank_account_number_number_iban_exclude"
+    cursor.execute(query)
+    query = "ALTER TABLE bank_account_number DROP CONSTRAINT IF EXISTS bank_account_number_account_iban_exclude"
+    cursor.execute(query)
+
+    query = "SELECT 1 FROM information_schema.columns  WHERE table_name='bank_account_number' and column_name='number_compact2'"
+    cursor.execute(query)
+    if cursor.fetchone():
+        query = "alter table bank_account_number drop column number_compact"
+        cursor.execute(query)
+        query = "alter table bank_account_number rename number_compact2 to number_compact"
+        cursor.execute(query)
+
+    query = "SELECT 1 FROM information_schema.columns  WHERE table_name='bank_account_number' and column_name='account2'"
+    cursor.execute(query)
+    if cursor.fetchone():
+        query = "alter table bank_account_number drop column account"
+        cursor.execute(query)
+        query = "alter table bank_account_number rename account2 to account"
+        cursor.execute(query)
+
     query = "select number_compact, count(*) from bank_account_number where type = 'iban' group by number_compact HAVING count(*) > 1"
 
     cursor.execute(query)
