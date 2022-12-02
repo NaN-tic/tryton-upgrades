@@ -1031,5 +1031,10 @@ after:
     version: 6.4
     query: delete from ir_export_line where name = 'currency_digits';
 
+  - comment: company_bank with MultiValue - 072070
+    version: 6.4
+    tables: bank_account-party_party
+    script: ./upgrades/before/072070-bank-account.py
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
