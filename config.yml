@@ -496,7 +496,7 @@ before:
         DELETE from ir_cron where function in ('trigger_time');
 
   - comment: # Delete unused crons
-    version: 5.6
+    version: 5.4
     query:
         DELETE from ir_model_data where fs_id = 'cron_post_clearing_moves' and model = 'ir.cron';
         DELETE FROM res_user WHERE login IN ('user_cron_post_clearing_moves');
