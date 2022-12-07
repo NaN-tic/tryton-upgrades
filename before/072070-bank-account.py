@@ -77,4 +77,7 @@ with Transaction().start(dbname, 1, context=context):
             query = 'insert into "party_party-bank_account-company" (party, company, payable_bank_account, receivable_bank_account) values (%s, %s, %s, %s)' % (owner_id, company_id, account_id if is_payable_bank_account else 'null', account_id if is_receivable_bank_account else 'null')
             cursor.execute(query)
 
+    query = 'alter table "bank_account-party_party" alter column company drop not null'
+    cursor.execute(query)
+
     Transaction().commit()
