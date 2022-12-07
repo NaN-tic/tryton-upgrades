@@ -37,8 +37,6 @@ with Transaction().start(dbname, 1, context=context):
 
     Payment = pool.get('account.payment')
     Line = pool.get('account.move.line')
-    SepaMandate = pool.get('account.payment.sepa.mandate')
-
     BankNumber = pool.get('bank.account.number')
 
     cursor = Transaction().connection.cursor()
