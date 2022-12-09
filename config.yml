@@ -688,7 +688,8 @@ before:
   - comment: company_bank with MultiValue - 072070
     version: 6.4
     tables: party_party-company_company
-    query: ALTER TABLE "party_party-company_company" RENAME TO "party_party-bank_account-company";ALTER TABLE "party_party-company_company_id_seq" RENAME TO "party_party-bank_account-company_id_seq";
+    query: ALTER TABLE "party_party-company_company" DROP CONSTRAINT IF EXISTS "party_party-company_company_company_party_uniq";
+         ALTER TABLE "party_party-company_company" RENAME TO "party_party-bank_account-company";ALTER TABLE "party_party-company_company_id_seq" RENAME TO "party_party-bank_account-company_id_seq";
          ALTER TABLE "party_party-bank_account-company" RENAME COLUMN receivable_bank_account TO receivable_company_bank_account;
          ALTER TABLE "party_party-bank_account-company" RENAME COLUMN payable_bank_account TO payable_company_bank_account;
 
