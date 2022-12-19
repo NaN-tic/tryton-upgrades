@@ -57,7 +57,7 @@ with Transaction().start(dbname, 1, context=context):
     cursor.execute(query)
     bank_rows = {}
     for account_id, owner_id, company_id, is_payable_bank_account, is_receivable_bank_account  in cursor.fetchall():
-        query2 = 'select id from "party_party-bank_account-company" where party = %s and company = %s' % (owner_id, company_id)
+        query2 = 'select id from "party_party-bank_account-company" where party = %s and company = %s' % (owner_id, company_id or 1)
         cursor.execute(query2)
 
         has_id = None
