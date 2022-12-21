@@ -44,9 +44,13 @@ to_uninstall:
   - party_credit_limit
   - party_vcarddav
   - party_merge
+  - party_search
+  - party_social_contact
   - product_configuration
   - product_barcode
   - product_code_unique
+  - product_review
+  - product_search_code
   - production_cost_distribution
   - production_quality_control_trigger_lot
   - production_package
@@ -59,6 +63,8 @@ to_uninstall:
   - product_price_list_category
   - production_origin # Remove in upgrade to 6.0
   - purchase_incoterm
+  - purchase_product_supplier
+  - sale_external_price
   - sale_fedicom
   - sale_incoterm
   - sale_invoices_paid
