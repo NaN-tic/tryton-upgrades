@@ -79,6 +79,7 @@ to_uninstall:
   - stock_quality_control_trigger_lot
   - webdav
   - stock_lot_quantity
+  - product_price_list_table # Deprecated at 6.4
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
