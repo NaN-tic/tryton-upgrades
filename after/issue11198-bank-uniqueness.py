@@ -38,6 +38,8 @@ with Transaction().start(dbname, 1, context=context):
     Payment = pool.get('account.payment')
     Line = pool.get('account.move.line')
     SepaMandate = pool.get('account.payment.sepa.mandate')
+    Invoice = pool.get('account.invoice')
+    PaymentType = pool.get('account.payment.type')
 
     BankNumber = pool.get('bank.account.number')
 
@@ -85,6 +87,24 @@ with Transaction().start(dbname, 1, context=context):
 
         for bn in bank_number_to_delete:
             ba = bn.account
+
+            query = 'update "bank_account-party_party" set account = %s where account = %s and owner in (%s)' % (bank_account.id, ba.id, ', '.join(str(o.id) for o in ba.owners))
+            cursor.execute(query)
+
+            query = 'update "party_party-bank_account-company" set receivable_company_bank_account = %s where receivable_company_bank_account = %s' % (bank_account.id, ba.id)
+            cursor.execute(query)
+            query = 'update "party_party-bank_account-company" set payable_company_bank_account = %s where payable_company_bank_account = %s' % (bank_account.id, ba.id)
+            cursor.execute(query)
+
+            invoices = Invoice.search([('bank_account', '=', ba)])
+            if invoices:
+                query = 'update account_invoice set bank_account = %s where id in (%s)' % (bank_account.id, ', '.join(str(i.id) for i in invoices))
+                cursor.execute(query)
+
+            payment_types = PaymentType.search([('bank_account', '=', ba)])
+            if payment_types:
+                query = 'update account_payment_type set bank_account = %s where id in (%s)' % (bank_account.id, ', '.join(str(p.id) for p in payment_types))
+                cursor.execute(query)
 
             lines = Line.search([('bank_account', '=', ba)])
             if lines:
