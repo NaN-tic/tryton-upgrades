@@ -84,6 +84,8 @@ to_uninstall:
   - account_invoice_line_search_by_shipment # Replace with account_invoice_line_origin
   - account_invoice_search_by_purchase # Replace with account_invoice_line_origin
   - dbcopy # Deprecated at 6.4
+  - account_invoice_origin_reference # Deprecated at 6.4. Replace with account_invoice_line_origin
+  - stock_shipment_in_return_childs # Deprecated at 6.4
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
