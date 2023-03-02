@@ -89,6 +89,7 @@ to_uninstall:
   - stock_lot_csv # Deprecated at 6.4
   - stock_move_warehouse # Deprecated at 6.4
   - activity_category # Deprecated at 6.4
+  - account_journal_company # Deprecated at 6.4
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
