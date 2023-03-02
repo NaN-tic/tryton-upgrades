@@ -40,6 +40,10 @@ with Transaction().start(dbname, 1, context=context):
     SepaMandate = pool.get('account.payment.sepa.mandate')
     Invoice = pool.get('account.invoice')
     PaymentType = pool.get('account.payment.type')
+    try:
+        Contract = pool.get('contract')
+    except KeyError:
+        Contract = None
 
     BankNumber = pool.get('bank.account.number')
 
@@ -88,7 +92,7 @@ with Transaction().start(dbname, 1, context=context):
         for bn in bank_number_to_delete:
             ba = bn.account
 
-            query = 'update "bank_account-party_party" set account = %s where account = %s and owner in (%s)' % (bank_account.id, ba.id, ', '.join(str(o.id) for o in ba.owners))
+            query = 'update "bank_account-party_party" set account = %s where account = %s' % (bank_account.id, ba.id)
             cursor.execute(query)
 
             query = 'update "party_party-bank_account-company" set receivable_company_bank_account = %s where receivable_company_bank_account = %s' % (bank_account.id, ba.id)
@@ -117,6 +121,12 @@ with Transaction().start(dbname, 1, context=context):
                 query = 'update account_payment set bank_account = %s, sepa_mandate = %s where id in (%s)' % (bank_account.id, mand, ', '.join(str(p.id) for p in payments))
                 cursor.execute(query)
 
+            if Contract:
+                contracts = Contract.search([('bank_account', '=', ba)])
+                if contracts:
+                    query = 'update contract set bank_account = %s where id in (%s)' % (bank_account.id, ', '.join(str(c.id) for c in contracts))
+                    cursor.execute(query)
+
             mandates = SepaMandate.search([
                 ('account_number', '=', bn),
                 ])
@@ -125,6 +135,9 @@ with Transaction().start(dbname, 1, context=context):
                 cursor.execute(query)
 
         query = "delete from bank_account_number where id in (%s)" % (', '.join(str(b.id) for b in bank_number_to_delete))
+        cursor.execute(query)
+
+        query = "delete from bank_account where id in (%s)" % (', '.join(str(b.account.id) for b in bank_number_to_delete if b.account))
         cursor.execute(query)
 
     query = "select account, count(*) from bank_account_number where type = 'iban' group by account HAVING count(*) > 1"
@@ -139,6 +152,18 @@ with Transaction().start(dbname, 1, context=context):
 
         query = "update bank_account_number set type = 'other' where id in (%s)" % (', '.join(str(b.id) for b in bank_number_to_inactive))
         cursor.execute(query)
+
+    query = 'select account, owner, company from "bank_account-party_party" group by account, owner, company having count(1) > 1'
+    cursor.execute(query)
+    for account, owner, company in cursor.fetchall():
+        query = 'select id from "bank_account-party_party" where account = %s and owner = %s and company = %s order by id ASC;' % (account, owner, company)
+        cursor.execute(query)
+        accounts = cursor.fetchall()
+        accounts.pop(0)
+        if len(accounts) >= 1:
+            for id_ in accounts:
+                query = 'delete from "bank_account-party_party" where id = %s' % id_
+                cursor.execute(query)
 
     if trytond_version > 3.8:
         Transaction().commit()
