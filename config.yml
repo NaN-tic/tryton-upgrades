@@ -731,6 +731,11 @@ before:
          delete from ir_model_data where module = 'incoterm' and model in ('act_incoterm_form', 'ir.action.act_window', 'ir.action.act_window.view', 'ir.ui.menu', 'ir.ui.view');
          delete from ir_translation where module in ('incoterm', 'sale_incoterm', 'purchase_incoterm');
 
+  - comment: allow upgrade issue11198 before run script. Note this is linked to another 'after' script that can be found searching for issue11198 in this file.
+    version: 6.4
+    query: alter table bank_account_number rename number_compact to number_compact2;
+         alter table bank_account_number rename account to account2;
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
@@ -1049,6 +1054,10 @@ after:
     version: 6.4
     tables: bank_account-party_party
     script: ./upgrades/before/072070-bank-account.py
+
+  - comment: issue11198 bank uniqueness. Note this is linked to another 'before' script that can be found searching for issue11198 in this file.
+    version: 6.4
+    script: ./upgrades/after/issue11198-bank-uniqueness.py
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
