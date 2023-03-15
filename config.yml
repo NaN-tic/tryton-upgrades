@@ -736,10 +736,14 @@ before:
          delete from ir_model_data where module = 'incoterm' and model in ('act_incoterm_form', 'ir.action.act_window', 'ir.action.act_window.view', 'ir.ui.menu', 'ir.ui.view');
          delete from ir_translation where module in ('incoterm', 'sale_incoterm', 'purchase_incoterm');
 
-  - comment: allow upgrade issue11198 before run script. Note this is linked to another 'after' script that can be found searching for issue11198 in this file.
+  - comment: Allow upgrade issue11198 before run script. Note this is linked to another 'after' script that can be found searching for issue11198 in this file.
     version: 6.4
-    query: alter table bank_account_number rename number_compact to number_compact2;
-         alter table bank_account_number rename account to account2;
+    fields: bank_account_number.number_compact
+    query: ALTER TABLE bank_account_number RENAME number_compact TO number_compact2;
+  - comment: Allow upgrade issue11198 before run script. Note this is linked to another 'after' script that can be found searching for issue11198 in this file.
+    version: 6.4
+    fields: bank_account_number.account
+    query: ALTER TABLE bank_account_number RENAME account TO account2;
 
 after:
   - comment: Remove include_347 from party
