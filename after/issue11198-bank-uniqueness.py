@@ -173,6 +173,10 @@ with Transaction().start(dbname, 1, context=context):
                 query = 'delete from "bank_account-party_party" where id = %s' % id_
                 cursor.execute(query)
 
+    # Ensure that all bank_account_number has an bank_account
+    query = 'delete from bank_account_number where account not in (select id from bank_account)'
+    cursor.execute(query)
+
     if trytond_version > 3.8:
         Transaction().commit()
     else:
