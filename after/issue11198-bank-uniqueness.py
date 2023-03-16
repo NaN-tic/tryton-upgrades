@@ -134,11 +134,19 @@ with Transaction().start(dbname, 1, context=context):
                 query = 'delete from account_payment_sepa_mandate where id in (%s)' % (', '.join(str(m.id) for m in mandates))
                 cursor.execute(query)
 
+        bank_account_ids = (', '.join(str(b.account.id) for b in bank_number_to_delete if b.account))
+        if bank_account_ids:
+            query = "update account_invoice set bank_account = null where bank_account in (%s)" % bank_account_ids
+            cursor.execute(query)
+            query = "update account_move_line set bank_account = null where bank_account in (%s)" % bank_account_ids
+            cursor.execute(query)
+
         query = "delete from bank_account_number where id in (%s)" % (', '.join(str(b.id) for b in bank_number_to_delete))
         cursor.execute(query)
 
-        query = "delete from bank_account where id in (%s)" % (', '.join(str(b.account.id) for b in bank_number_to_delete if b.account))
-        cursor.execute(query)
+        if bank_account_ids:
+            query = "delete from bank_account where id in (%s)" % bank_account_ids
+            cursor.execute(query)
 
     query = "select account, count(*) from bank_account_number where type = 'iban' group by account HAVING count(*) > 1"
 
