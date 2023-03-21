@@ -173,7 +173,10 @@ with Transaction().start(dbname, 1, context=context):
                 query = 'delete from "bank_account-party_party" where id = %s' % id_
                 cursor.execute(query)
 
-    # Ensure that all bank_account_number has an bank_account
+    # Ensure that all bank_account_number has an bank_account. For that we will clear sepa mandates leaving them without account_number.
+    query = 'UPDATE account_payment_sepa_mandate SET account_number = NULL WHERE account_number IN (SELECT id FROM bank_account_number WHERE account NOT IN (SELECT id FROM bank_account)'
+    cursor.execute(query)
+
     query = 'delete from bank_account_number where account not in (select id from bank_account)'
     cursor.execute(query)
 
