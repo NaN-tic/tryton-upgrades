@@ -76,6 +76,8 @@ with Transaction().start(dbname, 1, context=context):
 
     query = "select number_compact, count(*) from bank_account_number where type = 'iban' group by number_compact HAVING count(*) > 1"
 
+    account_bank2account_bank = {}
+
     cursor.execute(query)
     for number_compact, _ in cursor.fetchall():
         bank_numbers = BankNumber.search([
@@ -92,39 +94,46 @@ with Transaction().start(dbname, 1, context=context):
         for bn in bank_number_to_delete:
             ba = bn.account
 
-            query = 'update "bank_account-party_party" set account = %s where account = %s' % (bank_account.id, ba.id)
+            bank_account_id = bank_account.id
+            ba_id = ba.id
+            if bank_account_id in account_bank2account_bank:
+                bank_account_id = account_bank2account_bank[bank_account_id]
+            else:
+                account_bank2account_bank[ba_id] = bank_account_id
+
+            query = 'update "bank_account-party_party" set account = %s where account = %s' % (bank_account_id, ba_id)
             cursor.execute(query)
 
-            query = 'update "party_party-bank_account-company" set receivable_company_bank_account = %s where receivable_company_bank_account = %s' % (bank_account.id, ba.id)
+            query = 'update "party_party-bank_account-company" set receivable_company_bank_account = %s where receivable_company_bank_account = %s' % (bank_account_id, ba_id)
             cursor.execute(query)
-            query = 'update "party_party-bank_account-company" set payable_company_bank_account = %s where payable_company_bank_account = %s' % (bank_account.id, ba.id)
+            query = 'update "party_party-bank_account-company" set payable_company_bank_account = %s where payable_company_bank_account = %s' % (bank_account_id, ba_id)
             cursor.execute(query)
 
             invoices = Invoice.search([('bank_account', '=', ba)])
             if invoices:
-                query = 'update account_invoice set bank_account = %s where id in (%s)' % (bank_account.id, ', '.join(str(i.id) for i in invoices))
+                query = 'update account_invoice set bank_account = %s where id in (%s)' % (bank_account_id, ', '.join(str(i.id) for i in invoices))
                 cursor.execute(query)
 
             payment_types = PaymentType.search([('bank_account', '=', ba)])
             if payment_types:
-                query = 'update account_payment_type set bank_account = %s where id in (%s)' % (bank_account.id, ', '.join(str(p.id) for p in payment_types))
+                query = 'update account_payment_type set bank_account = %s where id in (%s)' % (bank_account_id, ', '.join(str(p.id) for p in payment_types))
                 cursor.execute(query)
 
             lines = Line.search([('bank_account', '=', ba)])
             if lines:
-                query = 'update account_move_line set bank_account = %s where id in (%s)' % (bank_account.id, ', '.join(str(l.id) for l in lines))
+                query = 'update account_move_line set bank_account = %s where id in (%s)' % (bank_account_id, ', '.join(str(l.id) for l in lines))
                 cursor.execute(query)
 
             payments = Payment.search([('bank_account', '=', ba)])
             if payments:
                 mand = bank_number_mandates[0].id if bank_number_mandates else 'null'
-                query = 'update account_payment set bank_account = %s, sepa_mandate = %s where id in (%s)' % (bank_account.id, mand, ', '.join(str(p.id) for p in payments))
+                query = 'update account_payment set bank_account = %s, sepa_mandate = %s where id in (%s)' % (bank_account_id, mand, ', '.join(str(p.id) for p in payments))
                 cursor.execute(query)
 
             if Contract:
                 contracts = Contract.search([('bank_account', '=', ba)])
                 if contracts:
-                    query = 'update contract set bank_account = %s where id in (%s)' % (bank_account.id, ', '.join(str(c.id) for c in contracts))
+                    query = 'update contract set bank_account = %s where id in (%s)' % (bank_account_id, ', '.join(str(c.id) for c in contracts))
                     cursor.execute(query)
 
             mandates = SepaMandate.search([
