@@ -73,6 +73,7 @@ to_uninstall:
   - stock_inventory_expected_quantity
   - stock_lot_expiry
   - stock_picking_box
+  - stock_update_planned_date
   - stock_quality_control_trigger_shipment_in
   - stock_reservation
   - stock_supply_production_warehouse
