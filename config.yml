@@ -746,6 +746,10 @@ before:
     fields: bank_account_number.account
     query: ALTER TABLE bank_account_number RENAME account TO account2;
 
+  - comment: uninstall stock_update_planned_date
+    version: 5.8
+    query: delete from ir_cron where method like '%update_planned_date%';
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
