@@ -92,6 +92,7 @@ to_uninstall:
   - activity_category # Deprecated at 6.4
   - account_journal_company # Deprecated at 6.4
   - sale_supply_drop_shipment_manual # Deprecated at 6.4
+  - purchase_contract # Deprecated at 6.4
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
