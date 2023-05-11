@@ -5,8 +5,11 @@ to_uninstall:
   - account_chart_speedup
   - account_invoice_data
   - account_invoice_consecutive
+  - account_invoice_line_search_by_shipment
   - account_invoice_post_in_tree
   - account_invoice_prevent_duplicates
+  - account_invoice_sale_relation
+  - account_invoice_search_by_purchase
   - account_move_party_required
   - account_payment_bank
   - account_payment_es_csb_19
