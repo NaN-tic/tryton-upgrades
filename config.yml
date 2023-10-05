@@ -512,6 +512,10 @@ before:
         DELETE from ir_model_data where module = 'stock_supply' and model = 'ir.cron';
 
   - comment: # Delete unused crons
+    version: 5.2
+    query: ALTER TABLE ir_cron DROP CONSTRAINT ir_cron_user_fkey;
+
+  - comment: # Delete unused crons
     version: 5.4
     fields: ir_cron.function
     query: DELETE from ir_cron where function in ('cron_post_clearing_moves');
@@ -659,6 +663,7 @@ before:
     query: ALTER TABLE sale_product_customer rename column product to template;
 
   - comment: ir.cron set hour 0 where is 24
+    fields: ir_cron.hour
     version: 5.4
     query: UPDATE ir_cron set hour = 0 where hour = 24;
 
@@ -751,6 +756,7 @@ before:
 
   - comment: uninstall stock_update_planned_date
     version: 5.8
+    fields: ir_cron.method
     query: delete from ir_cron where method like '%update_planned_date%';
 
   - comment: rename ir.model.data fs_id
@@ -1050,6 +1056,7 @@ after:
 
   - comment: replace sequence_type_lot from stock_lot_sequence to sequence_type_stock_lot from stock_lot module
     version: 5.4
+    fields: ir_sequence.sequence_type
     query: update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'stock_lot' and fs_id = 'sequence_type_stock_lot') where sequence_type = (select db_id from ir_model_data where module = 'stock_lot_sequence' and fs_id = 'sequence_type_lot');
         update ir_sequence set sequence_type = (select db_id from ir_model_data where module = 'farm' and fs_id = 'sequence_type_lot') where sequence_type = (select db_id from ir_model_data where module = 'farm' and fs_id = 'sequence_type_lot');
 
