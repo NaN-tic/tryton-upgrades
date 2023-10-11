@@ -83,17 +83,14 @@ with Transaction().start(dbname, 1, context=context):
 
     Account.parent.left = None
     Account.parent.right = None
+    Account._mptt_fields = set()
 
-    print("domain:", domain)
     if domain is None:
-        print("Get childs")
-        child_companies = Company.search([('parent', '!=', None)])
-        if child_companies:
-            domain=[('parent', '!=', None)]
+        domain=[]
 
     for company in Company.search(domain):
         logger.info("company %s" % company.id)
-        user.main_company=company.id
+        user.companies += (company,)
         user.company = company.id
         user.save()
         with Transaction().set_context(company=company.id):
@@ -147,7 +144,7 @@ with Transaction().start(dbname, 1, context=context):
         where = 'parent' + '=' + str(root)
 
         if not root:
-            where = field + 'IS NULL'
+            where = 'parent IS NULL'
 
         cr.execute('SELECT id FROM %s WHERE %s \
             ORDER BY %s' % ('account_account', where, 'parent'))

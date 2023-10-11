@@ -62,9 +62,6 @@ with Transaction().start(dbname, 1, context=context) as transaction:
     cursor.execute('select * from mapping_taxes')
 
     domain = []
-    child_companies = Company.search([('parent', '!=', None)])
-    if child_companies:
-        domain.append(('parent', '!=', None))
     for company in Company.search(domain):
         logger.info("company %s" % company.id)
         with Transaction().set_context(company=company.id):

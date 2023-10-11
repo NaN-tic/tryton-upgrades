@@ -56,11 +56,16 @@ def get_property_value(field_name, company_id, default=True):
     return result.split(',')[1]
 
 def account_configuration():
+    user_obj = pool.get('res.user')
+    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
+    user_id = user.id
+
     try:
         Company = pool.get('company.company')
         AccountConfiguration = pool.get('account.configuration')
         Account = pool.get('account.account')
         Sequence = pool.get('ir.sequence')
+        SequenceType = pool.get('ir.sequence_type')
     except KeyError:
         return
 
@@ -72,13 +77,10 @@ def account_configuration():
         }
 
     domain=[]
-    child_companies = Company.search([('parent', '!=', None)])
-    if child_companies:
-        domain=[('parent', '!=', None)]
-
 
     for company in Company.search(domain):
-        user.main_company=company.id
+        logger.info("company %s" % company.id)
+        user.companies += (company,)
         user.company = company.id
         user.save()
         with Transaction().set_context(company=company.id):
@@ -106,10 +108,19 @@ def account_configuration():
                     a.type.save()
                 setattr(accountConfig, mapping[field], int(value))
 
-            asset_sequence = Sequence.search([
-                ('code','=', 'account.asset'), ('company', '=', company.id)])
-            asset_sequence2 = Sequence.search([
-                ('code','=', 'account.asset'), ('company', '=', None)])
+            asset_sequence_type = SequenceType.search([
+                ('code', '=', 'account.asset')
+            ], limit=1)
+
+            asset_sequence = None
+            asset_sequence2 = None
+            if asset_sequence_type:
+                asset_sequence = Sequence.search([
+                    ('sequence_type', '=', asset_sequence_type[0]),
+                    ('company', '=', company.id)])
+                asset_sequence2 = Sequence.search([
+                    ('sequence_type', '=', asset_sequence_type[0]),
+                    ('company', '=', None)])
             if asset_sequence:
                 accountConfig.asset_sequence = asset_sequence[0]
             elif asset_sequence2:
@@ -119,6 +130,9 @@ def account_configuration():
             Transaction().commit()
 
 def party_configuration():
+    user_obj = pool.get('res.user')
+    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
+    user_id = user.id
     try:
         Company = pool.get('company.company')
         PartyConfiguration = pool.get('party.configuration')
@@ -140,6 +154,9 @@ def party_configuration():
         Transaction().commit()
 
 def sale_configuration():
+    user_obj = pool.get('res.user')
+    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
+    user_id = user.id
     mapping = {
         'sale_invoice_method': 'sale_invoice_method',
         'sale_shipment_method': 'sale_shipment_method',
@@ -166,6 +183,9 @@ def sale_configuration():
 
 
 def stock_configuration():
+    user_obj = pool.get('res.user')
+    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
+    user_id = user.id
     try:
         Company = pool.get('company.company')
         StockConfiguration = pool.get('stock.configuration')
@@ -183,6 +203,9 @@ def stock_configuration():
 
 
 def purchase_configuration():
+    user_obj = pool.get('res.user')
+    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
+    user_id = user.id
     try:
         Company = pool.get('company.company')
         PurchaseConfiguration = pool.get('purchase.configuration')
