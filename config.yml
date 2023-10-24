@@ -95,6 +95,7 @@ to_uninstall:
   - sale_supply_drop_shipment_manual # Deprecated at 6.4
   - purchase_contract # Deprecated at 6.4
   - purchase_lot_cost # Deprecated at 6.4
+  - product_sale_line_relation # Deprecated at 6.8
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
