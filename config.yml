@@ -38,6 +38,7 @@ to_uninstall:
   - calendar_scheduling
   - calendar_todo
   - commission_party
+  - commission_invoice_posted2draft
   - country_zip_es
   - csv_import
   - guarantee
