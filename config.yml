@@ -1090,5 +1090,10 @@ after:
     version: 6.4
     script: ./upgrades/after/issue11198-bank-uniqueness.py
 
+  - comment: shipment_cost_method to null when has not carrier
+    version: 6.8
+    fields: sale_sale.shipment_cost_method
+    query: update sale_sale set shipment_cost_method = null where carrier is null and shipment_cost_method is not null and state = 'draft';
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
