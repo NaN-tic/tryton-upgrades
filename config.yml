@@ -766,6 +766,11 @@ before:
     version: 6.8
     query: update ir_model_data set fs_id = replace(fs_id, ' ', '') where fs_id in ('es_pyg_normal_49400 ', 'es_2021_pyg_normal_49400 ') and module = 'account_financial_statement_es';
 
+  - comment: set company to null to allow insert data from account.journal_miscellaneous and account.journal_currency_exchange
+    version: 6.8
+    fields: ir_sequence.company
+    query: update ir_sequence set company = null where id in (select db_id from ir_model_data where fs_id = 'sequence_account_journal' and model = 'ir.sequence');
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
