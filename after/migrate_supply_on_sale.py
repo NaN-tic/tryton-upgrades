@@ -33,7 +33,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
 
     companys = Company.search([])
 
-    query = 'SELECT id FROM product_template WHERE _temp_supply_on_sale = True;'
+    query = 'SELECT id FROM product_template WHERE supply_on_sale = True;'
     cursor.execute(query)
     templates = cursor.fetchall()
 
