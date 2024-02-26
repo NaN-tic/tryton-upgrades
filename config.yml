@@ -1110,5 +1110,10 @@ after:
     tables: account_move
     query: update account_move set origin = null where origin like '%,-1';
 
+  - comment: Ensure cost_price has no more than the number of decimal places defined in the configuration
+    version: 6.8
+    tables: stock_move
+    query: UPDATE product_cost_price SET cost_price = ROUND(cost_price, (SELECT product_price_decimal FROM ir_configuration)) WHERE cost_price IS NOT NULL;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
