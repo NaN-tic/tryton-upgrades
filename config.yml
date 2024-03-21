@@ -99,6 +99,7 @@ to_uninstall:
   - purchase_lot_cost # Deprecated at 6.4
   - product_sale_line_relation # Deprecated at 6.8
   - party_communication # Deprecated at 6.8
+  - account_invoice_post_wizard # Deprecated at 6.8
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
