@@ -1117,5 +1117,10 @@ after:
     tables: stock_move
     query: UPDATE product_cost_price SET cost_price = ROUND(cost_price, (SELECT product_price_decimal FROM ir_configuration)) WHERE cost_price IS NOT NULL;
 
+  - comment: Set default lead_time at 00:00:00
+    version: 6.8
+    tables: product_configuration_default_lead_time
+    query: insert into product_configuration_default_lead_time (default_lead_time) values ('00:00:00');
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
