@@ -1122,5 +1122,10 @@ after:
     tables: product_configuration_default_lead_time
     query: insert into product_configuration_default_lead_time (default_lead_time) values ('00:00:00');
 
+  - comment: Set lot sequence to company to null
+    version: 6.8
+    tables: stock_lot
+    query: update ir_sequence set company = null where id in (select lot_sequence from product_template where lot_sequence is not null);
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
