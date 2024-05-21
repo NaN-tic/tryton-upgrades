@@ -1073,7 +1073,7 @@ after:
   - comment: change purchase_request to purchased state in case has purchase_line and draft state
     version: 6.2
     tables: purchase_request
-    query: update purchase_request set state = 'purchased' where state = 'draft' and purchase_line is null;
+    query: update purchase_request set state = 'purchased' where state = 'draft' and purchase_line is not null;
 
   - comment: text to JSONB
     version: 6.4
