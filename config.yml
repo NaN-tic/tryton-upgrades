@@ -258,11 +258,13 @@ before:
     version: 4.0
     query: INSERT INTO stock_location (name, code, type, create_uid, create_date, "right", "left") VALUES ('Migration Drop Shipment', 'DROPMIGRATION', 'drop', 0, '2016-10-04 00:00:00', 0, 0);
   - comment: # Rename table name - 3.6 migration
+    version: 6.0
     tables: account_financial_statement
     query:
       ALTER TABLE account_financial_statement_report_line_account
       RENAME TO account_financial_statement_rep_lin_acco
   - tables: account_financial_statement
+    version: 6.0
     query:
       ALTER TABLE account_financial_statement_report_line_account_id_seq
       RENAME TO account_financial_statement_rep_lin_acco_id_seq
@@ -773,6 +775,41 @@ before:
     fields: ir_sequence.company
     query: update ir_sequence set company = null where id in (select db_id from ir_model_data where fs_id = 'sequence_account_journal' and model = 'ir.sequence');
 
+  - comment: Remove translations for non-existing modules as this is required for the foreign key added
+    version: 7.2
+    query: DELETE FROM ir_translation WHERE module NOT IN (SELECT name FROM ir_module);
+
+  # TODO: There are more steps to implement on the migration from 6.8 to 7.0
+  - comment: https://discuss.tryton.org/t/migration-from-6-8-to-7-0/6265
+    version: 7.0
+    tables: account_payment
+    query:
+      UPDATE account_payment SET account = null WHERE line IS NOT NULL;
+
+  - comment: https://discuss.tryton.org/t/migration-from-7-0-to-7-2/7163
+    version: 7.2
+    query:
+      UPDATE ir_ui_view SET model = null WHERE model = '';
+      UPDATE ir_action_act_window SET res_model = null WHERE res_model = '';
+      UPDATE ir_action_wizard SET model = null WHERE model = '';
+      UPDATE ir_action_report SET model = null WHERE model = '';
+      UPDATE ir_action_report SET module = null WHERE module = '';
+
+  - comment: Remove ui_view_tree_width for non-existing field/model pairs
+    version: 7.2
+    query:
+      DELETE FROM ir_ui_view_tree_width WHERE (field, model) NOT IN (SELECT f.name, m.model FROM ir_model m, ir_model_field f WHERE m.id=f.model);
+
+  - comment: UPDATE ir_action_act_window's context_model if the model does not exist
+    version: 7.2
+    query:
+      UPDATE ir_action_act_window SET context_model=NULL WHERE context_model NOT IN (SELECT model FROM ir_model);
+
+  - comment: Remove ir_model_data records for no longer existing modules
+    version: 7.2
+    query:
+      DELETE FROM ir_model_data WHERE module NOT IN (SELECT name FROM ir_module);
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
@@ -1126,6 +1163,7 @@ after:
     version: 6.8
     tables: stock_lot
     query: update ir_sequence set company = null where id in (select lot_sequence from product_template where lot_sequence is not null);
+
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
