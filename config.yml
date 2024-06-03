@@ -810,6 +810,10 @@ before:
     query:
       DELETE FROM ir_model_data WHERE module NOT IN (SELECT name FROM ir_module);
 
+  - comment: set type to null from ir.ui.view that is an inherit
+    version: 5.4
+    query: update ir_ui_view set type = null from (select db_id from ir_model_data where module = 'account_payment_es' and fs_id = 'payment_process_start_view_form') as sub where id = sub.db_id;
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
@@ -1164,6 +1168,9 @@ after:
     tables: stock_lot
     query: update ir_sequence set company = null where id in (select lot_sequence from product_template where lot_sequence is not null);
 
+  - script: ./upgrades/after/invoice_amount_cache.py
+    tables: account_invoice
+    version: 7.0
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
