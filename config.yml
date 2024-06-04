@@ -778,11 +778,12 @@ before:
   - comment: Remove translations for non-existing modules as this is required for the foreign key added
     version: 7.2
     query: DELETE FROM ir_translation WHERE module NOT IN (SELECT name FROM ir_module);
+      DELETE FROM ir_translation WHERE module in ('sale_external_price', 'stock_lot_quantity');
 
   # TODO: There are more steps to implement on the migration from 6.8 to 7.0
   - comment: https://discuss.tryton.org/t/migration-from-6-8-to-7-0/6265
     version: 7.0
-    tables: account_payment
+    fields: account_payment.account
     query:
       UPDATE account_payment SET account = null WHERE line IS NOT NULL;
 
