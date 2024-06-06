@@ -756,6 +756,7 @@ before:
     version: 6.4
     fields: bank_account_number.number_compact
     query: ALTER TABLE bank_account_number RENAME number_compact TO number_compact2;
+
   - comment: Allow upgrade issue11198 before run script. Note this is linked to another 'after' script that can be found searching for issue11198 in this file.
     version: 6.4
     fields: bank_account_number.account
@@ -811,9 +812,16 @@ before:
     query:
       DELETE FROM ir_model_data WHERE module NOT IN (SELECT name FROM ir_module);
 
-  - comment: set type to null from ir.ui.view that is an inherit
-    version: 5.4
-    query: update ir_ui_view set type = null from (select db_id from ir_model_data where module = 'account_payment_es' and fs_id = 'payment_process_start_view_form') as sub where id = sub.db_id;
+  - comment: set inherit to null from ir.ui.view that is not an inherit
+    version: 7.0
+    query: update ir_ui_view set inherit = null from (select db_id from ir_model_data where module = 'account_payment_es' and fs_id = 'payment_process_start_view_form') as sub where id = sub.db_id;
+
+  - comment: rename constraint bank_account_number_number_iban_active_exclude in case has party_company module activated
+    version: 7.0
+    tables: party_company_rel
+    query:
+      ALTER TABLE bank_account_number DROP CONSTRAINT if exists bank_account_number_number_iban_exclude;
+      ALTER TABLE bank_account_number ADD CONSTRAINT bank_account_number_number_iban_active_exclude CHECK (type::text <> 'x'::text);
 
 after:
   - comment: Remove include_347 from party
