@@ -823,6 +823,17 @@ before:
       ALTER TABLE bank_account_number DROP CONSTRAINT if exists bank_account_number_number_iban_exclude;
       ALTER TABLE bank_account_number ADD CONSTRAINT bank_account_number_number_iban_active_exclude CHECK (type::text <> 'x'::text);
 
+  - comment: Rename supply_on_sale because 6.8 is multivalue patch and not required to migrate data
+    version: 7.2
+    fields: product_template.supply_on_sale
+    query: ALTER TABLE product_template RENAME COLUMN supply_on_sale TO _temp_supply_on_sale;
+
+  - comment: Rename supply_on_sale because 6.8 is multivalue patch and not required to migrate data
+    version: 7.2
+    fields: product_template__history.supply_on_sale
+    query: ALTER TABLE product_template__history RENAME COLUMN supply_on_sale TO _temp_supply_on_sale;
+
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
