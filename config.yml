@@ -779,7 +779,7 @@ before:
   - comment: Remove translations for non-existing modules as this is required for the foreign key added
     version: 7.2
     query: DELETE FROM ir_translation WHERE module NOT IN (SELECT name FROM ir_module);
-      DELETE FROM ir_translation WHERE module in ('sale_external_price', 'stock_lot_quantity');
+      DELETE FROM ir_translation WHERE module in ('sale_external_price', 'stock_lot_quantity', 'account_invoice_post_wizard', 'party_communication', 'product_sale_line_relation', 'base_external_mapping');
 
   # TODO: There are more steps to implement on the migration from 6.8 to 7.0
   - comment: https://discuss.tryton.org/t/migration-from-6-8-to-7-0/6265
