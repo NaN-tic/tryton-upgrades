@@ -1168,6 +1168,11 @@ after:
     fields: sale_sale.shipment_cost_method
     query: update sale_sale set shipment_cost_method = null where carrier is null and shipment_cost_method is not null and state = 'draft';
 
+  - comment: set shipment cost_method to order in case sale has shipment_method to order
+    script: ./upgrades/after/sale_shipment_cost_shipment_order.py
+    tables: sale_sale.shipment_cost_method
+    version: 6.8
+
   - comment: account_move set origin to none in case is -1
     version: 6.8
     tables: account_move
@@ -1191,6 +1196,7 @@ after:
   - script: ./upgrades/after/invoice_amount_cache.py
     tables: account_invoice
     version: 7.0
+
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
