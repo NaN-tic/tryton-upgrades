@@ -1161,6 +1161,7 @@ after:
 
   - comment: issue11198 bank uniqueness. Note this is linked to another 'before' script that can be found searching for issue11198 in this file.
     version: 6.4
+    tables: account_payment_sepa_mandate
     script: ./upgrades/after/issue11198-bank-uniqueness.py
 
   - comment: shipment_cost_method to null when has not carrier
