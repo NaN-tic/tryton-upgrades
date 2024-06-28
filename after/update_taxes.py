@@ -156,6 +156,11 @@ with Transaction().start(dbname, 1, context=context) as transaction:
                     for id_, line in cursor.fetchall():
                         cursor.execute('delete from %s where id=%s'%(table, id_))
                         for tax, template in taxes:
+                            cursor.execute('select id from %s where tax = %s and %s = %s' % (
+                                table, tax, rel, line))
+                            if cursor.fetchall():
+                                # Do not try to insert a line that already exists
+                                continue
                             cursor.execute('insert into %s(tax,%s) values(%s,%s)' % (
                                 table, rel, tax, line
                             ))
