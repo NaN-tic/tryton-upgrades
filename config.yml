@@ -1199,6 +1199,9 @@ after:
     tables: account_invoice
     version: 7.0
 
+  - comment: ir_export_line: replace gross_unit_price to base_price
+    version: 7.2
+    query: UPDATE ir_export_line SET name = replace(name, 'gross_unit_price', 'base_price') where name like '%gross_unit_price%';
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
