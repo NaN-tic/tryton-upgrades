@@ -1203,5 +1203,11 @@ after:
     version: 7.2
     query: UPDATE ir_export_line SET name = replace(name, 'gross_unit_price', 'base_price') where name like '%gross_unit_price%';
 
+  - comment: ir_ui_view: payment_process_start_form set type form and remove inherit
+    version: 7.2
+    query: UPDATE ir_ui_view SET type = 'form', inherit = null where name = 'payment_process_start_form' and module = 'account_payment_es';
+      UPDATE ir_model_data set fs_values = REGEXP_REPLACE(fs_values, '^\[\["inherit",[0-9]+\],', ''), values = REGEXP_REPLACE(fs_values, '^\[\["inherit",[0-9]+\],', '') where fs_id = 'payment_process_start_view_form' and module = 'account_payment_es' and fs_values like '%inherit%';
+
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
