@@ -3,6 +3,7 @@ to_uninstall:
   - account_invoice_post_in_tree
   - account_cash_management
   - account_chart_speedup
+  - account_invoice_3_discounts
   - account_invoice_data
   - account_invoice_consecutive
   - account_invoice_post_in_tree
@@ -68,6 +69,7 @@ to_uninstall:
   - production_origin # Remove in upgrade to 6.0
   - purchase_incoterm
   - purchase_product_supplier
+  - sale_3_discounts
   - sale_external_price
   - sale_fedicom
   - sale_incoterm
