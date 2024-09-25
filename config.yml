@@ -822,7 +822,7 @@ before:
 
   - comment: rename constraint bank_account_number_number_iban_active_exclude in case has party_company module activated
     version: 7.0
-    tables: party_company_rel
+    tables: party_company_rel bank_account_number
     query:
       ALTER TABLE bank_account_number DROP CONSTRAINT if exists bank_account_number_number_iban_exclude;
       ALTER TABLE bank_account_number ADD CONSTRAINT bank_account_number_number_iban_active_exclude CHECK (type::text <> 'x'::text);
