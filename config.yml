@@ -837,6 +837,8 @@ before:
     fields: product_template__history.supply_on_sale
     query: ALTER TABLE product_template__history RENAME COLUMN supply_on_sale TO _temp_supply_on_sale;
 
+  - comment: Remove ir_ui_view_search related to model that not exist
+    query: DELETE from ir_ui_view_search where model not in (select model from ir_model);
 
 after:
   - comment: Remove include_347 from party
