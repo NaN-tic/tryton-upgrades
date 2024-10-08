@@ -840,6 +840,10 @@ before:
   - comment: Remove ir_ui_view_search related to model that not exist
     query: DELETE from ir_ui_view_search where model not in (select model from ir_model);
 
+  - comment: replace party identifiers to eu_vat
+    tables: party_identifier
+    query: update party_identifier set code = concat('ES', code), type = 'eu_vat' where type = 'es_dni';
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
