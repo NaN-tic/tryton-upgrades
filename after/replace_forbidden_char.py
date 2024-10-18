@@ -60,9 +60,15 @@ with Transaction().start(dbname, 0, context=context):
         except TypeError:
             continue
         if is_column:
-            replace = "replace( replace( replace(\""+column+"\", E'\\n', '' ), E'\\t', '' ), E'\\r', '')"
+            replace = "replace(replace( replace( replace(\""+column+"\", E'\\n', '' ), E'\n', '' ), E'\\t', '' ), E'\\r', '')"
             query = "UPDATE %(table)s set \"%(column)s\" = %(replace)s" % {'table': table, 'column': column, 'replace': replace}
             cursor.execute(query)
+
+    # ir.translation
+    for column in ('src', 'value'):
+        replace = "replace(replace( replace( replace(\""+column+"\", E'\\n', '' ),  E'\n', '' ), E'\\t', '' ), E'\\r', '')"
+        query = "UPDATE ir_translation set \"%(column)s\" = %(replace)s" % {'column': column, 'replace': replace}
+        cursor.execute(query)
 
     Transaction().commit()
 
