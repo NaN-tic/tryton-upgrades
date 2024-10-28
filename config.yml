@@ -804,6 +804,7 @@ before:
     version: 7.2
     query:
       DELETE FROM ir_ui_view_tree_width WHERE (field, model) NOT IN (SELECT f.name, m.model FROM ir_model m, ir_model_field f WHERE m.id=f.model);
+      DELETE from ir_ui_view_tree_width where field in ('discount1', 'discount2', 'discount3');
 
   - comment: UPDATE ir_action_act_window's context_model if the model does not exist
     version: 7.2
