@@ -1218,5 +1218,9 @@ after:
     query: update html_template set data = replace(data, 'move.uom.render', 'move.unit.render') where data like '%move.uom.render%';
         UPDATE html_template SET data = replace(data, 'label(''stock.move'', ''uom'')', 'label(''stock.move'', ''unit'')') WHERE data LIKE '%label(''stock.move'', ''uom'')%';
 
+  - script: ./upgrades/after/remove_electronic_mail_mailbox_menu.py
+    tables: electronic_mail_mailbox
+    version: 7.2
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
