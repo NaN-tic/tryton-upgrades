@@ -1222,5 +1222,10 @@ after:
     tables: electronic_mail_mailbox
     version: 7.2
 
+  - comment: Set null when origin is <model,-1>
+    version: 6.8
+    tables: stock_move
+    query: update stock_move set origin = null where origin like '%,-1';
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
