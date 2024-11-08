@@ -845,6 +845,11 @@ before:
     tables: party_identifier
     query: update party_identifier set code = concat('ES', code), type = 'eu_vat' where type = 'es_dni';
 
+  - comment: drop constraint imap_server_account_uniq
+    version: 6.8
+    tables: imap_server
+    query: ALTER TABLE imap_server DROP CONSTRAINT IF EXISTS imap_server_account_uniq;
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
