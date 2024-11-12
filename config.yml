@@ -1232,5 +1232,10 @@ after:
     tables: stock_move
     query: update stock_move set origin = null where origin like '%,-1';
 
+  - comment: Set list_price in price_list in case lines has unit_price
+    version: 7.2
+    tables: product_price_list_line
+    query:  update product_price_list set price = 'list_price' where id in (select price_list from product_price_list_line where formula like 'unit_price');
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
