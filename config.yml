@@ -1220,6 +1220,7 @@ after:
 
   - comment: replace uom to unit in stock.move
     version: 7.2
+    tables: html_template
     query: update html_template set data = replace(data, 'move.uom.render', 'move.unit.render') where data like '%move.uom.render%';
         UPDATE html_template SET data = replace(data, 'label(''stock.move'', ''uom'')', 'label(''stock.move'', ''unit'')') WHERE data LIKE '%label(''stock.move'', ''uom'')%';
 
@@ -1235,7 +1236,28 @@ after:
   - comment: Set list_price in price_list in case lines has unit_price
     version: 7.2
     tables: product_price_list_line
-    query:  update product_price_list set price = 'list_price' where id in (select price_list from product_price_list_line where formula like 'unit_price');
+    query: update product_price_list set price = 'list_price' where id in (select price_list from product_price_list_line where formula like 'unit_price');
+
+  - comment: Set discount_formula in sale.sale in case sale has sale_discount
+    version: 7.2
+    tables: sale_sale.sale_discount
+    query: UPDATE sale_line SET discount_formula = ss.sale_discount * 100 FROM (SELECT id, sale_discount FROM sale_sale WHERE sale_discount IS NOT NULL AND sale_discount != 0 ) AS ss WHERE ss.id = sale_line.sale;
+        update sale_line  set discount_formula = null where discount_formula = '';
+
+  - comment: Set discount_formula in sale.sale in case sale has sale_discount ans sale_3_discounts
+    version: 7.2
+    tables: sale_line.discount1
+    query: UPDATE sale_line
+        SET discount_formula = CONCAT_WS(
+            ' + ',
+            CASE WHEN discount1 IS NOT NULL AND discount1 != 0 THEN (discount1 * 100)::text END,
+            CASE WHEN discount2 IS NOT NULL AND discount2 != 0 THEN (discount2 * 100)::text END,
+            CASE WHEN discount3 IS NOT NULL AND discount3 != 0 THEN (discount3 * 100)::text END,
+            CASE WHEN ss.sale_discount IS NOT NULL AND ss.sale_discount != 0 THEN (ss.sale_discount * 100)::text END
+        )
+        FROM sale_sale AS ss
+        WHERE ss.id = sale_line.sale;
+        update sale_line  set discount_formula = null where discount_formula = '';
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
