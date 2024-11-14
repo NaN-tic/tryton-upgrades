@@ -1283,5 +1283,16 @@ after:
         );
         update product_price_list_line set discount_formula = null where discount_formula = '';
 
+  - comment: Set formula to 0 in case discount_rate is not null
+    version: 7.2
+    tables: product_price_list_line.base_price_formula
+    query: update product_price_list_line set base_price_formula = formula;
+        update product_price_list_line set formula = 0 where discount_rate is not null;
+
+  - comment: Set formula to 0 in case discount_formula is not null
+    version: 7.2
+    tables: product_price_list_line.discount_formula
+    query: update product_price_list_line set formula = 0 where discount_formula is not null;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
