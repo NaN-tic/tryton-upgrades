@@ -1257,7 +1257,8 @@ after:
         )
         FROM sale_sale AS ss
         WHERE ss.id = sale_line.sale;
-        update sale_line  set discount_formula = null where discount_formula = '';
+        update sale_line set discount_formula = null where discount_formula = '';
+        update sale_line set discount_formula = trim(TRAILING '.' FROM trim(trailing '0' from to_char(discount_formula::numeric, 'FM999999999.999999'))) where discount_formula ~ '^\d+([.,]\d+)?0+$';
 
   - comment: Set discount_formula in account.invoice.line in case has account_invoice_3_discounts
     version: 7.2
@@ -1270,6 +1271,7 @@ after:
             CASE WHEN discount3 IS NOT NULL AND discount3 != 0 THEN (discount3 * 100)::text END
         );
         update account_invoice_line set discount_formula = null where discount_formula = '';
+        update account_invoice_line set discount_formula = trim(TRAILING '.' FROM trim(trailing '0' from to_char(discount_formula::numeric, 'FM999999999.999999'))) where discount_formula ~ '^\d+([.,]\d+)?0+$';
 
   - comment: Set discount_formula in product.price_list.line in case has account_invoice_3_discounts
     version: 7.2
@@ -1282,6 +1284,7 @@ after:
             CASE WHEN discount3 IS NOT NULL AND discount3 != 0 THEN (discount3 * 100)::text END
         );
         update product_price_list_line set discount_formula = null where discount_formula = '';
+        update product_price_list_line set discount_formula = trim(TRAILING '.' FROM trim(trailing '0' from to_char(discount_formula::numeric, 'FM999999999.999999'))) where discount_formula ~ '^\d+([.,]\d+)?0+$';
 
   - comment: Set formula to 0 in case discount_rate is not null
     version: 7.2
