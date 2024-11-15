@@ -1297,5 +1297,10 @@ after:
     tables: product_price_list_line.discount_formula
     query: update product_price_list_line set formula = 0 where discount_formula is not null;
 
+  - comment: Set list_price in price list when lines has unit_price, list_price...
+    version: 7.2
+    tables: product_price_list
+    query: update product_price_list set price = 'list_price' where id in (select price_list from product_price_list_line where formula like '%unit_price%' or formula like '%cost_price%' or formula like '%list_price%' group by price_list) and price is null;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
