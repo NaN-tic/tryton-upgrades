@@ -1233,11 +1233,6 @@ after:
     tables: stock_move
     query: update stock_move set origin = null where origin like '%,-1';
 
-  - comment: Set list_price in price_list in case lines has unit_price
-    version: 7.2
-    tables: product_price_list_line
-    query: update product_price_list set price = 'list_price' where id in (select price_list from product_price_list_line where formula like 'unit_price');
-
   - comment: Set discount_formula in sale.sale in case sale has sale_discount
     version: 7.2
     tables: sale_sale.sale_discount
