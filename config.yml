@@ -1233,6 +1233,31 @@ after:
     tables: stock_move
     query: update stock_move set origin = null where origin like '%,-1';
 
+  - comment: Replace sale_discount to core module
+    version: 7.2
+    tables: sale_line.gross_unit_price
+    query: update sale_line set base_price = gross_unit_price where gross_unit_price is not null and base_price is not null;
+
+  - comment: Replace stock_valued to base_price (sale_discount)
+    version: 7.2
+    tables: sale_line.gross_unit_price stock_move.base_price
+    query: update stock_move set base_price = sub.gross_unit_price from (select id, gross_unit_price from sale_line where gross_unit_price is not null) as sub where origin = concat('sale.line,', sub.id) and base_price is null;
+
+  - comment: Replace stock_valued to base_price (purchase_discount)
+    version: 7.2
+    tables: purchase_line.gross_unit_price stock_move.base_price
+    query: update stock_move set base_price = sub.gross_unit_price from (select id, gross_unit_price from sale_line where gross_unit_price is not null) as sub where origin = concat('purchase.line,', sub.id) and base_price is null;
+
+  - comment: Upgrade discount_formula from sale.line (discount_formula + sale_discount)
+    version: 7.2
+    tables: sale_line.discount_formula stock_move.discount_formula
+    query: update stock_move as sm set sm.discount_formula = sub.discount_formula from (select id, discount_formula from sale_line where discount_formula is not null) as sub where origin = concat('sale.line,', sub.id) and sm.discount_formula is null;
+
+  - comment: Upgrade discount_formula from purchase.line (discount_formula + purchase_discount)
+    version: 7.2
+    tables: purchase_line.discount_formula stock_move.discount_formula
+    query: update stock_move as sm set sm.discount_formula = sub.discount_formula from (select id, discount_formula from purchase_line where discount_formula is not null) as sub where origin = concat('purchase.line,', sub.id) and sm.discount_formula is null;
+
   - comment: Set discount_formula in sale.sale in case sale has sale_discount
     version: 7.2
     tables: sale_sale.sale_discount
