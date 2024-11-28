@@ -1191,9 +1191,12 @@ after:
     version: 6.8
 
   - comment: account_move set origin to none in case is -1
-    version: 6.8
     tables: account_move
     query: update account_move set origin = null where origin like '%,-1';
+
+  - comment: stock_move set origin to none in case is -1
+    tables: stock_move
+    query: update stock_move set origin = null where origin like '%,-1';
 
   - comment: Ensure cost_price has no more than the number of decimal places defined in the configuration
     version: 6.8
