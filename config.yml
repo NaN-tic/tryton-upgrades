@@ -1217,9 +1217,10 @@ after:
     tables: account_invoice
     version: 7.0
 
-  - comment: ir_export_line replace gross_unit_price to base_price
+  - comment: ir_export_line replace gross_unit_price to base_price, ...
     version: 7.2
     query: UPDATE ir_export_line SET name = replace(name, 'gross_unit_price', 'base_price') where name like '%gross_unit_price%';
+        UPDATE ir_export_line SET name = 'move_description_used' where name = 'move_description';
 
   - comment: replace uom to unit in stock.move
     version: 7.2
