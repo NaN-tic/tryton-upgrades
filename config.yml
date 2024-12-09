@@ -103,6 +103,7 @@ to_uninstall:
   - product_sale_line_relation # Deprecated at 6.8
   - party_communication # Deprecated at 6.8
   - account_invoice_post_wizard # Deprecated at 6.8
+  - account_payment_es:7.4 # Deprecated at 7.4. moved to account_es module
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates

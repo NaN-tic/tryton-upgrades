@@ -144,6 +144,13 @@ class Upgrade:
                 module_table = table
                 break
         for module in self.to_uninstall:
+            module, version = (module.split(':', 1) + [None])[:2]
+            if (version and (
+                    not (float(version) <= float(trytond_version)
+                    and float(version) > float(from_version))
+                    )):
+                continue
+
             logger.info('Module: %s' % module)
             execute('DELETE FROM ' + module_table + '_dependency WHERE '
                 'module IN (SELECT id FROM ' + module_table + ' WHERE name=%s)',
