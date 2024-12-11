@@ -851,6 +851,11 @@ before:
     tables: imap_server
     query: ALTER TABLE imap_server DROP CONSTRAINT IF EXISTS imap_server_account_uniq;
 
+  - comment: Rename stock_configuration_product_template_form_quantity from product_quantity
+    version: 7.2
+    tables: stock_configuration_product_template_form_quantity
+    query: ALTER TABLE stock_configuration_product_template_form_quantity RENAME TO stock_configuration_product_quantity;
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
