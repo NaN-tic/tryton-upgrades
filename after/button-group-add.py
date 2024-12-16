@@ -61,7 +61,6 @@ with Transaction().start(dbname, 0, context=context) as transaction:
         if default_group in button.groups:
             continue
         button.groups += (default_group,)
-        print(button.rec_name, button.model, button.groups)
         button.save()
 
     transaction.commit()
