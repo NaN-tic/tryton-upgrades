@@ -1302,5 +1302,9 @@ after:
     tables: product_price_list
     query: update product_price_list set price = 'list_price' where id in (select price_list from product_price_list_line where formula like '%unit_price%' or formula like '%cost_price%' or formula like '%list_price%' group by price_list) and price is null;
 
+  - comment: Add default group in btn groups in case has manual groups
+    version: 7.2
+    script: ./upgrades/after/button-group-add.py
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
