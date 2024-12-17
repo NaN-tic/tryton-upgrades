@@ -1235,38 +1235,38 @@ after:
 
   - comment: Replace sale_discount to core module
     version: 7.2
-    tables: sale_line.gross_unit_price
+    fields: sale_line.gross_unit_price
     query: update sale_line set base_price = gross_unit_price where gross_unit_price is not null and base_price is not null;
 
   - comment: Replace stock_valued to base_price (sale_discount)
     version: 7.2
-    tables: sale_line.gross_unit_price stock_move.base_price
+    fields: sale_line.gross_unit_price stock_move.base_price
     query: update stock_move set base_price = sub.gross_unit_price from (select id, gross_unit_price from sale_line where gross_unit_price is not null) as sub where origin = concat('sale.line,', sub.id) and base_price is null;
 
   - comment: Replace stock_valued to base_price (purchase_discount)
     version: 7.2
-    tables: purchase_line.gross_unit_price stock_move.base_price
+    fields: purchase_line.gross_unit_price stock_move.base_price
     query: update stock_move set base_price = sub.gross_unit_price from (select id, gross_unit_price from sale_line where gross_unit_price is not null) as sub where origin = concat('purchase.line,', sub.id) and base_price is null;
 
   - comment: Upgrade discount_formula from sale.line (discount_formula + sale_discount)
     version: 7.2
-    tables: sale_line.discount_formula stock_move.discount_formula
+    fields: sale_line.discount_formula stock_move.discount_formula
     query: update stock_move as sm set sm.discount_formula = sub.discount_formula from (select id, discount_formula from sale_line where discount_formula is not null) as sub where origin = concat('sale.line,', sub.id) and sm.discount_formula is null;
 
   - comment: Upgrade discount_formula from purchase.line (discount_formula + purchase_discount)
     version: 7.2
-    tables: purchase_line.discount_formula stock_move.discount_formula
+    fields: purchase_line.discount_formula stock_move.discount_formula
     query: update stock_move as sm set sm.discount_formula = sub.discount_formula from (select id, discount_formula from purchase_line where discount_formula is not null) as sub where origin = concat('purchase.line,', sub.id) and sm.discount_formula is null;
 
   - comment: Set discount_formula in sale.sale in case sale has sale_discount
     version: 7.2
-    tables: sale_sale.sale_discount
+    fields: sale_sale.sale_discount
     query: UPDATE sale_line SET discount_formula = ss.sale_discount * 100 FROM (SELECT id, sale_discount FROM sale_sale WHERE sale_discount IS NOT NULL AND sale_discount != 0 ) AS ss WHERE ss.id = sale_line.sale;
         update sale_line  set discount_formula = null where discount_formula = '';
 
   - comment: Set discount_formula in sale.line in case sale has sale_discount and sale_3_discounts
     version: 7.2
-    tables: sale_line.discount1
+    fields: sale_line.discount1
     query: UPDATE sale_line
         SET discount_formula = CONCAT_WS(
             '+',
@@ -1282,7 +1282,7 @@ after:
 
   - comment: Set discount_formula in account.invoice.line in case has account_invoice_3_discounts
     version: 7.2
-    tables: account_invoice_line.discount1
+    fields: account_invoice_line.discount1
     query: UPDATE account_invoice_line
         SET discount_formula = CONCAT_WS(
             '+',
@@ -1295,7 +1295,7 @@ after:
 
   - comment: Set discount_formula in product.price_list.line in case has account_invoice_3_discounts
     version: 7.2
-    tables: product_price_list_line.discount1
+    fields: product_price_list_line.discount1
     query: UPDATE product_price_list_line
         SET discount_formula = CONCAT_WS(
             '+',
@@ -1308,13 +1308,13 @@ after:
 
   - comment: Set formula to 0 in case discount_rate is not null
     version: 7.2
-    tables: product_price_list_line.base_price_formula
+    fields: product_price_list_line.base_price_formula
     query: update product_price_list_line set base_price_formula = formula;
         update product_price_list_line set formula = 0 where discount_rate is not null;
 
   - comment: Set formula to 0 in case discount_formula is not null
     version: 7.2
-    tables: product_price_list_line.discount_formula
+    fields: product_price_list_line.discount_formula
     query: update product_price_list_line set formula = 0 where discount_formula is not null;
 
   - comment: Set list_price in price list when lines has unit_price, list_price...
