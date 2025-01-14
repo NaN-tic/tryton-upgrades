@@ -55,6 +55,8 @@ to_uninstall:
   - product_code_unique
   - product_review
   - product_search_code
+  - product_template_form_quantity # Deprecated at 7.2 - Replace with product_quantity
+  - product_qty # Deprecated at 7.2 - Replace with product_quantity
   - production_cost_distribution
   - production_quality_control_trigger_lot
   - production_package
@@ -89,7 +91,7 @@ to_uninstall:
   - product_price_list_table # Deprecated at 6.4
   - account_invoice_sale_relation # Deprecated at 6.8 - Replace with account_invoice_line_origin
   - account_invoice_line_search_by_shipment # Deprecated at 6.8 - Replace with account_invoice_line_origin
-  - account_invoice_search_by_purchase # # Deprecated at 6.8 - Replace with account_invoice_line_origin
+  - account_invoice_search_by_purchase # Deprecated at 6.8 - Replace with account_invoice_line_origin
   - dbcopy # Deprecated at 6.4
   - account_invoice_origin_reference # Deprecated at 6.4. Replace with account_invoice_line_origin
   - stock_shipment_in_return_childs # Deprecated at 6.4
