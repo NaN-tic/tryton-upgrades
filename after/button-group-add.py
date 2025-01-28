@@ -30,6 +30,7 @@ model_startswiths = {
     'stock': 'group_stock',
     'purchase': 'group_purchase',
     'account': 'group_account',
+    'production': 'group_production',
     }
 
 with Transaction().start(dbname, 0, context=context) as transaction:
