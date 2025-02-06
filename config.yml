@@ -1338,5 +1338,10 @@ after:
     version: 7.2
     script: ./upgrades/after/button-group-add.py
 
+  - comment: Set currency to null in stock move from production inputs
+    version: 7.2
+    tables: production
+    query: update stock_move set currency = null where production_input is not null and currency is not null and unit_price is null;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
