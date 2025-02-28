@@ -1343,5 +1343,9 @@ after:
     tables: production
     query: update stock_move set currency = null where production_input is not null and currency is not null and unit_price is null;
 
+  - comment: replace 24 to 0 hour in ir.cron
+    version: 7.2
+    query: update ir_cron set hour = 0 where hour = 24;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
