@@ -1352,5 +1352,13 @@ after:
     version: 7.2
     query: update ir_cron set hour = 0 where hour = 24;
 
+  - comment: drop babi_execution_ tables
+    version: 7.4
+    query: SELECT 'DROP TABLE IF EXISTS ' || quote_ident(tablename) || ' CASCADE;'
+        FROM pg_tables
+        WHERE schemaname = 'public'
+        AND tablename LIKE 'babi_execution_%'
+        \gexec
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
