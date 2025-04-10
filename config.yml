@@ -863,6 +863,11 @@ before:
     tables: imap_server
     query: ALTER TABLE imap_server DROP CONSTRAINT IF EXISTS imap_server_account_uniq;
 
+  - comment: rename and inactive tables from babi.reports sii
+    version: 7.4
+    tables: babi_table
+    query: update babi_table set active = false, internal_name=concat(internal_name, '_back') where internal_name in ('invoices_that_are_in_the_summary_of_the_sii_but_its_state_in_tryton_is_not_correct', 'tryton_issued_invoice_taxes', 'tryton_received_invoice_taxes', 'estate_issued_invoice_taxes', 'estate_received_invoice_taxes', 'invoice_detection_with_subject_notice_of_the_sii');
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
