@@ -868,6 +868,14 @@ before:
     tables: babi_table
     query: update babi_table set active = false, internal_name=concat(internal_name, '_back') where internal_name in ('invoices_that_are_in_the_summary_of_the_sii_but_its_state_in_tryton_is_not_correct', 'tryton_issued_invoice_taxes', 'tryton_received_invoice_taxes', 'estate_issued_invoice_taxes', 'estate_received_invoice_taxes', 'invoice_detection_with_subject_notice_of_the_sii');
 
+  - comment: Migration from 7.2: add model. prevent add in case field that not exist
+    version: 7.4
+    query: delete from ir_ui_view_tree_optional where id in (select vto.id from ir_ui_view_tree_optional as vto left join ir_ui_view as uv on vto.view_id = uv.id where vto.field not in (select name from ir_model_field where model = uv.model));
+
+  - comment: Delete create_payment_group button from account_payment_es module
+    version: 7.4
+    query: delete from ir_model_button where name = 'create_payment_group' and model = 'account.move.line';
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
@@ -1359,11 +1367,9 @@ after:
 
   - comment: drop babi_execution_ tables
     version: 7.4
-    query: SELECT 'DROP TABLE IF EXISTS ' || quote_ident(tablename) || ' CASCADE;'
-        FROM pg_tables
-        WHERE schemaname = 'public'
-        AND tablename LIKE 'babi_execution_%'
-        \gexec
+    tables: babi_report
+    script: ./upgrades/after/drop_table_babi_execution.py
+
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
