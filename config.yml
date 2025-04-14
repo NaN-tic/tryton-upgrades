@@ -876,6 +876,12 @@ before:
     version: 7.4
     query: delete from ir_model_button where name = 'create_payment_group' and model = 'account.move.line';
 
+  - comment: Delete oldest not null column
+    version: 7.4
+    tables: account_statement_journal
+    query: ALTER TABLE account_statement_journal DROP COLUMN IF EXISTS acceptable_similarity_threshold;
+
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
