@@ -881,6 +881,15 @@ before:
     tables: account_statement_journal
     query: ALTER TABLE account_statement_journal DROP COLUMN IF EXISTS acceptable_similarity_threshold;
 
+  - comment: Delete open_lines button
+    version: 7.4
+    query: DELETE FROM "ir_model_button" WHERE "name" = 'open_lines' AND "model" = 'product.price_list';
+
+  - comment: Rename columns of ir.model and ir.model.field
+    version: 7.6
+    query: ALTER TABLE IF EXISTS "ir_model" RENAME COLUMN "name" TO "string";
+        ALTER TABLE IF EXISTS "ir_model" RENAME COLUMN "model" TO "name";
+        ALTER TABLE IF EXISTS "ir_model_field" RENAME COLUMN "field_description" TO "string";
 
 after:
   - comment: Remove include_347 from party
@@ -1376,6 +1385,20 @@ after:
     tables: babi_report
     script: ./upgrades/after/drop_table_babi_execution.py
 
+  - comment: internal shipment using transit location, fill the internal transit location
+    version: 7.6
+    tables: stock_shipment_internal
+    script: ./upgrades/after/stock_shipment_internal_location.py
+
+  - comment: If account_budget module is activated, invert amount sign
+    version: 7.6
+    tables: account_budget_line
+    query: UPDATE account_budget_line SET amount = -amount;
+
+  - comment: If analytic_budget module is activated, invert amount sign:
+    version: 7.6
+    tables: analytic_account_budget_line
+    query: UPDATE analytic_account_budget_line SET amount = -amount;
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
