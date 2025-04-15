@@ -1395,7 +1395,7 @@ after:
     tables: account_budget_line
     query: UPDATE account_budget_line SET amount = -amount;
 
-  - comment: If analytic_budget module is activated, invert amount sign:
+  - comment: If analytic_budget module is activated, invert amount sign
     version: 7.6
     tables: analytic_account_budget_line
     query: UPDATE analytic_account_budget_line SET amount = -amount;
