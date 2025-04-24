@@ -1259,6 +1259,10 @@ after:
     tables: account_invoice
     version: 7.0
 
+  - script: ./upgrades/after/move_unit_price_required.py
+    tables: stock_move
+    version: 7.0
+
   - comment: ir_export_line replace gross_unit_price to base_price, ...
     version: 7.2
     query: UPDATE ir_export_line SET name = replace(name, 'gross_unit_price', 'base_price') where name like '%gross_unit_price%';
