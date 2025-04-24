@@ -30,14 +30,14 @@ with Transaction().start(dbname, 0, context=context) as transaction:
 
     ids = []
     moves = Move.search([
+        # ('currency', '=', None), # TODO uncomment in case moves has currency not required
         ('state', 'not in', ['done', 'cancelled']), # TODO remove domain in case user do copy oldest shipments
         ])
     for move in moves:
         if not move.unit_price_required:
             ids.append(str(move.id))
 
-    query = 'update stock_move set unit_price = null, currency=null where id in (%s)' % ','.join(ids)
-    print(query)
+    query = 'update stock_move set unit_price = null, currency = null where id in (%s)' % ','.join(ids)
 
     cursor = transaction.connection.cursor()
     cursor.execute(query)
