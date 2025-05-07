@@ -886,6 +886,25 @@ before:
     version: 7.4
     query: DELETE FROM "ir_model_button" WHERE "name" = 'open_lines' AND "model" = 'product.price_list';
 
+  - comment: Rename optional view fields that not exists
+    version: 7.4
+    query: DELETE FROM ir_ui_view_tree_optional where id in (select iuvto.id from ir_ui_view_tree_optional as iuvto left join ir_ui_view as iuv on iuv.id = iuvto.view_id where iuvto.field in ('reconciliation', 'move_origin') and iuv.model = 'account.payment');
+
+  - comment: Remove ir_ui_view_tree_state fields that not exists
+    version: 7.4
+    query: DELETE FROM ir_model_field where model like 'babi_execution_*';
+      DELETE FROM ir_ui_view_tree_state where model like 'babi_execution_%';
+      DELETE FROM ir_ui_view_tree_state where child_name = 'childs' and model = 'company.company';
+
+  - comment: babi_reports_sii fs_id allow convert XML
+    version: 7.4
+    query: DELETE from ir_model_data where model = 'babi.measure';
+      DELETE from ir_model_data where model = 'babi.dimension';
+
+  - comment: babi_reports_sii fs_id replace
+    version: 7.4
+    query: UPDATE ir_model_data set fs_id = replace(fs_id, '__', '_') where fs_id in ('babi_field_summary_invoices_state__date', 'summary_invoices_state__date', 'babi_field_summary_invoices_state__state', 'summary_invoices_state__state', 'babi_field_summary_invoices_state__number', 'summary_invoices_state__number', 'babi_field_issued_invoices_taxes__description', 'issued_invoices_taxes__description', 'babi_field_issued_invoices_taxes__type', 'issued_invoices_taxes__type', 'babi_field_summary_invoices_state__description', 'summary_invoices_state__description', 'babi_field_summary_invoices_state__type', 'summary_invoices_state__type', 'babi_field_state_issued_invoices_taxes__description', 'state_issued_invoices_taxes__description', 'babi_field_state_issued_invoices_taxes__type', 'state_issued_invoices_taxes__type', 'babi_field_state_received_invoices_taxes__description', 'state_received_invoices_taxes__description', 'babi_field_state_received_invoices_taxes__type', 'state_received_invoices_taxes__type', 'babi_field_subject_sii_invoice__date', 'subject_sii_invoice__date', 'babi_field_subject_sii_invoice__description') and module = 'babi_reports_sii';
+
   - comment: Rename columns of ir.model and ir.model.field
     version: 7.6
     query: ALTER TABLE IF EXISTS "ir_model" RENAME COLUMN "name" TO "string";
