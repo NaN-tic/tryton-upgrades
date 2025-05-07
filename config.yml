@@ -1385,6 +1385,10 @@ after:
     version: 7.2
     query: update ir_cron set hour = 0 where hour = 24;
 
+  # - comment: replace unit_price digits to 4 decimals
+  #   version: 7.2
+  #   query: UPDATE stock_move SET unit_price = ROUND(unit_price::numeric, 4) WHERE unit_price::text ~ '\.\d{5,}' and unit_price is not null;
+
   - comment: drop babi_execution_ tables
     version: 7.4
     tables: babi_report
