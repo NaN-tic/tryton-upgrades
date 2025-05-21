@@ -222,12 +222,16 @@ class Upgrade:
                 tables = action.get('tables', '')
                 fields = action.get('fields', '')
                 version = action.get('version', trytond_version)
+                since_version = action.get('since_version')
                 query = action.get('query')
                 script = action.get('script')
                 where = action.get('where')
 
                 # Check version
                 if not (float(version) <= float(trytond_version) and float(version) > float(from_version)):
+                    continue
+
+                if since_version and float(from_version) < float(since_version):
                     continue
 
                 # Check tables
