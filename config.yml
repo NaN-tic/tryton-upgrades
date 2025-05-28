@@ -1423,6 +1423,10 @@ after:
     version: 7.4
     query: delete from ir_cron where method like 'babi.report%';
 
+  - comment: stock_lot
+    version: 7.4
+    query: delete from ir_model_data where fs_id = 'act_lots_by_warehouse_relate' and module = 'stock_lot';
+
   - comment: internal shipment using transit location, fill the internal transit location
     version: 7.6
     tables: stock_shipment_internal
