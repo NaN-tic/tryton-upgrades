@@ -833,6 +833,11 @@ before:
       ALTER TABLE bank_account_number DROP CONSTRAINT if exists bank_account_number_number_iban_exclude;
       ALTER TABLE bank_account_number ADD CONSTRAINT bank_account_number_number_iban_active_exclude CHECK (type::text <> 'x'::text);
 
+  - comment: drop constraint account_invoice_line_account_tax_line_tax_unique
+    version: 7.0
+    tables: account_invoice
+    query: ALTER TABLE account_invoice_line_account_tax DROP CONSTRAINT IF EXISTS account_invoice_line_account_tax_line_tax_unique;
+
   - comment: Rename supply_on_sale because 6.8 is multivalue patch and not required to migrate data
     version: 7.2
     fields: product_template.supply_on_sale
