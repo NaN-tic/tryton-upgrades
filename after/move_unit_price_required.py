@@ -36,9 +36,9 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     for move in moves:
         if not move.unit_price_required:
             ids.append(str(move.id))
+    if ids:
+        query = 'update stock_move set unit_price = null, currency = null where id in (%s)' % ','.join(ids)
 
-    query = 'update stock_move set unit_price = null, currency = null where id in (%s)' % ','.join(ids)
-
-    cursor = transaction.connection.cursor()
-    cursor.execute(query)
-    transaction.commit()
+        cursor = transaction.connection.cursor()
+        cursor.execute(query)
+        transaction.commit()
