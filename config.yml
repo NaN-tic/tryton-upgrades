@@ -923,6 +923,13 @@ before:
         ALTER TABLE IF EXISTS "ir_model" RENAME COLUMN "model" TO "name";
         ALTER TABLE IF EXISTS "ir_model_field" RENAME COLUMN "field_description" TO "string";
 
+  - comment: Remove babi.reports
+    version: 7.4
+    query: delete from ir_action_act_window_view where id in (select id from ir_action_act_window where babi_report is not null);
+      delete from ir_action_act_window where babi_report is not null;
+      delete from ir_ui_menu where babi_report is not null;
+      delete from ir_cron where method like 'babi.report|compute';
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
