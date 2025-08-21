@@ -1433,9 +1433,10 @@ after:
     tables: babi_report
     script: ./upgrades/after/drop_table_babi_execution.py
 
-  - comment: drop babi.report cron
+  - comment: drop babi.report cron + act_babi_report
     version: 7.4
     query: delete from ir_cron where method like 'babi.report%';
+        delete from ir_model_data where fs_id in ('act_babi_execution', 'act_babi_report_execution_form', 'act_babi_report') and module = 'babi';
 
   - comment: stock_lot
     version: 7.4
