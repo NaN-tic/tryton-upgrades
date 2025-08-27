@@ -944,7 +944,6 @@ after:
     version: 5.1
     tables: account_tax_rule_template
     query: ALTER TABLE account_tax_rule_template DROP COLUMN IF EXISTS include_347;
-  - DELETE FROM ir_translation WHERE module = 'account_es_pyme';
   - comment: -> Change sign on account_tax_line
     version: 3.8 # TODO: check i 3.8 needs.
     query:  update account_tax_line set amount=amount*-1 where type = 'tax' and tax in (select id from account_tax where name ilike '%(2)%');
