@@ -933,6 +933,10 @@ before:
       delete from ir_cron where method like 'babi.report|compute';
       update babi_report set parent_menu = (select db_id from ir_model_data where module = 'babi' and model = 'ir.ui.menu' and fs_id = 'menu_babi') where parent_menu = (select db_id from ir_model_data where module = 'babi' and model = 'ir.ui.menu' and fs_id = 'menu_babi_report');
 
+  - comment: Remove translations menus
+    version: 7.4
+    query: delete from ir_translation where name in ('ir.action,name', 'ir.ui.menu,name') and module in ('account_reports', 'account_jasper_reports', 'nantic_connection', 'babi');
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
