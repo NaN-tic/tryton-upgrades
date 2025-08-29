@@ -931,6 +931,7 @@ before:
       delete from ir_action_act_window where babi_report is not null;
       delete from ir_ui_menu where babi_report is not null;
       delete from ir_cron where method like 'babi.report|compute';
+      update babi_report set parent_menu = (select db_id from ir_model_data where module = 'babi' and model = 'ir.ui.menu' and fs_id = 'menu_babi') where parent_menu = (select db_id from ir_model_data where module = 'babi' and model = 'ir.ui.menu' and fs_id = 'menu_babi_report');
 
 after:
   - comment: Remove include_347 from party
