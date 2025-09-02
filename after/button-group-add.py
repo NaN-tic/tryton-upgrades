@@ -54,6 +54,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
         btn_cores = ModelData.search([
             ('model', '=',  'res.group'),
             ('db_id', 'in', [g.id for g in button.groups]),
+            ('module', '=', module),
             ])
         # in case has only a core group, not add new groups
         if len(btn_cores) == 1 and len(button.groups) == 1:
