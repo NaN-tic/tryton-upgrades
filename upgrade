@@ -138,6 +138,7 @@ class Upgrade:
         self.config_file = None
 
     def uninstall_modules(self):
+        model_ir_model = 'name' if float(trytond_version) >= 7.6 else 'model'
         module_table = None
         for table in ('ir_module_module', 'ir_module'):
             if table_exists(table):
@@ -203,10 +204,10 @@ class Upgrade:
             'id FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
             module_table)
         execute('DELETE FROM ir_action_act_window WHERE res_model IN (SELECT '
-            'model FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
-            module_table)
-        execute('DELETE FROM ir_action_wizard WHERE model in (SELECT model FROM '
-            'ir_model WHERE module NOT IN (SELECT name FROM %s))' % module_table)
+            '%s FROM ir_model WHERE module NOT IN (SELECT name FROM %s))' %
+            (model_ir_model, module_table))
+        execute('DELETE FROM ir_action_wizard WHERE model in (SELECT %s FROM '
+            'ir_model WHERE module NOT IN (SELECT name FROM %s))' % (model_ir_model, module_table))
         execute('DELETE FROM ir_model WHERE module NOT IN (SELECT name FROM '
             '%s)' % module_table)
         execute('DELETE FROM ir_model_field WHERE module NOT IN (SELECT name FROM '
@@ -223,6 +224,7 @@ class Upgrade:
                 fields = action.get('fields', '')
                 version = action.get('version', trytond_version)
                 since_version = action.get('since_version')
+                until_version = action.get('until_version')
                 query = action.get('query')
                 script = action.get('script')
                 where = action.get('where')
@@ -232,6 +234,8 @@ class Upgrade:
                     continue
 
                 if since_version and float(from_version) < float(since_version):
+                    continue
+                if until_version and float(trytond_version) > float(until_version):
                     continue
 
                 # Check tables

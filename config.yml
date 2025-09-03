@@ -1186,6 +1186,7 @@ after:
     query: ALTER TABLE ir_sequence_type DROP COLUMN IF EXISTS code;
 
   - comment: all versions sync model data
+    until_version: 7.4
     script: ./upgrades/after/sync_model_data.py
 
   - comment: Migrate data from commission_party agent to new agent in commission module
