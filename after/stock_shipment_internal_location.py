@@ -28,13 +28,23 @@ context={'active_test': False}
 with Transaction().start(dbname, 0, context=context) as transaction:
     pool = Pool()
     Shipment = pool.get('stock.shipment.internal')
+    ModelData = pool.get('ir.model.data')
+    Location = pool.get('stock.location')
+
+    cursor = Transaction().connection.cursor()
+
+    model_data, = ModelData.search([
+        ('fs_id', '=', 'location_transit'),
+        ('module', '=', 'stock'),
+        ])
+    transit_loc = Location(model_data.db_id)
+
+    cursor = Transaction().connection.cursor()
 
     shipments = Shipment.search([('state', 'not in', ['request', 'draft'])])
     for shipment in shipments:
-        state = shipment.state
-        shipment.state = 'draft'
-        shipment.internal_transit_location = shipment.transit_location
-        shipment.state = state
-    Shipment.save(shipments)
+        transit_location = shipment.transit_location or transit_loc
+        query = 'update stock_shipment_internal set internal_transit_location = %s where id = %s' % (transit_location.id, shipment.id)
+        cursor.execute(query)
 
     Transaction().commit()
