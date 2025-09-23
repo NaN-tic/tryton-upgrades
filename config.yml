@@ -1444,9 +1444,10 @@ after:
     query: delete from ir_cron where method like 'babi.report%';
         delete from ir_model_data where fs_id in ('act_babi_execution', 'act_babi_report_execution_form', 'act_babi_report') and module = 'babi';
 
-  - comment: stock_lot
+  - comment: ir_model_data - importer, stock_lot
     version: 7.4
     query: delete from ir_model_data where fs_id = 'act_lots_by_warehouse_relate' and module = 'stock_lot';
+        delete from ir_model_data where fs_id in ('act_import_errors', 'act_error')  and model = 'ir.action.act_window';
 
   - comment: internal shipment using transit location, fill the internal transit location
     version: 7.6
