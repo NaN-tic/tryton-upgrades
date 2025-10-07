@@ -937,6 +937,11 @@ before:
     version: 7.4
     query: delete from ir_translation where name in ('ir.action,name', 'ir.ui.menu,name') and module in ('account_reports', 'account_jasper_reports', 'nantic_connection', 'babi');
 
+  - comment: Add location column in stock_order_point
+    version: 7.4
+    tables: stock_order_point
+    query: ALTER TABLE stock_order_point ADD COLUMN IF NOT EXISTS location integer;update stock_order_point set location = storage_location where storage_location is not null;update stock_order_point set location = warehouse_location where warehouse_location is not null;
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
