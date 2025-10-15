@@ -1449,6 +1449,11 @@ after:
     fields: account_payment.sepa_mandate_sequence_type
     query: update account_payment set sepa_info_id = 'xxx' where sepa_mandate_sequence_type is not null and sepa_info_id is null;
 
+  - comment: drop not null in case acceptable_similarity column exists
+    version: 7.4
+    fields: account_statement_journal.acceptable_similarity
+    query: alter table account_statement_journal alter column acceptable_similarity drop not null;
+
   - comment: drop babi_execution_ tables
     version: 7.4
     tables: babi_report
