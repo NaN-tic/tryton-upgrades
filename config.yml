@@ -1444,6 +1444,11 @@ after:
   #   version: 7.2
   #   query: UPDATE stock_move SET unit_price = ROUND(unit_price::numeric, 4) WHERE unit_price::text ~ '\.\d{5,}' and unit_price is not null;
 
+  - comment: update hash in sepa_info_id to generate mandates (records before 2023)
+    version: 7.4
+    fields: account_payment.sepa_mandate_sequence_type
+    query: update account_payment set sepa_info_id = 'xxx' where sepa_mandate_sequence_type is not null and sepa_info_id is null;
+
   - comment: drop babi_execution_ tables
     version: 7.4
     tables: babi_report
