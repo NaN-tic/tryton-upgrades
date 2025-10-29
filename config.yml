@@ -806,6 +806,10 @@ before:
       UPDATE ir_action_report SET model = null WHERE model = '';
       UPDATE ir_action_report SET module = null WHERE module = '';
 
+  - comment: remove celery view tree width
+    version: 7.2
+    query: delete from ir_ui_view_tree_width where model like '%celery%';
+
   - comment: Remove ui_view_tree_width for non-existing field/model pairs
     version: 7.2
     query:
