@@ -946,9 +946,9 @@ before:
     tables: stock_order_point
     query: ALTER TABLE stock_order_point ADD COLUMN IF NOT EXISTS location integer;update stock_order_point set location = storage_location where storage_location is not null;update stock_order_point set location = warehouse_location where warehouse_location is not null;
 
-  - comment: Replace lot_required character varying to jsonb
+  - comment: Replace lot_required character varying to jsonb (a custom model has lot_required bolena field - same name field)
     version: 7.4
-    fields: product_template.lot_required
+    fields: product_template.lot_sequence
     query: update product_template set lot_required = null  where lot_required = '[]';ALTER TABLE product_template ALTER COLUMN lot_required TYPE jsonb USING lot_required::jsonb;
 
 after:
