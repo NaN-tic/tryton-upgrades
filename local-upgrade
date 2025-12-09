@@ -16,4 +16,4 @@ fi
 dropdb $TO_DATABASE
 k database copy --full $FROM_DATABASE $TO_DATABASE
 export PYTHONPATH=trytond:proteus
-./upgrades/upgrade $TO_DATABASE $FROM_VERSION $OTHER
+k database upgrade $TO_DATABASE $FROM_VERSION $OTHER
