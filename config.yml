@@ -76,6 +76,7 @@ to_uninstall:
   - sale_fedicom
   - sale_incoterm
   - sale_invoices_paid
+  - sale_issue
   - sale_shipments_done
   - shine
   - stock_inventory_expected_quantity
