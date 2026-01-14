@@ -860,11 +860,6 @@ before:
     tables: party_identifier
     query: update party_identifier set code = concat('ES', code), type = 'eu_vat' where type = 'es_dni';
 
-  - comment: drop constraint imap_server_account_uniq
-    version: 6.8
-    tables: imap_server
-    query: ALTER TABLE imap_server DROP CONSTRAINT IF EXISTS imap_server_account_uniq;
-
   - comment: Rename stock_configuration_product_template_form_quantity from product_quantity
     version: 7.2
     tables: stock_configuration_product_template_form_quantity
@@ -874,6 +869,11 @@ before:
     version: 7.2
     tables: imap_server
     query: ALTER TABLE imap_server DROP CONSTRAINT IF EXISTS imap_server_account_uniq;
+
+  - comment: set warehouse_location to null in case type == internal
+    version: 7.2
+    tables: stock_order_point
+    query: update stock_order_point set warehouse_location = null where warehouse_location is not null and type = 'internal';
 
   - comment: rename and inactive tables from babi.reports sii
     version: 7.4
