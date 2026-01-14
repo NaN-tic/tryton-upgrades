@@ -46,6 +46,7 @@ to_uninstall:
   - quality_control_trigger
   - party_asterisk
   - party_credit_limit
+  - party_lang
   - party_vcarddav
   - party_merge
   - party_search
