@@ -1498,5 +1498,9 @@ after:
     query: UPDATE html_template set data = replace(data, 'payment.render.description', 'payment.render.reference') where data like '%payment.render.description%';
         UPDATE html_template set data = replace(data, 'payment.raw.description', 'payment.raw.reference') where data like '%payment.raw.description%';
 
+  - comment: Rename ir_export_line
+    version: 7.6
+    query: update ir_export_line set name = replace(name, 'post_number', 'number') where name like '%post_number%';
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
