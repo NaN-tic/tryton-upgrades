@@ -1488,9 +1488,10 @@ after:
     tables: analytic_account_budget_line
     query: UPDATE analytic_account_budget_line SET amount = -amount;
 
-  - comment: Rename payment.description to payment.reference
+  - comment: Rename ir_export_line
     version: 7.6
     query: UPDATE ir_export_line set name = replace(name, 'payment/description', 'payment/reference') where name = 'payment/description';
+        update ir_export_line set name = replace(name, 'post_number', 'number') where name like '%post_number%';
 
   - comment: Rename payment.description to payment.reference
     version: 7.6
@@ -1498,9 +1499,9 @@ after:
     query: UPDATE html_template set data = replace(data, 'payment.render.description', 'payment.render.reference') where data like '%payment.render.description%';
         UPDATE html_template set data = replace(data, 'payment.raw.description', 'payment.raw.reference') where data like '%payment.raw.description%';
 
-  - comment: Rename ir_export_line
+  - comment: Remove name in format_address
     version: 7.6
-    query: update ir_export_line set name = replace(name, 'post_number', 'number') where name like '%post_number%';
+    query: update party_address_format set format_ = replace(format_, '${name}', '') where format_ like '%${name}%';
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
