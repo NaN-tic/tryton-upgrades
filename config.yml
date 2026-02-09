@@ -1492,6 +1492,7 @@ after:
     version: 7.6
     query: UPDATE ir_export_line set name = replace(name, 'payment/description', 'payment/reference') where name = 'payment/description';
         update ir_export_line set name = replace(name, 'post_number', 'number') where name like '%post_number%';
+        update ir_export_line set name = replace(name, '/model', '/name') where name like '%/model%';
 
   - comment: Rename payment.description to payment.reference
     version: 7.6
