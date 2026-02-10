@@ -1504,5 +1504,15 @@ after:
     version: 7.6
     query: update party_address_format set format_ = replace(format_, '${name}', '') where format_ like '%${name}%';
 
+  - comment: Remove building_name values (format address)
+    version: 7.6
+    fields: party_address.building_name
+    query: ALTER TABLE party_address ADD COLUMN building_name_76 character varying;
+        ALTER TABLE party_address ADD COLUMN street_unstructured_76 text;
+        UPDATE party_address SET building_name_76 = building_name;
+        UPDATE party_address SET street_unstructured_76 = street_unstructured;
+        UPDATE party_address SET street_unstructured = CASE WHEN street_unstructured IS NOT NULL AND street_unstructured <> '' THEN building_name_76 || E'\n' || street_unstructured ELSE building_name_76 END WHERE building_name IS NOT NULL AND building_name <> '';
+        UPDATE party_address SET building_name = NULL;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
