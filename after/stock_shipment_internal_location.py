@@ -43,7 +43,9 @@ with Transaction().start(dbname, 0, context=context) as transaction:
 
     shipments = Shipment.search([('state', 'not in', ['request', 'draft'])])
     for shipment in shipments:
-        transit_location = shipment.transit_location or transit_loc
+        transit_location = shipment.on_change_with_transit_location()
+        if not transit_location:
+            continue
         query = 'update stock_shipment_internal set internal_transit_location = %s where id = %s' % (transit_location.id, shipment.id)
         cursor.execute(query)
 
