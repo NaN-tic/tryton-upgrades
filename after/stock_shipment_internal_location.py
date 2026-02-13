@@ -43,6 +43,7 @@ with Transaction().start(dbname, 0, context=context) as transaction:
 
     shipments = Shipment.search([('state', 'not in', ['request', 'draft'])])
     for shipment in shipments:
+        shipment.state = 'draft'
         transit_location = shipment.on_change_with_transit_location()
         if not transit_location:
             continue
