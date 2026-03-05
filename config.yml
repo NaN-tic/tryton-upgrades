@@ -1515,5 +1515,15 @@ after:
         UPDATE party_address SET street_unstructured = CASE WHEN street_unstructured IS NOT NULL AND street_unstructured <> '' THEN building_name_76 || E'\n' || street_unstructured ELSE building_name_76 END WHERE building_name IS NOT NULL AND building_name <> '';
         UPDATE party_address SET building_name = NULL;
 
+  - comment: dominate reports
+    version: 7.6
+    query: update ir_action set active = true where id in (select action from ir_action_report where template_extension = 'jinja' and model is not null and extension = 'pdf');
+        delete from ir_model_data where model in ('html.template', 'html.template.signature') and module = 'html_report';
+
+  - comment: electronic_mail dominate reports
+    version: 7.6
+    tables: electronic_mail_template
+    script: ./upgrades/after/electronic_mail_template_to_dominate.py
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
