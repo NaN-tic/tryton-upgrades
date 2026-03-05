@@ -1525,5 +1525,9 @@ after:
     tables: electronic_mail_template
     script: ./upgrades/after/electronic_mail_template_to_dominate.py
 
+  - comment: aeat_303
+    version: 7.6
+    query: delete from ir_model_data where model = 'ir.action.act_window' and fs_id = 'act_aeat_347_record';
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
