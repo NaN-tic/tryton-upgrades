@@ -952,6 +952,11 @@ before:
     fields: product_template.lot_sequence
     query: update product_template set lot_required = null  where lot_required = '[]';ALTER TABLE product_template ALTER COLUMN lot_required TYPE jsonb USING lot_required::jsonb;
 
+  - comment: dominate reports
+    version: 7.6
+    query: update ir_action set active = true where id in (select action from ir_action_report where template_extension = 'jinja' and model is not null and extension = 'pdf');
+        delete from ir_model_data where model in ('html.template', 'html.template.signature') and module = 'html_report';
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
@@ -1514,11 +1519,6 @@ after:
         UPDATE party_address SET street_unstructured_76 = street_unstructured;
         UPDATE party_address SET street_unstructured = CASE WHEN street_unstructured IS NOT NULL AND street_unstructured <> '' THEN building_name_76 || E'\n' || street_unstructured ELSE building_name_76 END WHERE building_name IS NOT NULL AND building_name <> '';
         UPDATE party_address SET building_name = NULL;
-
-  - comment: dominate reports
-    version: 7.6
-    query: update ir_action set active = true where id in (select action from ir_action_report where template_extension = 'jinja' and model is not null and extension = 'pdf');
-        delete from ir_model_data where model in ('html.template', 'html.template.signature') and module = 'html_report';
 
   - comment: electronic_mail dominate reports
     version: 7.6
