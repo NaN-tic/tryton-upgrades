@@ -954,7 +954,7 @@ before:
 
   - comment: dominate reports
     version: 7.6
-    query: update ir_action set active = false where id in (select action from ir_action_report where template_extension = 'jinja' and model is not null and extension = 'pdf');
+    query: update ir_action set active = false where id in (select action from ir_action_report where template_extension = 'jinja' and model is not null and extension = 'pdf' and (module is null or module = 'html_report'));
         delete from ir_model_data where model in ('html.template', 'html.template.signature', 'html.report.template', 'ir.action.report') and module in ('html_report', 'account_py');
 
 after:
