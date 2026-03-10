@@ -1529,5 +1529,9 @@ after:
     version: 7.6
     query: delete from ir_model_data where model = 'ir.action.act_window' and fs_id = 'act_aeat_347_record';
 
+  - comment: account_financial_statement
+    version: 7.6
+    query: update ir_action set active = true  where id in (select action from ir_action_report where template_extension = 'html' and module = 'account_financial_statement');
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
