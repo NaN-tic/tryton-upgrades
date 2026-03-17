@@ -1533,5 +1533,9 @@ after:
     version: 7.6
     query: update ir_action set active = true  where id in (select action from ir_action_report where template_extension = 'html' and module = 'account_financial_statement');
 
+  - comment: fuzzy translations
+    version: 7.6
+    query: update  ir_translation set fuzzy = false where src = 'Stock Shipment Out' and fuzzy= true;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
