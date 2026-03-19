@@ -1537,5 +1537,9 @@ after:
     version: 7.6
     query: update  ir_translation set fuzzy = false where src = 'Stock Shipment Out' and fuzzy= true;
 
+  - comment: dominate reports sure html_reports are active
+    version: 7.6
+    query: update ir_action set active = true where id in (select action from ir_action_report where id in (select db_id from ir_model_data where model = 'ir.action.report' and module = 'html_report' and fs_id like 'html_report_%' ));
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
