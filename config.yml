@@ -955,7 +955,7 @@ before:
   - comment: dominate reports
     version: 7.6
     query: update ir_action set active = false where id in (select action from ir_action_report where template_extension = 'jinja' and model is not null and (module is null or module = 'html_report'));
-        delete from ir_model_data where model in ('html.template', 'html.template.signature', 'html.report.template') and module in ('html_report', 'account_py');
+        delete from ir_model_data where model in ('html.template', 'html.template.signature', 'html.report.template') and module in ('html_report', 'account_py', 'stock_inventory_jreport');
 
 after:
   - comment: Remove include_347 from party
