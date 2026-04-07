@@ -115,6 +115,7 @@ to_uninstall:
   - account_invoice_validate_identifier # Replaced by account_invoice_vat_required since version 7.2
   - account_jasper_reports:7.6 # Deprecated at 7.6. moved to account_reports module
   - stock_inventory_jreport:7.6 # Deprecated at 7.6. jasper_reports
+  - account_invoice_jreport_cache # Deprecated at 7.8. jasper_reports
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
