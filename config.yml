@@ -1553,5 +1553,9 @@ after:
         delete from ir_action_report where template_extension = 'jinja';
         delete from ir_model_data where fs_id in ('act_report_template_form', 'act_template_form', 'act_signature_form') and module = 'html_report';
 
+  - comment: building_name to street
+    version: 7.6
+    query: update party_address set building_name = null, street_unstructured = concat(building_name, E'\n', street_unstructured) where building_name is not null and street_unstructured is not null;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
