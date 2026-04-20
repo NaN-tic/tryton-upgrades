@@ -1557,5 +1557,13 @@ after:
     version: 7.6
     query: update party_address set building_name = null, street_unstructured = concat(building_name, E'\n', street_unstructured) where building_name is not null and street_unstructured is not null;
 
+  - comment: account_invoice_facturae isalnum oficina_contable
+    version: 7.8
+    fields: party_address.oficina_contable
+    query: update party_address set oficina_contable = null where oficina_contable = '';
+        update party_address set organo_gestor = null where organo_gestor = '';
+        update party_address set unidad_tramitadora = null where unidad_tramitadora = '';
+        update party_address set organo_proponente = null where organo_proponente = '';
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
