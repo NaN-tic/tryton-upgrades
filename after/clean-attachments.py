@@ -9,7 +9,6 @@ CONFIG.update_etc(config_file)
 
 from trytond.pool import Pool
 from trytond.transaction import Transaction
-from trytond.model.modelstorage import DomainValidationError
 import logging
 
 Pool.start()
@@ -33,12 +32,12 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     cursor.execute(query)
     for id, resource in cursor.fetchall():
         model, _id = resource.split(',')
-    
+
         try:
             Model = pool.get(model)
-        except Exception as e:
+        except Exception:
             continue
-        
+
         exist = Model.search([('id', '=', _id)], count=True)
         if exist:
             continue
