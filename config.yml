@@ -1559,6 +1559,7 @@ after:
     query: update party_address set building_name = null, street_unstructured = concat(building_name, E'\n', street_unstructured) where building_name is not null and street_unstructured is not null;
 
   - comment: production_bom phantom to False
+    version: 7.8
     tables: production_bom
     query: update production_bom set phantom = False where phantom is null;
 
