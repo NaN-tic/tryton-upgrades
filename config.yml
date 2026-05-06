@@ -1558,6 +1558,10 @@ after:
     version: 7.6
     query: update party_address set building_name = null, street_unstructured = concat(building_name, E'\n', street_unstructured) where building_name is not null and street_unstructured is not null;
 
+  - comment: production_bom phantom to False
+    tables: production_bom
+    query: update production_bom set phantom = False where phantom is null;
+
   - comment: account_invoice_facturae isalnum oficina_contable
     version: 7.8
     fields: party_address.oficina_contable
