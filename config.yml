@@ -963,6 +963,12 @@ before:
     query: update ir_action set active = false where id in (select action from ir_action_report where template_extension = 'jinja' and model is not null and (module is null or module = 'html_report'));
         delete from ir_model_data where model in ('html.template', 'html.template.signature', 'html.report.template') and module in ('html_report', 'account_py', 'stock_inventory_jreport');
 
+  - comment: party_identifier_number_excl_py_ruc to py_vat
+    version: 7.8
+    tables: party_identifier
+    query: ALTER TABLE party_identifier DROP CONSTRAINT IF EXISTS party_identifier_number_excl_py_ruc;
+
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
