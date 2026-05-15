@@ -974,6 +974,11 @@ before:
     fields: project_work.code
     query: ALTER TABLE project_work rename column code to number;
 
+  - comment: project_work rename code to number
+    version: 8.0
+    tables: work_configuration_activity_employee
+    query: ALTER TABLE work_configuration_activity_employee RENAME TO project_configuration_activity_employee;
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
@@ -1591,6 +1596,11 @@ after:
     version: 8.0
     fields: project_work.number
     query: delete from ir_model_data where fs_id = 'sequence_work' and module = 'project_sequence';
+
+  - comment: project_work rename code to number
+    version: 8.0
+    fields: work_configuration.default_allocation_employee
+    query: update project_configuration set default_allocation_employee = (select default_allocation_employee from work_configuration);
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
