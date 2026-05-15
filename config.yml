@@ -118,6 +118,7 @@ to_uninstall:
   - account_invoice_jreport_cache # Deprecated at 7.8. jasper_reports
   - stock_move_label:7.8 # Deprecated at 7.6. jasper_reports
   - papyrus_azure:7.6 # Deprecated at 7.6. moved to papyrus_model module
+  - project_sequence:8.0 # Deprecated at 8.0. project.work has number field
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
@@ -968,6 +969,10 @@ before:
     tables: party_identifier
     query: ALTER TABLE party_identifier DROP CONSTRAINT IF EXISTS party_identifier_number_excl_py_ruc;
 
+  - comment: project_work rename code to number
+    version: 8.0
+    fields: project_work.code
+    query: ALTER TABLE project_work rename column code to number;
 
 after:
   - comment: Remove include_347 from party
@@ -1576,6 +1581,16 @@ after:
         update party_address set organo_gestor = null where organo_gestor = '';
         update party_address set unidad_tramitadora = null where unidad_tramitadora = '';
         update party_address set organo_proponente = null where organo_proponente = '';
+
+  - comment: project_work rename code to number
+    version: 8.0
+    fields: project_work.number
+    script: ./upgrades/after/migration_project_work_sequence.py
+
+  - comment: project_work rename code to number
+    version: 8.0
+    fields: project_work.number
+    query: delete from ir_model_data where fs_id = 'sequence_work' and module = 'project_sequence';
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
