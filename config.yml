@@ -1602,5 +1602,8 @@ after:
     fields: work_configuration.default_allocation_employee
     query: update project_configuration set default_allocation_employee = (select default_allocation_employee from work_configuration);
 
+  - comment: delete ir.cron nantic_check
+    query: delete from ir_cron where method like  '%nantic_check';
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
