@@ -979,6 +979,10 @@ before:
     tables: work_configuration_activity_employee
     query: ALTER TABLE work_configuration_activity_employee RENAME TO project_configuration_activity_employee;
 
+  - comment: ir.cron noupdate
+    version: 8.0
+    query: update ir_model_data set noupdate = true where fs_id in ('cron_create_dunning', 'cron_import_edi_invoice', 'cron_run_generate_edi_file', 'cron_update_invoice_b2brouter_state', 'cron_gateway_import_transaction', 'cron_fetch_pending_facturae', 'cron_calculate_sii', 'cron_send_verifactu', 'cron_variant_deactivation', 'cron_table_clean', 'cron_create_notification', 'cron_renew_documents', 'cron_invoice_send', 'cron_generate_request', 'cron_build', 'cron_product_analysis', 'cron_create_review', 'cron_stock_export', 'cron_create_activity', 'cron_imap', 'cron_getmail', 'cron_recompute_cost_price', 'cron_deactivate_invalid_supplier_prices', 'cron_account_update', 'cron_virtual_agent_run', 'cron_find_binary_issues', 'cron_send_modules', 'cron_ticket_sync', 'cron_process_queue', 'cron_clean_files', 'cron_inspect_documents', 'cron_process_documents', 'cron_inspect_pages', 'cron_process_pages', 'cron_document_expiration_date_check', 'cron_update_printer_info', 'cron_product_review', 'cron_edi_sale', 'cron_create_edi_orders', 'sale_exception_fix_cron', 'cron_deactivate_lots_without_stock', 'cron_shop_shipments_update') and model = 'ir.cron';
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
