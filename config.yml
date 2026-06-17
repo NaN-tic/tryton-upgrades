@@ -969,6 +969,10 @@ before:
     tables: party_identifier
     query: ALTER TABLE party_identifier DROP CONSTRAINT IF EXISTS party_identifier_number_excl_py_ruc;
 
+  - comment: Convert varchar and text columns to jsonb
+    version: 8.0
+    script: ./upgrades/before/convert_columns_to_jsonb.py
+
   - comment: project_work rename code to number
     version: 8.0
     fields: project_work.code
