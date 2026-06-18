@@ -19,6 +19,8 @@ COLUMNS_TO_CONVERT = [
     ('ir_avatar', 'copy_to_resources'),
     ('party_address_subdivision_type', 'types'),
     ('party_configuration', 'identifier_types'),
+    ('party_relation_type', 'usages'),
+    ('account_statement_origin', 'information'),
     ('product_template', 'custom_attributes'),
 ]
 
