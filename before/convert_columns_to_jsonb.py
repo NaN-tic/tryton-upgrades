@@ -20,6 +20,8 @@ COLUMNS_TO_CONVERT = [
     ('party_address_subdivision_type', 'types'),
     ('party_configuration', 'identifier_types'),
     ('party_relation_type', 'usages'),
+    ('project_work_status', 'types'),
+    ('activity_activity', 'translation_languages'),
     ('account_statement_origin', 'information'),
     ('product_template', 'custom_attributes'),
 ]
