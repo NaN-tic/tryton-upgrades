@@ -1616,6 +1616,11 @@ after:
     fields: work_configuration.default_allocation_employee
     query: update project_configuration set default_allocation_employee = (select default_allocation_employee from work_configuration);
 
+  - comment: account_statement_line set account not null
+    version: 8.0
+    tables: account_statement_line
+    query: update account_statement_line SET account = (SELECT id FROM account_account WHERE code LIKE '572%0' ORDER BY code LIMIT 1) WHERE account IS NULL;
+
   - comment: delete ir.cron nantic_check
     query: delete from ir_cron where method like  '%nantic_check';
 
