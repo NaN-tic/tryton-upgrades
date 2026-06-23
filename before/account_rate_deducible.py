@@ -27,12 +27,15 @@ OLD_NEW_FS_IDS = {
     'iva_no_ded_21': 'iva_sop_21',
 }
 DELETE_FS_IDS = [
+    'vat_code_chart_no_ded',
     'iva_no_ded_4',
     'iva_no_ded_10',
     'iva_no_ded_21',
+    'iva_no_ded_22',
     'iva_no_ded_22_4',
     'iva_no_ded_22_10',
     'iva_no_ded_22_21',
+    'iva_no_ded_cuota_23',
     'iva_no_ded_cuota_23_4',
     'iva_no_ded_cuota_23_10',
     'iva_no_ded_cuota_23_21',
@@ -60,6 +63,9 @@ DELETE_MODEL_DATA = {
         'account_es.iva_no_ded_4',
         'account_es.iva_no_ded_10',
         'account_es.iva_no_ded_21',
+        ],
+    'aeat_303': [
+        'aeat_303_prorrata_mapping_iva_no_ded_22',
         ],
     }
 END_DATE = '2025-12-31'
