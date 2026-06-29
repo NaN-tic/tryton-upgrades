@@ -940,7 +940,7 @@ before:
   - comment: Remove babi.reports
     version: 7.4
     tables: babi_report
-    query: delete from ir_action_act_window_view where id in (select id from ir_action_act_window where babi_report is not null);
+    query: delete from ir_action_act_window_view where act_window in (select id from ir_action_act_window where babi_report is not null);
       delete from ir_action_act_window where babi_report is not null;
       delete from ir_ui_menu where babi_report is not null;
       delete from ir_cron where method like 'babi.report|compute';
