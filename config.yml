@@ -610,8 +610,6 @@ before:
     version: 5.2
     fields: production_lead_time.lead_time
     query: ALTER TABLE production_lead_time DROP COLUMN lead_time;
-  - script: ./upgrades/before/remove_deprecated_taxes.py
-    version: 5.2
   - comment: replace account_payment_sepa_message from TEXT to BYTEA
     version: 5.4
     tables: account_payment_sepa_message
@@ -970,10 +968,6 @@ before:
     tables: party_identifier
     query: ALTER TABLE party_identifier DROP CONSTRAINT IF EXISTS party_identifier_number_excl_py_ruc;
 
-  - comment: Convert varchar and text columns to jsonb
-    version: 8.0
-    script: ./upgrades/before/convert_columns_to_jsonb.py
-
   - comment: project_work rename code to number
     version: 8.0
     fields: project_work.code
@@ -987,11 +981,6 @@ before:
   - comment: ir.cron noupdate
     version: 8.0
     query: update ir_model_data set noupdate = true where fs_id in ('cron_create_dunning', 'cron_import_edi_invoice', 'cron_run_generate_edi_file', 'cron_update_invoice_b2brouter_state', 'cron_gateway_import_transaction', 'cron_fetch_pending_facturae', 'cron_calculate_sii', 'cron_send_verifactu', 'cron_variant_deactivation', 'cron_table_clean', 'cron_create_notification', 'cron_renew_documents', 'cron_invoice_send', 'cron_generate_request', 'cron_build', 'cron_product_analysis', 'cron_create_review', 'cron_stock_export', 'cron_create_activity', 'cron_imap', 'cron_getmail', 'cron_recompute_cost_price', 'cron_deactivate_invalid_supplier_prices', 'cron_account_update', 'cron_virtual_agent_run', 'cron_find_binary_issues', 'cron_send_modules', 'cron_ticket_sync', 'cron_process_queue', 'cron_clean_files', 'cron_inspect_documents', 'cron_process_documents', 'cron_inspect_pages', 'cron_process_pages', 'cron_document_expiration_date_check', 'cron_update_printer_info', 'cron_product_review', 'cron_edi_sale', 'cron_create_edi_orders', 'sale_exception_fix_cron', 'cron_deactivate_lots_without_stock', 'cron_shop_shipments_update') and model = 'ir.cron';
-
-  - comment: remove no deducible taxes
-    version: 8.0
-    tables: account_account_template
-    script: ./upgrades/before/account_rate_deducible.py
 
 after:
   - comment: Remove include_347 from party
@@ -1160,6 +1149,9 @@ after:
     version: 5.2
     tables: aeat_347_report
     query: update account_invoice set aeat347_operation_key = null where aeat347_operation_key = 'none';
+
+  - script: ./upgrades/before/remove_deprecated_taxes.py
+    version: 5.2
 
   - comment: # https://hg.tryton.org/modules/sale/rev/5809fe404415
     version: 5.4
@@ -1620,6 +1612,15 @@ after:
     version: 8.0
     tables: account_statement_line
     query: update account_statement_line SET account = (SELECT id FROM account_account WHERE code LIKE '572%0' ORDER BY code LIMIT 1) WHERE account IS NULL;
+
+  - comment: Convert varchar and text columns to jsonb
+    version: 8.0
+    script: ./upgrades/before/convert_columns_to_jsonb.py
+
+  - comment: remove no deducible taxes
+    version: 8.0
+    tables: account_account_template
+    script: ./upgrades/before/account_rate_deducible.py
 
   - comment: delete ir.cron nantic_check
     query: delete from ir_cron where method like  '%nantic_check';
