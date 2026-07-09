@@ -125,6 +125,58 @@ to_uninstall:
 #  - account_invoice_prevent_duplicates
 
 before:
+  - comment: Restore missing primary keys on legacy tables
+    since_version: 7.2
+    script: ./upgrades/before/restore_missing_primary_keys.py
+
+  - comment: Backup invoice action reports
+    since_version: 7.2
+    script: ./upgrades/before/backup_invoice_action_report.py
+
+  - comment: Backup modality reports
+    since_version: 7.2
+    script: ./upgrades/before/backup_modality_reports.py
+
+  - comment: Remove orphan menu-group relations
+    since_version: 7.2
+    where: >
+      SELECT count(*)
+      FROM "ir_ui_menu-res_group" rel
+      WHERE NOT EXISTS (
+          SELECT 1
+          FROM ir_ui_menu menu
+          WHERE menu.id = rel.menu)
+        OR NOT EXISTS (
+          SELECT 1
+          FROM res_group grp
+          WHERE grp.id = rel."group")
+    query: >
+      DELETE FROM "ir_ui_menu-res_group" rel
+      WHERE NOT EXISTS (
+          SELECT 1
+          FROM ir_ui_menu menu
+          WHERE menu.id = rel.menu)
+        OR NOT EXISTS (
+          SELECT 1
+          FROM res_group grp
+          WHERE grp.id = rel."group");
+
+  - comment: Remove orphan menu favorites
+    since_version: 7.2
+    where: >
+      SELECT count(*)
+      FROM ir_ui_menu_favorite fav
+      WHERE NOT EXISTS (
+          SELECT 1
+          FROM ir_ui_menu menu
+          WHERE menu.id = fav.menu)
+    query: >
+      DELETE FROM ir_ui_menu_favorite fav
+      WHERE NOT EXISTS (
+          SELECT 1
+          FROM ir_ui_menu menu
+          WHERE menu.id = fav.menu);
+
   # - tables: ir_model_data
   #   version: 3.2
   #   query: ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;
@@ -887,10 +939,34 @@ before:
     tables: babi_table
     query: update babi_table set active = false, internal_name=concat(internal_name, '_back') where internal_name in ('invoices_that_are_in_the_summary_of_the_sii_but_its_state_in_tryton_is_not_correct', 'tryton_issued_invoice_taxes', 'tryton_received_invoice_taxes', 'estate_issued_invoice_taxes', 'estate_received_invoice_taxes', 'invoice_detection_with_subject_notice_of_the_sii');
 
-  - comment: Migration from 7.2 add model. prevent add in case field that not exist
+  - comment: Remove orphan tree optional view fields
     version: 7.4
     since_version: 7.2
-    query: delete from ir_ui_view_tree_optional where id in (select vto.id from ir_ui_view_tree_optional as vto left join ir_ui_view as uv on vto.view_id = uv.id where vto.field not in (select name from ir_model_field where model = uv.model));
+    where: >
+      SELECT count(*)
+      FROM ir_ui_view_tree_optional AS vto
+      LEFT JOIN ir_ui_view AS uv ON uv.id = vto.view_id
+      WHERE uv.id IS NULL
+        OR uv.model IS NULL
+        OR NOT EXISTS (
+          SELECT 1
+          FROM ir_model_field AS imf
+          WHERE imf.model = uv.model
+            AND imf.name = vto.field)
+    query:
+      DELETE FROM ir_ui_view_tree_optional
+      WHERE view_id NOT IN (SELECT id FROM ir_ui_view);
+      DELETE FROM ir_ui_view_tree_optional
+      WHERE id IN (
+        SELECT vto.id
+        FROM ir_ui_view_tree_optional AS vto
+        JOIN ir_ui_view AS uv ON uv.id = vto.view_id
+        WHERE uv.model IS NULL
+          OR NOT EXISTS (
+            SELECT 1
+            FROM ir_model_field AS imf
+            WHERE imf.model = uv.model
+              AND imf.name = vto.field));
 
   - comment: Delete create_payment_group button from account_payment_es module
     version: 7.4
@@ -931,9 +1007,34 @@ before:
 
   - comment: Rename columns of ir.model and ir.model.field
     version: 7.6
+    since_version: 7.2
+    where: >
+      SELECT count(*)
+      FROM information_schema.columns
+      WHERE table_name = 'ir_model'
+        AND column_name = 'name'
+        AND NOT EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_name = 'ir_model'
+            AND column_name = 'string')
     query: ALTER TABLE IF EXISTS "ir_model" RENAME COLUMN "name" TO "string";
         ALTER TABLE IF EXISTS "ir_model" RENAME COLUMN "model" TO "name";
-        ALTER TABLE IF EXISTS "ir_model_field" RENAME COLUMN "field_description" TO "string";
+
+  - comment: Rename ir.model.field column
+    version: 7.6
+    since_version: 7.2
+    where: >
+      SELECT count(*)
+      FROM information_schema.columns
+      WHERE table_name = 'ir_model_field'
+        AND column_name = 'field_description'
+        AND NOT EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_name = 'ir_model_field'
+            AND column_name = 'string')
+    query: ALTER TABLE IF EXISTS "ir_model_field" RENAME COLUMN "field_description" TO "string";
 
   - comment: Remove babi.reports
     version: 7.4
@@ -1568,6 +1669,28 @@ after:
   - comment: dominate reports sure html_reports are active
     version: 7.6
     query: update ir_action set active = true where id in (select action from ir_action_report where id in (select db_id from ir_model_data where model = 'ir.action.report' and module = 'html_report' and fs_id like 'html_report_%' ));
+
+  - comment: dominate reports sure valero html reports are active
+    version: 7.6
+    since_version: 7.2
+    query: >
+      UPDATE ir_action
+      SET active = true
+      WHERE id IN (
+          SELECT report.action
+          FROM ir_action_report report
+          WHERE report.template_extension = 'html'
+            AND report.module = 'valero');
+
+  - comment: Restore invoice action reports
+    version: 7.6
+    since_version: 7.2
+    script: ./upgrades/after/migrate_invoice_action_report.py
+
+  - comment: Restore modality reports
+    version: 7.6
+    since_version: 7.2
+    script: ./upgrades/after/migrate_modality_reports.py
 
   - comment: remove jinja reports and ir_model_data
     version: 7.8

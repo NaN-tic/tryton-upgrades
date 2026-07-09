@@ -9,7 +9,6 @@ CONFIG.update_etc(config_file)
 
 from trytond.pool import Pool
 from trytond.transaction import Transaction
-from trytond.model.modelstorage import DomainValidationError
 import logging
 
 Pool.start()
@@ -27,7 +26,6 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 with Transaction().start(dbname, 0, context=context) as transaction:
-    Template = pool.get('product.template')
     Company = pool.get('company.company')
     cursor = transaction.connection.cursor()
 
@@ -37,7 +35,6 @@ with Transaction().start(dbname, 0, context=context) as transaction:
     cursor.execute(query)
     templates = cursor.fetchall()
 
-    to_save = []
     for company in companys:
         for template in templates:
             query = "insert into product_template_supply_on_sale (template, company, supply_on_sale) values (%s, %s, 'always')" % (template[0], company.id)

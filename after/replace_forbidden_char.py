@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import os
 import sys
 
 dbname = sys.argv[1]
@@ -26,7 +25,6 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 from sql.functions import Function
-from trytond.model import fields
 # from psycopg2.errors import UndefinedColumn
 
 class StringAgg(Function):

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import os
 import sys
 
 dbname = sys.argv[1]

@@ -27,8 +27,7 @@ logger.addHandler(ch)
 
 with Transaction().start(dbname, 0, context=context):
     user_obj = pool.get('res.user')
-    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
-    user_id = user.id
+    user_obj.search([('login', '=', 'admin')], limit=1)[0]
 
 def get_property_value(field_name, company_id, default=True):
     query = """
@@ -58,7 +57,6 @@ def get_property_value(field_name, company_id, default=True):
 def account_configuration():
     user_obj = pool.get('res.user')
     user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
-    user_id = user.id
 
     try:
         Company = pool.get('company.company')
@@ -131,8 +129,7 @@ def account_configuration():
 
 def party_configuration():
     user_obj = pool.get('res.user')
-    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
-    user_id = user.id
+    user_obj.search([('login', '=', 'admin')], limit=1)[0]
     try:
         Company = pool.get('company.company')
         PartyConfiguration = pool.get('party.configuration')
@@ -155,8 +152,7 @@ def party_configuration():
 
 def sale_configuration():
     user_obj = pool.get('res.user')
-    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
-    user_id = user.id
+    user_obj.search([('login', '=', 'admin')], limit=1)[0]
     mapping = {
         'sale_invoice_method': 'sale_invoice_method',
         'sale_shipment_method': 'sale_shipment_method',
@@ -184,8 +180,7 @@ def sale_configuration():
 
 def stock_configuration():
     user_obj = pool.get('res.user')
-    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
-    user_id = user.id
+    user_obj.search([('login', '=', 'admin')], limit=1)[0]
     try:
         Company = pool.get('company.company')
         StockConfiguration = pool.get('stock.configuration')
@@ -204,8 +199,7 @@ def stock_configuration():
 
 def purchase_configuration():
     user_obj = pool.get('res.user')
-    user = user_obj.search([('login', '=', 'admin')], limit=1)[0]
-    user_id = user.id
+    user_obj.search([('login', '=', 'admin')], limit=1)[0]
     try:
         Company = pool.get('company.company')
         PurchaseConfiguration = pool.get('purchase.configuration')

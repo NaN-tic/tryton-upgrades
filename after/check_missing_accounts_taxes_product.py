@@ -1,3 +1,6 @@
+pool = globals().get('pool')
+transaction = globals().get('transaction')
+
 User = pool.get('res.user')
 context = User.get_preferences(context_only=True)
 

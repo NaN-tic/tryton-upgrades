@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import os
 
 dbname = sys.argv[1]
 config_file = sys.argv[2]
@@ -10,7 +9,6 @@ CONFIG.update_etc(config_file)
 from trytond import __version__
 from trytond.pool import Pool
 from trytond.transaction import Transaction
-import trytond.tools as tools
 import logging
 
 trytond_version = float('.'.join(__version__.split('.')[:2]))

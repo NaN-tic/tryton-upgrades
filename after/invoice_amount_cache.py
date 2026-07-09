@@ -9,7 +9,7 @@ CONFIG.update_etc(config_file)
 
 from trytond.pool import Pool
 from trytond.transaction import Transaction
-from trytond.tools import grouped_slice, reduce_ids
+from trytond.tools import grouped_slice
 import logging
 
 Pool.start()

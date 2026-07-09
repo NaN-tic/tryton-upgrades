@@ -9,7 +9,6 @@ CONFIG.update_etc(config_file)
 
 from trytond.pool import Pool
 from trytond.transaction import Transaction
-import trytond.tools as tools
 import logging
 
 Pool.start()

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import datetime
 #from itertools import izip
 
 dbname = sys.argv[1]

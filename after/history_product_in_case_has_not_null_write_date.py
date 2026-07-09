@@ -3,9 +3,8 @@
 # When the _history (trytond-admin --all) is activated, it creates these records
 # with a write_date set to NULL.
 
-from trytond.modules.product.product import round_price
-from decimal import Decimal
-from datetime import datetime, date
+pool = globals().get('pool')
+transaction = globals().get('transaction')
 
 User = pool.get('res.user')
 Company = pool.get('company.company')

@@ -1,5 +1,8 @@
 from trytond.transaction import Transaction
 
+pool = globals().get('pool')
+transaction = globals().get('transaction')
+
 transaction.set_user(1)
 
 Configuration = pool.get('account.configuration')
