@@ -1670,18 +1670,6 @@ after:
     version: 7.6
     query: update ir_action set active = true where id in (select action from ir_action_report where id in (select db_id from ir_model_data where model = 'ir.action.report' and module = 'html_report' and fs_id like 'html_report_%' ));
 
-  - comment: dominate reports sure valero html reports are active
-    version: 7.6
-    since_version: 7.2
-    query: >
-      UPDATE ir_action
-      SET active = true
-      WHERE id IN (
-          SELECT report.action
-          FROM ir_action_report report
-          WHERE report.template_extension = 'html'
-            AND report.module = 'valero');
-
   - comment: Restore invoice action reports
     version: 7.6
     since_version: 7.2
