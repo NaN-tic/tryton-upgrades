@@ -5,15 +5,10 @@ import sys
 dbname = sys.argv[1]
 config_file = sys.argv[2]
 
-from trytond.config import config as CONFIG
+from trytond import config as CONFIG
 CONFIG.update_etc(config_file)
 
-from trytond.pool import Pool
 from trytond.transaction import Transaction
-
-Pool.start()
-pool = Pool(dbname)
-pool.init()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
