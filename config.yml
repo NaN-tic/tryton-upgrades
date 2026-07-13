@@ -125,35 +125,6 @@ to_uninstall:
 #  - account_invoice_prevent_duplicates
 
 before:
-
-  - comment: Remove orphan tree optional view fields before model migration
-    since_version: 7.2
-    where: >
-      SELECT count(*)
-      FROM ir_ui_view_tree_optional AS vto
-      LEFT JOIN ir_ui_view AS uv ON uv.id = vto.view_id
-      WHERE uv.id IS NULL
-        OR uv.model IS NULL
-        OR NOT EXISTS (
-          SELECT 1
-          FROM ir_model_field AS imf
-          WHERE imf.model = uv.model
-            AND imf.name = vto.field)
-    query:
-      DELETE FROM ir_ui_view_tree_optional
-      WHERE view_id NOT IN (SELECT id FROM ir_ui_view);
-      DELETE FROM ir_ui_view_tree_optional
-      WHERE id IN (
-        SELECT vto.id
-        FROM ir_ui_view_tree_optional AS vto
-        JOIN ir_ui_view AS uv ON uv.id = vto.view_id
-        WHERE uv.model IS NULL
-          OR NOT EXISTS (
-            SELECT 1
-            FROM ir_model_field AS imf
-            WHERE imf.model = uv.model
-              AND imf.name = vto.field));
-
   # - tables: ir_model_data
   #   version: 3.2
   #   query: ALTER TABLE ir_model_data ADD COLUMN fs_values TEXT;
