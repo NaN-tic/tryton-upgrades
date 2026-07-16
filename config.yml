@@ -1650,5 +1650,11 @@ after:
   - comment: delete ir.cron nantic_check
     query: delete from ir_cron where method like  '%nantic_check';
 
+  - comment: remove nantic notification
+    tables: nantic_connection_notification_model
+    query: DELETE FROM nantic_connection_notification AS n USING nantic_connection_notification_model AS nm WHERE n.id = nm.notification AND NOT EXISTS (SELECT 1 FROM ir_model AS im WHERE im.name = nm.name);
+        DELETE FROM nantic_connection_notification_field AS nf USING nantic_connection_notification_model AS nm WHERE nf.notification_model = nm.id AND NOT EXISTS (SELECT 1 FROM ir_model AS im WHERE im.name = nm.name);
+        DELETE FROM nantic_connection_notification_model AS nm WHERE NOT EXISTS (SELECT 1 FROM ir_model AS im WHERE im.name = nm.name);
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
