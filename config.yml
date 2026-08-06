@@ -120,6 +120,7 @@ to_uninstall:
   - papyrus_azure:7.6 # Deprecated at 7.6. moved to papyrus_model module
   - project_sequence:8.0 # Deprecated at 8.0. project.work has number field
   - jasper_reports:8.0 # Deprecated at 8.0. Replace by Dominate reports
+  - company_user:7.6 #Deprecated at 7.6. Use set_user(0), set_context(company=target_company) instead
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
