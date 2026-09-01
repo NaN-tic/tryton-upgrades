@@ -1008,6 +1008,12 @@ before:
     query: INSERT INTO ir_module (name, state) SELECT 'nantic_common', 'not activated' WHERE NOT EXISTS (SELECT 1 FROM ir_module WHERE name = 'nantic_common');
         UPDATE ir_model_data SET module = 'nantic_common' WHERE module = 'nantic_connection' AND fs_id IN ('manual_invoice_allowed', 'user_admin_manual_invoice_allowed', 'purchase.purchase_manual_button_group_purchase', 'purchase.purchase_manual_button_group_account', 'purchase_manual_button_group_manual_invoice_allowed', 'sale.sale_manual_invoice_button_group_sale', 'sale.sale_manual_invoice_button_group_account', 'sale_manual_button_group_manual_invoice_allowed', 'relation_view_form', 'relation_view_tree', 'purchase_request_view_form');
 
+  - comment: replace work_configuration to project_configuration
+    version: 8.0
+    tables: work_configuration
+    query: delete from ir_model_data  where  fs_id = 'work_configuration_view_form' and model = 'ir.ui.view';
+        delete from ir_model_data  where  fs_id = 'work_configuration_view_form' and model = 'ir.ui.view';
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
