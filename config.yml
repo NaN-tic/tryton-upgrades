@@ -1014,6 +1014,10 @@ before:
     query: delete from ir_model_data  where  fs_id = 'work_configuration_view_form' and model = 'ir.ui.view';
         delete from ir_model_data  where  fs_id = 'work_configuration_view_form' and model = 'ir.ui.view';
 
+  - comment: nantic_common views
+    version: 8.0
+    query: update ir_ui_view set module = 'nantic_common' where id in (select id FROM ir_ui_view WHERE module = 'nantic_connection' AND name in ('relation_tree', 'relation_form'));
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
