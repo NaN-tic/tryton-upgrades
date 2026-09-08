@@ -1667,5 +1667,10 @@ after:
         DELETE FROM nantic_connection_notification_field AS nf USING nantic_connection_notification_model AS nm WHERE nf.notification_model = nm.id AND NOT EXISTS (SELECT 1 FROM ir_model AS im WHERE im.name = nm.name);
         DELETE FROM nantic_connection_notification_model AS nm WHERE NOT EXISTS (SELECT 1 FROM ir_model AS im WHERE im.name = nm.name);
 
+  - comment: delete account_payment_sepa_message when message is null
+    version: 8.0
+    tables: account_payment_sepa_message
+    query: delete from account_payment_sepa_message where message is null;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
