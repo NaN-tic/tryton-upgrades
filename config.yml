@@ -1019,6 +1019,15 @@ before:
     version: 8.0
     query: update ir_ui_view set module = 'nantic_common' where id in (select id FROM ir_ui_view WHERE module = 'nantic_connection' AND name in ('relation_tree', 'relation_form'));
 
+  - comment: Remove hard-coded admin user and add root user:
+    version: 8.2
+    query: DELETE FROM "ir_model_data" WHERE module = 'res' AND fs_id = 'user_admin';
+        INSERT INTO ir_model_data (fs_id, model, module, db_id, noupdate, field_names) VALUES ('user_root', 'res.user', 'res', 0, False, '["login", "name", "active", "administrator"]');
+
+  - comment: finish all dequeued tasks
+    version: 8.2
+    query: UPDATE "ir_queue" SET finished_at = CURRENT_TIMESTAMP WHERE dequeued_at IS NOT NULL AND finished_at IS NULL;
+
 after:
   - comment: Remove include_347 from party
     version: 5.1
@@ -1678,6 +1687,15 @@ after:
     tables: babi_filter
     query: update babi_filter set python_expression = replace(python_expression, 'Pool().get', 'pool') where python_expression like '%Pool%';
         update babi_expression set expression = replace(expression, 'Pool().get', 'pool') where expression like '%Pool%';
+
+  - comment: Set the administrator flag on the ``admin`` user
+    version: 8.2
+    query: UPDATE "res_user" SET administrator = true WHERE login IN ('root', 'admin');
+
+  - comment: update the reconciliation date using maturity date
+    version: 8.2
+    tables: account_move_reconciliation
+    query: UPDATE "account_move_reconciliation" AS r SET date = (SELECT GREATEST(MAX(l.maturity_date), MAX(m.date)) FROM account_move_line AS l JOIN account_move AS m ON l.move = m.id WHERE l.reconciliation = r.id);
 
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
