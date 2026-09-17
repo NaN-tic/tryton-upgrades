@@ -1026,7 +1026,7 @@ before:
     query: ALTER TABLE ai_model ALTER COLUMN allow_web_search DROP DEFAULT;
         ALTER TABLE ai_model ALTER COLUMN allow_web_search TYPE varchar USING allow_web_search::text;
 
-  - comment: Remove hard-coded admin user and add root user:
+  - comment: Remove hard-coded admin user and add root user
     version: 8.2
     query: DELETE FROM "ir_model_data" WHERE module = 'res' AND fs_id = 'user_admin';
         INSERT INTO ir_model_data (fs_id, model, module, db_id, noupdate, field_names) VALUES ('user_root', 'res.user', 'res', 0, False, '["login", "name", "active", "administrator"]');
