@@ -1700,6 +1700,11 @@ after:
     tables: account_payment_type
     query:  alter table account_payment_type alter column company drop not null;
 
+  - comment: product_package remove name not null
+    version: 8.0
+    tables: product_package
+    query:  alter table product_package alter column name drop not null;
+
   - comment: Set the administrator flag on the ``admin`` user
     version: 8.2
     query: UPDATE "res_user" SET administrator = true WHERE login IN ('root', 'admin');
