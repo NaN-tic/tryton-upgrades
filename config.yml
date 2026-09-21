@@ -1695,6 +1695,11 @@ after:
     query: update babi_filter set python_expression = replace(python_expression, 'Pool().get', 'pool') where python_expression like '%Pool%';
         update babi_expression set expression = replace(expression, 'Pool().get', 'pool') where expression like '%Pool%';
 
+  - comment: remove company not null (states required)
+    version: 8.0
+    tables: account_payment_type
+    query:  alter table account_payment_type alter column company drop not null;
+
   - comment: Set the administrator flag on the ``admin`` user
     version: 8.2
     query: UPDATE "res_user" SET administrator = true WHERE login IN ('root', 'admin');
