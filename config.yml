@@ -1670,6 +1670,22 @@ after:
     version: 8.0
     script: ./upgrades/before/convert_columns_to_jsonb.py
 
+  - comment: Add Spanish and EU identifier types except for Paraguayan configurations
+    tables: party_configuration
+    fields: party_configuration.identifier_types
+    version: 8.0
+    query: |
+      UPDATE party_configuration
+      SET identifier_types = identifier_types::jsonb || (
+          SELECT COALESCE(jsonb_agg(option ORDER BY position), '[]'::jsonb)
+          FROM jsonb_array_elements(
+              '["es_cae", "es_cif", "es_dni", "es_nie", "es_vat", "eu_vat"]'::jsonb
+          ) WITH ORDINALITY AS options(option, position)
+          WHERE NOT identifier_types::jsonb @> jsonb_build_array(option)
+      )
+      WHERE identifier_types IS NOT NULL
+          AND NOT identifier_types::jsonb ? 'py_vat';
+
   - comment: remove no deducible taxes
     version: 8.0
     tables: account_account_template
