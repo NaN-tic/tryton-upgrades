@@ -1730,5 +1730,77 @@ after:
     tables: account_move_reconciliation
     query: UPDATE "account_move_reconciliation" AS r SET date = (SELECT GREATEST(MAX(l.maturity_date), MAX(m.date)) FROM account_move_line AS l JOIN account_move AS m ON l.move = m.id WHERE l.reconciliation = r.id);
 
+  - comment: Backup, normalize and convert Spanish EU VAT identifiers, excluding invalid codes and conflicts
+    version: 8.2
+    tables: party_identifier
+    query: |
+      ALTER TABLE party_identifier
+          ADD COLUMN IF NOT EXISTS type_80 VARCHAR,
+          ADD COLUMN IF NOT EXISTS code_80 VARCHAR;
+
+      UPDATE party_identifier
+      SET type_80 = type, code_80 = code
+      WHERE type_80 IS NULL AND code_80 IS NULL;
+
+      WITH normalized AS (
+          SELECT id, type,
+              upper(regexp_replace(code, '[[:space:].-]', '', 'g')) AS code
+          FROM party_identifier
+          WHERE type IN ('eu_vat', 'es_cif', 'es_dni', 'es_nie', 'es_vat')
+      ), spanish AS (
+          SELECT id, type,
+              CASE WHEN type = 'eu_vat' THEN substring(code FROM 3)
+                  ELSE code END AS code
+          FROM normalized
+          WHERE type <> 'eu_vat' OR code LIKE 'ES%'
+      ), classified AS (
+          SELECT id, code,
+              CASE
+                  WHEN code ~ '^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$'
+                      THEN 'es_cif'
+                  WHEN code ~ '^[0-9]{8}[A-Z]$' THEN 'es_dni'
+                  WHEN code ~ '^[XYZ][0-9]{7}[A-Z]$' THEN 'es_nie'
+                  WHEN code ~ '^[KLM][0-9]{7}[A-Z]$' THEN 'es_vat'
+              END AS new_type
+          FROM spanish
+          WHERE type = 'eu_vat'
+      ), validated AS (
+          SELECT *, CASE new_type
+              WHEN 'es_dni' THEN right(code, 1) = substring(
+                  'TRWAGMYFPDXBNJZSQVHLCKE',
+                  (left(code, 8)::integer % 23) + 1, 1)
+              WHEN 'es_nie' THEN right(code, 1) = substring(
+                  'TRWAGMYFPDXBNJZSQVHLCKE',
+                  (translate(left(code, 8), 'XYZ', '012')::integer % 23) + 1, 1)
+              WHEN 'es_vat' THEN right(code, 1) = substring(
+                  'TRWAGMYFPDXBNJZSQVHLCKE',
+                  (substring(code, 2, 7)::integer % 23) + 1, 1)
+              WHEN 'es_cif' THEN (
+                  SELECT right(code, 1) IN (
+                      digit::text, substring('JABCDEFGHI', digit + 1, 1))
+                  FROM (
+                      SELECT ((10 - sum(
+                          CASE WHEN position % 2 = 0 THEN n
+                              ELSE (2 * n) / 10 + (2 * n) % 10 END
+                          ) % 10) % 10)::integer AS digit
+                      FROM (
+                          SELECT position,
+                              substring(code, position + 1, 1)::integer AS n
+                          FROM generate_series(1, 7) AS positions(position)
+                      ) AS digits
+                  ) AS checksum
+              )
+              ELSE false END AS valid
+          FROM classified
+      )
+      UPDATE party_identifier AS identifier
+      SET type = candidate.new_type, code = candidate.code
+      FROM validated AS candidate
+      WHERE identifier.id = candidate.id AND candidate.valid
+          AND NOT EXISTS (
+              SELECT 1 FROM spanish AS other
+              WHERE other.id <> candidate.id AND other.code = candidate.code
+          );
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
