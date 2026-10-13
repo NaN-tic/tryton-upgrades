@@ -1028,6 +1028,24 @@ before:
     query: ALTER TABLE ai_model ALTER COLUMN allow_web_search DROP DEFAULT;
         ALTER TABLE ai_model ALTER COLUMN allow_web_search TYPE varchar USING allow_web_search::text;
 
+  - comment: Preserve the users from the Administration group as administrators
+    version: 8.2
+    query: |
+      ALTER TABLE "res_user"
+          ADD COLUMN IF NOT EXISTS administrator BOOLEAN DEFAULT FALSE;
+      UPDATE "res_user"
+          SET administrator = FALSE
+          WHERE administrator IS NULL;
+      UPDATE "res_user" AS "user"
+          SET administrator = TRUE
+          FROM "res_user-res_group" AS user_group
+          JOIN ir_model_data AS model_data
+              ON model_data.db_id = user_group."group"
+              AND model_data.model = 'res.group'
+              AND model_data.module = 'res'
+              AND model_data.fs_id = 'group_admin'
+          WHERE "user".id = user_group."user";
+
   - comment: Remove hard-coded admin user and add root user
     version: 8.2
     query: DELETE FROM "ir_model_data" WHERE module = 'res' AND fs_id = 'user_admin';
@@ -1727,10 +1745,11 @@ after:
     version: 8.2
     query: UPDATE "res_user" SET administrator = true WHERE login IN ('root', 'admin');
 
-  - comment: update the reconciliation date using maturity date
+  - comment: Remove residual reconciliations without lines and update the reconciliation date using maturity date
     version: 8.2
     tables: account_move_reconciliation
-    query: UPDATE "account_move_reconciliation" AS r SET date = (SELECT GREATEST(MAX(l.maturity_date), MAX(m.date)) FROM account_move_line AS l JOIN account_move AS m ON l.move = m.id WHERE l.reconciliation = r.id);
+    query: DELETE FROM "account_move_reconciliation" AS r WHERE NOT EXISTS (SELECT 1 FROM "account_move_line" AS l WHERE l.reconciliation = r.id);
+        UPDATE "account_move_reconciliation" AS r SET date = (SELECT GREATEST(MAX(l.maturity_date), MAX(m.date)) FROM account_move_line AS l JOIN account_move AS m ON l.move = m.id WHERE l.reconciliation = r.id);
 
   - comment: Backup, normalize and convert Spanish EU VAT identifiers, excluding invalid codes and conflicts
     version: 8.2
