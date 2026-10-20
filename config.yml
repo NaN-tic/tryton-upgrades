@@ -1824,6 +1824,11 @@ after:
               WHERE other.id <> candidate.id AND other.code = candidate.code
           );
 
+  - comment: Convert United Kingdom VAT identifiers from EU VAT to GB VAT
+    version: 8.2
+    tables: party_identifier
+    query: UPDATE party_identifier SET type = 'gb_vat' WHERE type = 'eu_vat' AND code LIKE 'GB%';
+
   - comment: Remove companies from crons that do not need a company
     version: 8.2
     tables: ir_cron-company_company
