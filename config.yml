@@ -1824,5 +1824,61 @@ after:
               WHERE other.id <> candidate.id AND other.code = candidate.code
           );
 
+  - comment: Remove companies from crons that do not need a company
+    version: 8.2
+    tables: ir_cron-company_company
+    query: |
+      DELETE FROM "ir_cron-company_company" AS cron_company
+      USING ir_cron AS cron
+      WHERE cron_company.cron = cron.id
+          AND cron.method NOT IN (
+              'account.account.receivable.rule|apply',
+              'account.invoice.chorus|send',
+              'account.invoice.chorus|update',
+              'account.invoice|cron_update_verifactu_invoices',
+              'account.invoice|post_invoices_cron',
+              'account.invoice|reinvoice_invoices_cron',
+              'account.invoice|send_verifactu',
+              'account.move.line|reconcile_automatic',
+              'account.payment.braintree.refund|braintree_pull',
+              'account.payment.journal|cron_post_clearing_moves',
+              'account.payment|braintree_pull',
+              'account.payment|braintree_transact',
+              'account.payment|stripe_capture_',
+              'account.payment|stripe_charge',
+              'account.statement.journal|synchronize_enable_banking_journals',
+              'aeat.sii.report|calculate_sii',
+              'babi.table.cluster|compute',
+              'babi.table|_compute',
+              'contract.review|create_review_cron',
+              'edi.sale|import_sales',
+              'invoice.edi|import_edi_files',
+              'ir.cron|stock_shipment_assign_try',
+              'lkbitronic.tpv_sync|cron_sync_debt',
+              'lkbitronic.tpv_sync|cron_sync_orders',
+              'lkbitronic.tpv_sync|cron_sync_party',
+              'lkbitronic.tpv_sync|cron_sync_products',
+              'lkbitronic.tpv_sync|cron_sync_sales',
+              'lkbitronic.tpv_sync|cron_sync_shipments',
+              'lkbitronic.tpv_sync|cron_sync_statements',
+              'lkbitronic.tpv_sync|cron_sync_stock',
+              'party.identifier|check_aeat',
+              'product.price_list|fill_cache',
+              'product.product|export_stock_csv',
+              'product.product|recompute_cost_price_from_moves',
+              'product.template|sync_products',
+              'sale.sale|cancel_expired_quotation',
+              'sale.sale|payment_confirm',
+              'sale.sale|sale_exception_fix_cron',
+              'sale.subscription.line|generate_consumption',
+              'sale.subscription|generate_invoice',
+              'stock.order_point|supply_stock',
+              'stock.period|auto_close',
+              'stock.period|auto_create',
+              'stock.quantity.issue|generate_issues',
+              'yeastar.cdr|get_calls_details',
+              'yeastar.pbx|sync_directory'
+          );
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
