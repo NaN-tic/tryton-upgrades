@@ -1905,5 +1905,9 @@ after:
               'yeastar.webhook.event|process_pending'
           );
 
+  - comment: Set the default assistant notification preference
+    fields: res_user.assistant_notify
+    query: UPDATE res_user SET assistant_notify = 'never' WHERE assistant_notify IS NULL;
+
 ignore:
   - WARNING trytond.backend.postgresql.table Unable to set column move_line of table analytic_account_line not null !
