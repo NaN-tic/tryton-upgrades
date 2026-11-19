@@ -1646,6 +1646,56 @@ after:
     version: 7.6
     query: update ir_action set active = true  where id in (select action from ir_action_report where template_extension = 'html' and module = 'account_financial_statement');
 
+  - comment: Remove deprecated financial statement actions left by the update
+    version: 7.8
+    tables: ir_action
+    query: |
+      DELETE FROM ir_translation
+      WHERE name = 'ir.action,name'
+        AND res_id IN (
+          SELECT db_id
+          FROM ir_model_data
+          WHERE module = 'account_financial_statement'
+            AND model = 'ir.action.act_window'
+            AND fs_id IN ('act_report_line_account', 'act_report_lines')
+        );
+      DELETE FROM ir_action
+      WHERE id IN (
+        SELECT db_id
+        FROM ir_model_data
+        WHERE module = 'account_financial_statement'
+          AND model = 'ir.action.act_window'
+          AND fs_id IN ('act_report_line_account', 'act_report_lines')
+        );
+      DELETE FROM ir_model_data
+      WHERE module = 'account_financial_statement'
+        AND model = 'ir.action.act_window'
+        AND fs_id IN ('act_report_line_account', 'act_report_lines');
+
+  - comment: Recreate stock location lead time with the interval type
+    version: 7.8
+    fields: stock_location_lead_time.lead_time
+    where: >
+      SELECT count(*)
+      FROM information_schema.columns
+      WHERE table_schema = current_schema()
+        AND table_name = 'stock_location_lead_time'
+        AND column_name = 'lead_time'
+        AND udt_name = 'float8'
+    query: ALTER TABLE stock_location_lead_time DROP COLUMN lead_time;
+
+  - comment: Recreate production lead time with the interval type
+    version: 7.8
+    fields: production_lead_time.lead_time
+    where: >
+      SELECT count(*)
+      FROM information_schema.columns
+      WHERE table_schema = current_schema()
+        AND table_name = 'production_lead_time'
+        AND column_name = 'lead_time'
+        AND udt_name = 'float8'
+    query: ALTER TABLE production_lead_time DROP COLUMN lead_time;
+
   - comment: fuzzy translations
     version: 7.6
     query: update  ir_translation set fuzzy = false where src = 'Stock Shipment Out' and fuzzy= true;
