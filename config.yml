@@ -1029,6 +1029,17 @@ before:
     query: ALTER TABLE ai_model ALTER COLUMN allow_web_search DROP DEFAULT;
         ALTER TABLE ai_model ALTER COLUMN allow_web_search TYPE varchar USING allow_web_search::text;
 
+  - comment: Allow translations without a resource before registering new models
+    version: 8.2
+    tables: ir_translation
+    query: ALTER TABLE ir_translation ALTER COLUMN res_id DROP NOT NULL;
+
+  - comment: Remove translations from deprecated custom translation systems
+    version: 7.8
+    tables: ir_translation
+    query: DELETE FROM ir_translation
+        WHERE type IN ('html_report', 'voyager');
+
   - comment: Preserve the users from the Administration group as administrators
     version: 8.2
     query: |
