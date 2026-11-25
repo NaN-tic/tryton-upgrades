@@ -870,7 +870,7 @@ before:
 
   - comment: replace party identifiers to eu_vat
     tables: party_identifier
-    query: update party_identifier set code = concat('ES', code), type = 'eu_vat' where type = 'es_dni';
+    query: update party_identifier AS source SET code = concat('ES', source.code), type = 'eu_vat' WHERE source.type = 'es_dni' AND NOT EXISTS (SELECT 1 FROM party_identifier AS target WHERE target.type = 'eu_vat' AND target.code = concat('ES', source.code));
 
   - comment: Rename stock_configuration_product_template_form_quantity from product_quantity
     version: 7.2
