@@ -125,6 +125,8 @@ to_uninstall:
   - product_cost_plan_process:8.0
   - production_process:8.0
   - account_move_line_related:8.2 # Deprecated at 8.2. Replaced by account
+  - product_cost_plan_margin:8.0 # Deprecated at 8.0. Replaced by product_cost_plan
+  - product_cost_plan_operation:8.0 # Deprecated at 8.0. Replaced by product_cost_plan + production_routing + production_plan
 
 # TODO: Add to uninstall to upgrades to v6.4
 #  - account_invoice_prevent_duplicates
